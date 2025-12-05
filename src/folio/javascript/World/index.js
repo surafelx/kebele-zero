@@ -176,13 +176,13 @@ export default class
             halfExtents: new THREE.Vector2(2.35, 1.5),
             hasKey: false,
             testCar: false,
-            active: true // Activate immediately, skip loading
+            active: false // Start inactive for preloading
         })
 
-        // Hide the starting screen after 3 seconds
+        // Show the starting screen after 3 seconds of preloading
         setTimeout(() =>
         {
-            this.startingScreen.area.deactivate()
+            this.startingScreen.area.activate()
         }, 3000)
 
         // On interact, reveal
