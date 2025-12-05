@@ -41,6 +41,21 @@ export default class ThreejsJourney
                 }
             }
         })
+
+        this.setLog()
+
+        this.time.on('tick', () =>
+        {
+            if(this.world.physics)
+            {
+                this.traveledDistance += this.world.physics.car.forwardSpeed
+
+                if(!this.config.touch && !this.shown && this.traveledDistance > this.minTraveledDistance)
+                {
+                    this.start()
+                }
+            }
+        })
     }
 
     // Removed setYesNo method - no longer needed for Kebele Zero loading screen

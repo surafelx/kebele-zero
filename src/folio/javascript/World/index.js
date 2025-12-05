@@ -179,6 +179,12 @@ export default class
             active: true // Activate immediately, skip loading
         })
 
+        // Hide the starting screen after 3 seconds
+        setTimeout(() =>
+        {
+            this.startingScreen.area.deactivate()
+        }, 3000)
+
         // On interact, reveal
         this.startingScreen.area.on('interact', () =>
         {
