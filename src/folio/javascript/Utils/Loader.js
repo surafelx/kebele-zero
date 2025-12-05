@@ -119,11 +119,29 @@ export default class Resources extends EventEmitter
                 continue
             }
 
-            const extensionMatch = source.match(/\.([a-z]+)$/)
-
-            if(extensionMatch && typeof extensionMatch[1] !== 'undefined')
+            // Handle data URLs (e.g., base64 encoded images)
+            let extension = null
+            if(source.startsWith('data:'))
             {
-                const extension = extensionMatch[1]
+                // Extract extension from data URL (e.g., "data:image/png;base64," -> "png")
+                const mimeMatch = source.match(/data:image\/([a-z]+);/)
+                if(mimeMatch)
+                {
+                    extension = mimeMatch[1]
+                }
+            }
+            else
+            {
+                // Regular file extension matching
+                const extensionMatch = source.match(/\.([a-z]+)$/)
+                if(extensionMatch && typeof extensionMatch[1] !== 'undefined')
+                {
+                    extension = extensionMatch[1]
+                }
+            }
+
+            if(extension)
+            {
                 const loader = this.loaders.find((_loader) => _loader.extensions.find((_extension) => _extension === extension))
 
                 if(loader)
@@ -139,7 +157,7 @@ export default class Resources extends EventEmitter
             }
             else
             {
-                console.warn(`Cannot found extension of ${_resource.name} with source ${source}`)
+                console.warn(`Cannot found extension of ${_resource.name} with source ${source.substring(0, 100)}...`)
             }
         }
     }
