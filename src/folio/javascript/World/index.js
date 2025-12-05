@@ -238,6 +238,9 @@ export default class
 
             TweenLite.to(this.startingScreen.startLabel.material, 0.3, { opacity: 0, delay: 0.4 })
 
+            // Start audio after user interaction
+            this.sounds.startAudio()
+
             this.start()
 
             window.setTimeout(() =>

@@ -103,7 +103,23 @@ export default class Resources extends EventEmitter
         for(const _resource of _resources)
         {
             this.toLoad++
-            const extensionMatch = _resource.source.match(/\.([a-z]+)$/)
+
+            // Handle source if it's an object (e.g., imported asset)
+            let source = _resource.source
+            if(typeof source === 'object' && source !== null)
+            {
+                source = source.default || source.src || source
+            }
+
+            // Ensure source is a string
+            if(typeof source !== 'string')
+            {
+                console.warn(`Cannot handle source type for ${_resource.name}: ${typeof source}`)
+                this.toLoad--
+                continue
+            }
+
+            const extensionMatch = source.match(/\.([a-z]+)$/)
 
             if(extensionMatch && typeof extensionMatch[1] !== 'undefined')
             {
@@ -112,16 +128,18 @@ export default class Resources extends EventEmitter
 
                 if(loader)
                 {
-                    loader.action(_resource)
+                    // Create a copy of resource with resolved source
+                    const resourceWithSource = { ..._resource, source }
+                    loader.action(resourceWithSource)
                 }
                 else
                 {
-                    console.warn(`Cannot found loader for ${_resource}`)
+                    console.warn(`Cannot found loader for ${_resource.name} with extension ${extension}`)
                 }
             }
             else
             {
-                console.warn(`Cannot found extension of ${_resource}`)
+                console.warn(`Cannot found extension of ${_resource.name} with source ${source}`)
             }
         }
     }

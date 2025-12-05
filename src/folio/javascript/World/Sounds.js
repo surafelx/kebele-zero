@@ -278,7 +278,8 @@ export default class Sounds
             loop: true
         })
 
-        this.engine.sound.play()
+        // Don't play immediately - wait for user interaction
+        // this.engine.sound.play()
 
         // Time tick
         this.time.on('tick', () =>
@@ -310,6 +311,15 @@ export default class Sounds
             folder.add(this.engine, 'speedMultiplier').step(0.01).min(0).max(5).name('speedMultiplier')
             folder.add(this.engine, 'accelerationMultiplier').step(0.01).min(0).max(100).name('accelerationMultiplier')
             folder.add(this.engine, 'progress').step(0.01).min(0).max(1).name('progress').listen()
+        }
+    }
+
+    startAudio()
+    {
+        if(this.engine.sound && !this.engine.started)
+        {
+            this.engine.started = true
+            this.engine.sound.play()
         }
     }
 
