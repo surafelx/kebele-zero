@@ -180,6 +180,12 @@ export default class
             active: true
         })
 
+        // Show key immediately on touch devices
+        if(this.config.touch)
+        {
+            this.startingScreen.area.in(true)
+        }
+
         // Auto-interact after 3 seconds
         setTimeout(() =>
         {

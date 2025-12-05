@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Leva } from "leva";
-import { Info, Calendar, ShoppingBag, Radio, Image } from 'lucide-react';
+import { Info, Calendar, ShoppingBag, Radio, Image, Menu, X } from 'lucide-react';
 import "./App.css";
 import FolioCanvas from "./folio/javascript/FolioCanvas";
 import "./folio/style/main.css";
@@ -77,6 +77,7 @@ const isLevaDebug = window.location.hash === "#leva";
 
 function MainApp() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   // Set up global function immediately
@@ -118,8 +119,8 @@ function MainApp() {
             <span>KEBELE</span>
           </div>
 
-          {/* Navigation Links */}
-          <div className="flex space-x-4">
+          {/* Navigation */}
+          <div className="hidden md:flex space-x-4">
             <button
               onClick={() => setActiveModal('about')}
               className="bg-white/5 backdrop-blur-sm text-white px-6 py-3 rounded-lg hover:bg-white/10 transition-colors font-medium text-sm flex items-center space-x-2"
@@ -155,6 +156,58 @@ function MainApp() {
               <Image className="w-5 h-5" />
               <span>MEDIA</span>
             </button>
+          </div>
+
+          {/* Mobile Hamburger Menu */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="bg-white/5 backdrop-blur-sm text-white p-3 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+
+            {isMenuOpen && (
+              <div className="absolute top-full right-8 mt-2 bg-white/10 backdrop-blur-sm rounded-lg p-4 min-w-[200px]">
+                <div className="flex flex-col space-y-2">
+                  <button
+                    onClick={() => { setActiveModal('about'); setIsMenuOpen(false); }}
+                    className="text-white hover:bg-white/10 px-4 py-2 rounded text-left flex items-center space-x-2"
+                  >
+                    <Info className="w-5 h-5" />
+                    <span>ABOUT</span>
+                  </button>
+                  <button
+                    onClick={() => { setActiveModal('events'); setIsMenuOpen(false); }}
+                    className="text-white hover:bg-white/10 px-4 py-2 rounded text-left flex items-center space-x-2"
+                  >
+                    <Calendar className="w-5 h-5" />
+                    <span>EVENTS</span>
+                  </button>
+                  <button
+                    onClick={() => { setActiveModal('souq'); setIsMenuOpen(false); }}
+                    className="text-white hover:bg-white/10 px-4 py-2 rounded text-left flex items-center space-x-2"
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    <span>SOUQ</span>
+                  </button>
+                  <button
+                    onClick={() => { setActiveModal('radio'); setIsMenuOpen(false); }}
+                    className="text-white hover:bg-white/10 px-4 py-2 rounded text-left flex items-center space-x-2"
+                  >
+                    <Radio className="w-5 h-5" />
+                    <span>RADIO</span>
+                  </button>
+                  <button
+                    onClick={() => { setActiveModal('media'); setIsMenuOpen(false); }}
+                    className="text-white hover:bg-white/10 px-4 py-2 rounded text-left flex items-center space-x-2"
+                  >
+                    <Image className="w-5 h-5" />
+                    <span>MEDIA</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
