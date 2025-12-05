@@ -73,20 +73,20 @@ import crossroadsStaticBaseSource from '/models/crossroads/static/nk/base.glb'
 import crossroadsStaticCollisionSource from '/models/crossroads/static/nk/collision.glb'
 
 // Car sam
-import carDefaultChassisSource from '../models/car/lada/chassis.glb'
-import carDefaultWheelSource from '../models/car/lada/wheel.glb'
-import carDefaultBackLightsBrakeSource from '../models/car/default/backLightsBrake.glb'
-import carDefaultBackLightsReverseSource from '../models/car/default/backLightsReverse.glb'
-import carDefaultAntenaSource from '../models/car/default/antena.glb'
+import carDefaultChassisSource from '../models/car/lada/chassis.glb?url'
+import carDefaultWheelSource from '../models/car/lada/wheel.glb?url'
+import carDefaultBackLightsBrakeSource from '../models/car/default/backLightsBrake.glb?url'
+import carDefaultBackLightsReverseSource from '../models/car/default/backLightsReverse.glb?url'
+import carDefaultAntenaSource from '../models/car/default/antena.glb?url'
 // import carDefaultBunnyEarLeftSource from '../models/car/default/bunnyEarLeft.glb'
 // import carDefaultBunnyEarRightSource from '../models/car/default/bunnyEarRight.glb'
 
 // Car cyber truck
-import carCyberTruckChassisSource from '../models/car/cyberTruck/chassis.glb'
-import carCyberTruckWheelSource from '../models/car/cyberTruck/wheel.glb'
-import carCyberTruckBackLightsBrakeSource from '../models/car/cyberTruck/backLightsBrake.glb'
-import carCyberTruckBackLightsReverseSource from '../models/car/cyberTruck/backLightsReverse.glb'
-import carCyberTruckAntenaSource from '../models/car/cyberTruck/antena.glb'
+import carCyberTruckChassisSource from '../models/car/cyberTruck/chassis.glb?url'
+import carCyberTruckWheelSource from '../models/car/cyberTruck/wheel.glb?url'
+import carCyberTruckBackLightsBrakeSource from '../models/car/cyberTruck/backLightsBrake.glb?url'
+import carCyberTruckBackLightsReverseSource from '../models/car/cyberTruck/backLightsReverse.glb?url'
+import carCyberTruckAntenaSource from '../models/car/cyberTruck/antena.glb?url'
 
 // Projects
 import projectsBoardStructureSource from '/models/projects/board/structure.glb'
