@@ -44,6 +44,10 @@ export default class Area extends EventEmitter
         if(this.hasKey)
         {
             this.setKey()
+            this.resources.on('ready', () =>
+            {
+                this.setKeyTextures()
+            })
         }
     }
 
@@ -128,11 +132,6 @@ export default class Area extends EventEmitter
         this.key.enter.geometry = new THREE.PlaneBufferGeometry(this.key.enter.size, this.key.enter.size / 4, 1, 1)
 
         this.key.enter.texture = this.resources.items.areaEnterTexture
-        if(this.key.enter.texture)
-        {
-            this.key.enter.texture.magFilter = THREE.NearestFilter
-            this.key.enter.texture.minFilter = THREE.LinearFilter
-        }
 
         this.key.enter.material = new THREE.MeshBasicMaterial({ color: 0xffffff, alphaMap: this.key.enter.texture, transparent: true, opacity: 0, depthWrite: false })
 
@@ -149,11 +148,6 @@ export default class Area extends EventEmitter
         this.key.icon.geometry = new THREE.PlaneBufferGeometry(this.key.icon.size, this.key.icon.size, 1, 1)
 
         this.key.icon.texture = this.resources.items.areaKeyEnterTexture
-        if(this.key.icon.texture)
-        {
-            this.key.icon.texture.magFilter = THREE.NearestFilter
-            this.key.icon.texture.minFilter = THREE.LinearFilter
-        }
 
         this.key.icon.material = new THREE.MeshBasicMaterial({ color: 0xffffff, alphaMap: this.key.icon.texture, transparent: true, opacity: 0, depthWrite: false })
 
@@ -163,6 +157,29 @@ export default class Area extends EventEmitter
         this.key.icon.mesh.matrixAutoUpdate = false
         this.key.icon.mesh.updateMatrix()
         this.key.container.add(this.key.icon.mesh)
+    }
+
+    setKeyTextures()
+    {
+        // Enter texture
+        this.key.enter.texture = this.resources.items.areaEnterTexture
+        if(this.key.enter.texture)
+        {
+            this.key.enter.texture.magFilter = THREE.NearestFilter
+            this.key.enter.texture.minFilter = THREE.LinearFilter
+            this.key.enter.material.alphaMap = this.key.enter.texture
+            this.key.enter.material.needsUpdate = true
+        }
+
+        // Icon texture
+        this.key.icon.texture = this.resources.items.areaKeyEnterTexture
+        if(this.key.icon.texture)
+        {
+            this.key.icon.texture.magFilter = THREE.NearestFilter
+            this.key.icon.texture.minFilter = THREE.LinearFilter
+            this.key.icon.material.alphaMap = this.key.icon.texture
+            this.key.icon.material.needsUpdate = true
+        }
     }
 
     interact(_showKey = true)
