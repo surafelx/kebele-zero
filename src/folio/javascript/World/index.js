@@ -175,7 +175,7 @@ export default class
         this.startingScreen.area = this.areas.add({
             position: new THREE.Vector2(0, 0),
             halfExtents: new THREE.Vector2(2.35, 1.5),
-            hasKey: true, // Show start button
+            hasKey: false, // Show start button
             testCar: false,
             active: true
         })
@@ -205,7 +205,7 @@ export default class
             window.setTimeout(() =>
             {
                 this.reveal.go()
-            }, 2000)
+            }, 1000)
         })
     }
 
