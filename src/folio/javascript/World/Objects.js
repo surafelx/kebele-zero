@@ -35,6 +35,9 @@ export default class Objects {
                     const match = _mesh.name.match(
                         /^shade([a-z]+)_?[0-9]{0,3}?/i
                     );
+                    if (!match) {
+                        return _mesh.clone();
+                    }
                     const materialName = `${match[1]
                         .substring(0, 1)
                         .toLowerCase()}${match[1].substring(1)}`; // PastalCase to camelCase
@@ -69,6 +72,9 @@ export default class Objects {
                     const match = _mesh.name.match(
                         /^pure([a-z]+)_?[0-9]{0,3}?/i
                     );
+                    if (!match) {
+                        return _mesh.clone();
+                    }
                     const materialName = match[1].toLowerCase();
                     let material = this.materials.pures.items[materialName];
 
@@ -90,7 +96,7 @@ export default class Objects {
                 regex: /^floor_?[0-9]{0,3}?/i,
                 apply: (_mesh, _options) => {
                     // Create floor manually because of missing UV
-                    const geometry = new THREE.PlaneBufferGeometry(
+                    const geometry = new THREE.PlaneGeometry(
                         _mesh.scale.x,
                         _mesh.scale.y,
                         10,

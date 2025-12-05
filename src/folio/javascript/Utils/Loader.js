@@ -105,7 +105,7 @@ export default class Resources extends EventEmitter
             this.toLoad++
             const extensionMatch = _resource.source.match(/\.([a-z]+)$/)
 
-            if(typeof extensionMatch[1] !== 'undefined')
+            if(extensionMatch && typeof extensionMatch[1] !== 'undefined')
             {
                 const extension = extensionMatch[1]
                 const loader = this.loaders.find((_loader) => _loader.extensions.find((_extension) => _extension === extension))
