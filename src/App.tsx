@@ -15,6 +15,64 @@ import KebeleMedia from './pages/KebeleMedia';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 
+// Error Boundary Component
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error('Error Boundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if ((this.state as any).hasError) {
+      return (
+        <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+          <div className="text-center text-white p-8 max-w-md">
+            <div className="text-6xl mb-4">🚨</div>
+            <h2 className="text-2xl font-bold mb-4">Something went wrong</h2>
+            <p className="text-gray-300 mb-6">
+              We encountered an unexpected error. Please try refreshing the page.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Refresh Page
+              </button>
+              <button
+                onClick={() => window.location.href = '/'}
+                className="w-full px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Go Home
+              </button>
+            </div>
+            {process.env.NODE_ENV === 'development' && (
+              <details className="mt-6 text-left">
+                <summary className="cursor-pointer text-sm text-gray-400 hover:text-gray-300">
+                  Error Details (Dev Mode)
+                </summary>
+                <pre className="mt-2 text-xs text-red-400 bg-gray-800 p-3 rounded overflow-auto">
+                  {(this.state as any).error?.toString()}
+                </pre>
+              </details>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 const isLevaDebug = window.location.hash === "#leva";
 
 function MainApp() {
@@ -131,13 +189,15 @@ function MainApp() {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<MainApp />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-      </Routes>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          <Route path="/" element={<MainApp />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

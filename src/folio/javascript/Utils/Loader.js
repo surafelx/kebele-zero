@@ -76,6 +76,10 @@ export default class Resources extends EventEmitter
                 gltfLoader.load(_resource.source, (_data) =>
                 {
                     this.fileLoadEnd(_resource, _data)
+                }, undefined, (_error) =>
+                {
+                    console.error(`Failed to load GLTF ${_resource.name}:`, _error)
+                    this.fileLoadEnd(_resource, null)
                 })
             }
         })
@@ -119,15 +123,24 @@ export default class Resources extends EventEmitter
                 continue
             }
 
-            // Handle data URLs (e.g., base64 encoded images)
+            // Handle data URLs (e.g., base64 encoded images and models)
             let extension = null
             if(source.startsWith('data:'))
             {
-                // Extract extension from data URL (e.g., "data:image/png;base64," -> "png")
-                const mimeMatch = source.match(/data:image\/([a-z]+);/)
-                if(mimeMatch)
+                // Extract extension from data URL
+                if(source.includes('data:image/'))
                 {
-                    extension = mimeMatch[1]
+                    // Image types (e.g., "data:image/png;base64," -> "png")
+                    const mimeMatch = source.match(/data:image\/([a-z]+);/)
+                    if(mimeMatch)
+                    {
+                        extension = mimeMatch[1]
+                    }
+                }
+                else if(source.includes('data:model/gltf'))
+                {
+                    // GLTF/GLB models (e.g., "data:model/gltf-binary;base64," -> "glb")
+                    extension = 'glb'
                 }
             }
             else

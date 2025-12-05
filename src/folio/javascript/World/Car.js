@@ -67,6 +67,28 @@ export default class Car
             this.models.backLightsReverse = this.resources.items.carDefaultBackLightsReverse
             this.models.wheel = this.resources.items.carDefaultWheel
         }
+
+        // Check if models loaded successfully
+        if(!this.models.chassis || !this.models.chassis.scene)
+        {
+            console.error('Car chassis model failed to load')
+            return
+        }
+        if(!this.models.wheel || !this.models.wheel.scene)
+        {
+            console.error('Car wheel model failed to load')
+            return
+        }
+        if(!this.models.backLightsBrake || !this.models.backLightsBrake.scene)
+        {
+            console.error('Car back lights brake model failed to load')
+            return
+        }
+        if(!this.models.backLightsReverse || !this.models.backLightsReverse.scene)
+        {
+            console.error('Car back lights reverse model failed to load')
+            return
+        }
     }
 
     setMovement()
@@ -80,6 +102,8 @@ export default class Car
         // Time tick
         this.time.on('tick', () =>
         {
+            if(!this.chassis || !this.chassis.object) return
+
             // Movement
             const movementSpeed = new THREE.Vector3()
             movementSpeed.copy(this.chassis.object.position).sub(this.chassis.oldPosition)
@@ -102,6 +126,13 @@ export default class Car
 
     setChassis()
     {
+        // Skip if chassis model not loaded
+        if(!this.models.chassis || !this.models.chassis.scene)
+        {
+            console.warn('Skipping chassis setup - model not loaded')
+            return
+        }
+
         this.chassis = {}
         this.chassis.offset = new THREE.Vector3(0, 0, - 0.28)
         this.chassis.object = this.objects.getConvertedMesh(this.models.chassis.scene.children)
@@ -114,6 +145,8 @@ export default class Car
         // Time tick
         this.time.on('tick', () =>
         {
+            if(!this.chassis || !this.chassis.object) return
+
             // Save old position for movement calculation
             this.chassis.oldPosition = this.chassis.object.position.clone()
 
@@ -131,6 +164,13 @@ export default class Car
 
     setAntena()
     {
+        // Skip if models not loaded
+        if(!this.models.antena || !this.models.antena.scene || !this.chassis || !this.chassis.object)
+        {
+            console.warn('Skipping antena setup - models not loaded')
+            return
+        }
+
         this.antena = {}
 
         this.antena.speedStrength = 10
@@ -153,6 +193,8 @@ export default class Car
         // Time tick
         this.time.on('tick', () =>
         {
+            if(!this.antena || !this.chassis || !this.chassis.object) return
+
             const max = 1
             const accelerationX = Math.min(Math.max(this.movement.acceleration.x, - max), max)
             const accelerationY = Math.min(Math.max(this.movement.acceleration.y, - max), max)
@@ -196,6 +238,15 @@ export default class Car
 
     setBackLights()
     {
+        // Skip if models not loaded
+        if(!this.models.backLightsBrake || !this.models.backLightsBrake.scene ||
+           !this.models.backLightsReverse || !this.models.backLightsReverse.scene ||
+           !this.chassis || !this.chassis.object)
+        {
+            console.warn('Skipping back lights setup - models not loaded')
+            return
+        }
+
         this.backLightsBrake = {}
 
         this.backLightsBrake.material = this.materials.pures.items.red.clone()
@@ -228,13 +279,26 @@ export default class Car
         // Time tick
         this.time.on('tick', () =>
         {
-            this.backLightsBrake.material.opacity = this.physics.controls.actions.brake ? 1 : 0.5
-            this.backLightsReverse.material.opacity = this.physics.controls.actions.down ? 1 : 0.5
+            if(this.backLightsBrake && this.backLightsBrake.material)
+            {
+                this.backLightsBrake.material.opacity = this.physics.controls.actions.brake ? 1 : 0.5
+            }
+            if(this.backLightsReverse && this.backLightsReverse.material)
+            {
+                this.backLightsReverse.material.opacity = this.physics.controls.actions.down ? 1 : 0.5
+            }
         })
     }
 
     setWheels()
     {
+        // Skip if wheel model not loaded
+        if(!this.models.wheel || !this.models.wheel.scene)
+        {
+            console.warn('Skipping wheels setup - model not loaded')
+            return
+        }
+
         this.wheels = {}
         this.wheels.object = this.objects.getConvertedMesh(this.models.wheel.scene.children)
         this.wheels.items = []
@@ -250,15 +314,18 @@ export default class Car
         // Time tick
         this.time.on('tick', () =>
         {
-            if(!this.transformControls.enabled)
+            if(!this.transformControls.enabled && this.wheels && this.wheels.items)
             {
                 for(const _wheelKey in this.physics.car.wheels.bodies)
                 {
                     const wheelBody = this.physics.car.wheels.bodies[_wheelKey]
                     const wheelObject = this.wheels.items[_wheelKey]
 
-                    wheelObject.position.copy(wheelBody.position)
-                    wheelObject.quaternion.copy(wheelBody.quaternion)
+                    if(wheelObject)
+                    {
+                        wheelObject.position.copy(wheelBody.position)
+                        wheelObject.quaternion.copy(wheelBody.quaternion)
+                    }
                 }
             }
         })
@@ -268,7 +335,13 @@ export default class Car
     {
         this.transformControls = new TransformControls(this.camera.instance, this.renderer.domElement)
         this.transformControls.size = 0.5
-        this.transformControls.attach(this.chassis.object)
+
+        // Only attach if chassis exists
+        if(this.chassis && this.chassis.object)
+        {
+            this.transformControls.attach(this.chassis.object)
+        }
+
         this.transformControls.enabled = false
         this.transformControls.visible = this.transformControls.enabled
 
