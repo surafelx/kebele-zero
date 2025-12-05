@@ -4,95 +4,95 @@ import Loader from './Utils/Loader.js'
 import EventEmitter from './Utils/EventEmitter.js'
 
 // Matcaps
-import matcapBeigeSource from '../models/matcaps/beige.png'
-import matcapBlackSource from '../models/matcaps/black.png'
-import matcapOrangeSource from '../models/matcaps/orange.png'
-import matcapRedSource from '../models/matcaps/red.png'
-import matcapWhiteSource from '../models/matcaps/white.png'
-import matcapGreenSource from '../models/matcaps/green.png'
-import matcapBrownSource from '../models/matcaps/brown.png'
-import matcapGraySource from '../models/matcaps/gray.png'
-import matcapEmeraldGreenSource from '../models/matcaps/emeraldGreen.png'
-import matcapPurpleSource from '../models/matcaps/purple.png'
-import matcapBlueSource from '../models/matcaps/blue.png'
-import matcapYellowSource from '../models/matcaps/yellow.png'
-import matcapMetalSource from '../models/matcaps/metal.png'
-// import matcapGoldSource from '../models/matcaps/gold.png'
+import matcapBeigeSource from '/models/matcaps/beige.png'
+import matcapBlackSource from '/models/matcaps/black.png'
+import matcapOrangeSource from '/models/matcaps/orange.png'
+import matcapRedSource from '/models/matcaps/red.png'
+import matcapWhiteSource from '/models/matcaps/white.png'
+import matcapGreenSource from '/models/matcaps/green.png'
+import matcapBrownSource from '/models/matcaps/brown.png'
+import matcapGraySource from '/models/matcaps/gray.png'
+import matcapEmeraldGreenSource from '/models/matcaps/emeraldGreen.png'
+import matcapPurpleSource from '/models/matcaps/purple.png'
+import matcapBlueSource from '/models/matcaps/blue.png'
+import matcapYellowSource from '/models/matcaps/yellow.png'
+import matcapMetalSource from '/models/matcaps/metal.png'
+// import matcapGoldSource from '/models/matcaps/gold.png'
 
-import matcapCyanSource from "../models/matcaps/nk/cyan.png"
-import matcapPurple2Source from "../models/matcaps/nk/purple2.png"
-import matcapGreen2Source from "../models/matcaps/nk/green2.png"
-import matcapGreen3Source from "../models/matcaps/nk/tree.png"
+import matcapCyanSource from "/models/matcaps/nk/cyan.png"
+import matcapPurple2Source from "/models/matcaps/nk/purple2.png"
+import matcapGreen2Source from "/models/matcaps/nk/green2.png"
+import matcapGreen3Source from "/models/matcaps/nk/tree.png"
 
 // Intro
-import introStaticBaseSource from '../models/intro/static/nk/base.glb'
-import introStaticCollisionSource from '../models/intro/static/collision.glb'
-import introStaticFloorShadowSource from '../models/intro/static/nk/floorShadow.png'
+import introStaticBaseSource from '/models/intro/static/nk/base.glb'
+import introStaticCollisionSource from '/models/intro/static/collision.glb'
+import introStaticFloorShadowSource from '/models/intro/static/nk/floorShadow.png'
 
-import introInstructionsLabelsSource from '../models/intro/instructions/labels.glb'
-import introInstructionsArrowsSource from '../models/intro/instructions/arrows.png'
-import introInstructionsControlsSource from '../models/intro/instructions/controls.png'
-import introInstructionsOtherSource from '../models/intro/instructions/other.png'
+import introInstructionsLabelsSource from '/models/intro/instructions/labels.glb'
+import introInstructionsArrowsSource from '/models/intro/instructions/arrows.png'
+import introInstructionsControlsSource from '/models/intro/instructions/controls.png'
+import introInstructionsOtherSource from '/models/intro/instructions/other.png'
 
-import introArrowKeyBaseSource from  '../models/intro/arrowKey/base.glb'
-import introArrowKeyCollisionSource from '../models/intro/arrowKey/collision.glb'
+import introArrowKeyBaseSource from  '/models/intro/arrowKey/base.glb'
+import introArrowKeyCollisionSource from '/models/intro/arrowKey/collision.glb'
 
-import introBBaseSource from '../models/intro/b/base.glb'
-import introBCollisionSource from '../models/intro/b/collision.glb'
+import introBBaseSource from '/models/intro/b/base.glb'
+import introBCollisionSource from '/models/intro/b/collision.glb'
 
-import introRBaseSource from '../models/intro/r/base.glb'
-import introRCollisionSource from '../models/intro/r/collision.glb'
+import introRBaseSource from '/models/intro/r/base.glb'
+import introRCollisionSource from '/models/intro/r/collision.glb'
 
-import introUBaseSource from '../models/intro/u/base.glb'
-import introUCollisionSource from '../models/intro/u/collision.glb'
+import introUBaseSource from '/models/intro/u/base.glb'
+import introUCollisionSource from '/models/intro/u/collision.glb'
 
-import introNBaseSource from '../models/intro/n/base.glb'
-import introNCollisionSource from '../models/intro/n/collision.glb'
+import introNBaseSource from '/models/intro/n/base.glb'
+import introNCollisionSource from '/models/intro/n/collision.glb'
 
-import introOBaseSource from '../models/intro/ke/base.glb'
-import introOCollisionSource from '../models/intro/o/collision.glb'
+import introOBaseSource from '/models/intro/ke/base.glb'
+import introOCollisionSource from '/models/intro/o/collision.glb'
 
-import introSBaseSource from '../models/intro/zero/base.glb'
-import introSCollisionSource from '../models/intro/s/collision.glb'
+import introSBaseSource from '/models/intro/zero/base.glb'
+import introSCollisionSource from '/models/intro/s/collision.glb'
 
-import introIBaseSource from '../models/intro/i/base.glb'
-import introICollisionSource from '../models/intro/i/collision.glb'
+import introIBaseSource from '/models/intro/i/base.glb'
+import introICollisionSource from '/models/intro/i/collision.glb'
 
-import introMBaseSource from '../models/intro/m/base.glb'
-import introMCollisionSource from '../models/intro/m/collision.glb'
+import introMBaseSource from '/models/intro/m/base.glb'
+import introMCollisionSource from '/models/intro/m/collision.glb'
 
-import introCreativeBaseSource from '../models/intro/kebele/base.glb'
-import introCreativeCollisionSource from '../models/intro/creative/collision.glb'
+import introCreativeBaseSource from '/models/intro/kebele/base.glb'
+import introCreativeCollisionSource from '/models/intro/creative/collision.glb'
 
-import introDevBaseSource from '../models/intro/zero-/base.glb'
-import introDevCollisionSource from '../models/intro/dev/collision.glb'
+import introDevBaseSource from '/models/intro/zero-/base.glb'
+import introDevCollisionSource from '/models/intro/dev/collision.glb'
 
 // Crossroads
-import crossroadsStaticFloorShadowSource from '../models/crossroads/static/nk/floorShadow.png'
-import crossroadsStaticBaseSource from '../models/crossroads/static/nk/base.glb'
-import crossroadsStaticCollisionSource from '../models/crossroads/static/nk/collision.glb'
+import crossroadsStaticFloorShadowSource from '/models/crossroads/static/nk/floorShadow.png'
+import crossroadsStaticBaseSource from '/models/crossroads/static/nk/base.glb'
+import crossroadsStaticCollisionSource from '/models/crossroads/static/nk/collision.glb'
 
 // Car sam
-import carDefaultChassisSource from '../models/car/lada/chassis.glb'
-import carDefaultWheelSource from '../models/car/lada/wheel.glb'
-import carDefaultBackLightsBrakeSource from '../models/car/default/backLightsBrake.glb'
-import carDefaultBackLightsReverseSource from '../models/car/default/backLightsReverse.glb'
-import carDefaultAntenaSource from '../models/car/default/antena.glb'
+import carDefaultChassisSource from '/models/car/lada/chassis.glb'
+import carDefaultWheelSource from '/models/car/lada/wheel.glb'
+import carDefaultBackLightsBrakeSource from '/models/car/default/backLightsBrake.glb'
+import carDefaultBackLightsReverseSource from '/models/car/default/backLightsReverse.glb'
+import carDefaultAntenaSource from '/models/car/default/antena.glb'
 // import carDefaultBunnyEarLeftSource from '../models/car/default/bunnyEarLeft.glb'
 // import carDefaultBunnyEarRightSource from '../models/car/default/bunnyEarRight.glb'
 
 // Car cyber truck
-import carCyberTruckChassisSource from '../models/car/cyberTruck/chassis.glb'
-import carCyberTruckWheelSource from '../models/car/cyberTruck/wheel.glb'
-import carCyberTruckBackLightsBrakeSource from '../models/car/cyberTruck/backLightsBrake.glb'
-import carCyberTruckBackLightsReverseSource from '../models/car/cyberTruck/backLightsReverse.glb'
-import carCyberTruckAntenaSource from '../models/car/cyberTruck/antena.glb'
+import carCyberTruckChassisSource from '/models/car/cyberTruck/chassis.glb'
+import carCyberTruckWheelSource from '/models/car/cyberTruck/wheel.glb'
+import carCyberTruckBackLightsBrakeSource from '/models/car/cyberTruck/backLightsBrake.glb'
+import carCyberTruckBackLightsReverseSource from '/models/car/cyberTruck/backLightsReverse.glb'
+import carCyberTruckAntenaSource from '/models/car/cyberTruck/antena.glb'
 
 // Projects
-import projectsBoardStructureSource from '../models/projects/board/structure.glb'
-import projectsBoardCollisionSource from '../models/projects/board/collision.glb'
-import projectsBoardStructureFloorShadowSource from '../models/projects/board/floorShadow.png'
-import projectsBoardPlaneSource from '../models/projects/board/plane.glb'
+import projectsBoardStructureSource from '/models/projects/board/structure.glb'
+import projectsBoardCollisionSource from '/models/projects/board/collision.glb'
+import projectsBoardStructureFloorShadowSource from '/models/projects/board/floorShadow.png'
+import projectsBoardPlaneSource from '/models/projects/board/plane.glb'
 
 import projectsDistinctionsAwwwardsBaseSource from '../models/projects/distinctions/awwwards/base.glb'
 import projectsDistinctionsAwwwardsCollisionSource from '../models/projects/distinctions/awwwards/collision.glb'
@@ -113,12 +113,12 @@ import projectsOranoFloorSource from '../models/projects/orano/floorTexture.png'
 import projectsKepplerFloorSource from '../models/projects/keppler/floorTexture.png'
 
 // Information
-import informationStaticBaseSource from '../models/information/static/base.glb'
-import informationStaticCollisionSource from '../models/information/static/collision.glb'
-import informationStaticFloorShadowSource from '../models/information/static/floorShadow.png'
+import informationStaticBaseSource from '/models/information/static/base.glb'
+import informationStaticCollisionSource from '/models/information/static/collision.glb'
+import informationStaticFloorShadowSource from '/models/information/static/floorShadow.png'
 
-import informationBaguetteBaseSource from '../models/information/baguette/base.glb'
-import informationBaguetteCollisionSource from '../models/information/baguette/collision.glb'
+import informationBaguetteBaseSource from '/models/information/baguette/base.glb'
+import informationBaguetteCollisionSource from '/models/information/baguette/collision.glb'
 
 import informationContactTwitterLabelSource from '../models/information/static/contactTwitterLabel.png'
 import informationContactGithubLabelSource from '../models/information/static/contactGithubLabel.png'
@@ -128,17 +128,17 @@ import informationContactMailLabelSource from '../models/information/static/cont
 import informationActivitiesSource from '../models/information/static/activities.png'
 
 // Playground
-import playgroundStaticFloorShadowSource from '../models/playground/static/nk/floorShadow.png'
-import playgroundStaticBaseSource from '../models/playground/static/nk/base.glb'
-import playgroundStaticCollisionSource from '../models/playground/static/nk/collision.glb'
+import playgroundStaticFloorShadowSource from '/models/playground/static/nk/floorShadow.png'
+import playgroundStaticBaseSource from '/models/playground/static/nk/base.glb'
+import playgroundStaticCollisionSource from '/models/playground/static/nk/collision.glb'
 
 // Brick
-import brickBaseSource from '../models/brick/base.glb'
-import brickCollisionSource from '../models/brick/collision.glb'
+import brickBaseSource from '/models/brick/base.glb'
+import brickCollisionSource from '/models/brick/collision.glb'
 
 // Horn
-import hornBaseSource from '../models/horn/base.glb'
-import hornCollisionSource from '../models/horn/collision.glb'
+import hornBaseSource from '/models/horn/base.glb'
+import hornCollisionSource from '/models/horn/collision.glb'
 
 // // Distinction A
 // import distinctionAStaticFloorShadowSource from '../models/distinctionA/static/floorShadow.png'
@@ -168,16 +168,16 @@ import webbyTrophyBaseSource from '../models/webbyTrophy/base.glb'
 import webbyTrophyCollisionSource from '../models/webbyTrophy/collision.glb'
 
 // Lemon
-import lemonBaseSource from '../models/lemon/base.glb'
-import lemonCollisionSource from '../models/lemon/collision.glb'
+import lemonBaseSource from '/models/lemon/base.glb'
+import lemonCollisionSource from '/models/lemon/collision.glb'
 
 // Bowling ball
-import bowlingBallBaseSource from '../models/bowlingBall/base.glb'
-import bowlingBallCollisionSource from '../models/bowlingBall/collision.glb'
+import bowlingBallBaseSource from '/models/bowlingBall/base.glb'
+import bowlingBallCollisionSource from '/models/bowlingBall/collision.glb'
 
 // Bowling pin
-import bowlingPinBaseSource from '../models/bowlingPin/base.glb'
-import bowlingPinCollisionSource from '../models/bowlingPin/collision.glb'
+import bowlingPinBaseSource from '/models/bowlingPin/base.glb'
+import bowlingPinCollisionSource from '/models/bowlingPin/collision.glb'
 
 // Area
 import areaKeyEnterSource from '../models/area/keyEnter.png'
