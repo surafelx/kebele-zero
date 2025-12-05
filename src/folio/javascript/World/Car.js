@@ -54,6 +54,13 @@ export default class Car
             this.models.backLightsBrake = this.resources.items.carCyberTruckBackLightsBrake
             this.models.backLightsReverse = this.resources.items.carCyberTruckBackLightsReverse
             this.models.wheel = this.resources.items.carCyberTruckWheel
+            console.log('Debug: Cyber truck models loaded:', {
+                chassis: this.models.chassis,
+                antena: this.models.antena,
+                backLightsBrake: this.models.backLightsBrake,
+                backLightsReverse: this.models.backLightsReverse,
+                wheel: this.models.wheel
+            })
         }
 
         // Default
@@ -66,12 +73,20 @@ export default class Car
             this.models.backLightsBrake = this.resources.items.carDefaultBackLightsBrake
             this.models.backLightsReverse = this.resources.items.carDefaultBackLightsReverse
             this.models.wheel = this.resources.items.carDefaultWheel
+            console.log('Debug: Default car models loaded:', {
+                chassis: this.models.chassis,
+                antena: this.models.antena,
+                backLightsBrake: this.models.backLightsBrake,
+                backLightsReverse: this.models.backLightsReverse,
+                wheel: this.models.wheel
+            })
         }
 
         // Check if models loaded successfully
         if(!this.models.chassis || !this.models.chassis.scene)
         {
             console.error('Car chassis model failed to load')
+            console.error('Debug: chassis model details:', this.models.chassis)
             return
         }
         if(!this.models.wheel || !this.models.wheel.scene)
