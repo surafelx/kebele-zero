@@ -54,6 +54,7 @@ export default class
         this.setControls()
         this.setAreas()
         this.setStartingScreen()
+        // this.start()
     }
 
     start()
@@ -174,16 +175,16 @@ export default class
         this.startingScreen.area = this.areas.add({
             position: new THREE.Vector2(0, 0),
             halfExtents: new THREE.Vector2(2.35, 1.5),
-            hasKey: false,
+            hasKey: true, // Show start button
             testCar: false,
-            active: false // Start inactive for preloading
+            active: true
         })
 
-        // Show the starting screen after 3 seconds of preloading
+        // Auto-interact after 3 seconds
         setTimeout(() =>
         {
-            this.startingScreen.area.activate()
-        }, 3000)
+            this.startingScreen.area.interact()
+        }, 5000)
 
         // On interact, reveal
         this.startingScreen.area.on('interact', () =>
@@ -198,7 +199,7 @@ export default class
             window.setTimeout(() =>
             {
                 this.reveal.go()
-            }, 600)
+            }, 2000)
         })
     }
 
