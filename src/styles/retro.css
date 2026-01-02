@@ -1,0 +1,545 @@
+/* 🎨 Hand-Drawn Cartoon Software Interface Styles */
+
+/* Base Background - Warm Cream with Subtle Paper Texture */
+.retro-bg {
+  background: #f9f6f0;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(0,0,0,0.03) 1px, transparent 1px),
+    radial-gradient(circle at 80% 20%, rgba(0,0,0,0.03) 1px, transparent 1px),
+    radial-gradient(circle at 40% 40%, rgba(0,0,0,0.02) 1px, transparent 1px);
+  background-size: 30px 30px, 50px 50px, 70px 70px;
+  background-position: 0 0, 15px 15px, 35px 35px;
+}
+
+/* 🎯 Core Color Palette */
+:root {
+  --mustard: #d4af37;
+  --sky-blue: #87ceeb;
+  --coral-red: #ff7f50;
+  --muted-teal: #5f9ea0;
+  --charcoal: #36454f;
+  --cream: #f9f6f0;
+  --paper: #f5f2e8;
+}
+
+/* 🖼️ Desktop Window Panels */
+.retro-window {
+  background: var(--paper);
+  border: 4px solid var(--charcoal);
+  border-radius: 16px;
+  position: relative;
+  box-shadow:
+    0 6px 12px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.retro-window::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid var(--charcoal);
+  border-radius: 14px;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+/* 🎨 Window Title Bars */
+.retro-titlebar {
+  background: var(--mustard);
+  border-bottom: 3px solid var(--charcoal);
+  border-radius: 12px 12px 0 0;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.retro-titlebar-sky {
+  background: var(--sky-blue);
+}
+
+.retro-titlebar-coral {
+  background: var(--coral-red);
+}
+
+.retro-titlebar-teal {
+  background: var(--muted-teal);
+}
+
+/* 🔴 Window Controls (Cartoon Dots) */
+.retro-window-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.retro-window-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--charcoal);
+  background: var(--paper);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retro-window-dot:hover {
+  background: var(--coral-red);
+  transform: scale(1.1);
+}
+
+.retro-window-dot:nth-child(2) {
+  background: var(--mustard);
+}
+
+.retro-window-dot:nth-child(3) {
+  background: var(--sky-blue);
+}
+
+/* Window Header Style */
+.retro-window-header {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-bottom: 4px solid #2d3748;
+  border-radius: 8px 8px 0 0;
+  padding: 12px 16px;
+  position: relative;
+}
+
+.retro-window-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #92400e;
+}
+
+/* 🔘 Chunky Cartoon Buttons */
+.retro-btn {
+  background: var(--sky-blue);
+  border: 4px solid var(--charcoal);
+  border-radius: 12px;
+  color: var(--charcoal);
+  font-weight: bold;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 20px;
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.2),
+    inset 0 2px 0 rgba(255,255,255,0.4),
+    inset 0 -2px 0 rgba(0,0,0,0.2);
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.retro-btn::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid var(--charcoal);
+  border-radius: 10px;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.retro-btn:hover {
+  background: var(--mustard);
+  transform: translateY(-2px) rotate(-0.5deg);
+  box-shadow:
+    0 6px 12px rgba(0,0,0,0.3),
+    inset 0 2px 0 rgba(255,255,255,0.5),
+    inset 0 -2px 0 rgba(0,0,0,0.3);
+}
+
+.retro-btn:active {
+  transform: translateY(0) rotate(0.2deg);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
+}
+
+/* Secondary Button */
+.retro-btn-secondary {
+  background: var(--coral-red);
+  border: 4px solid var(--charcoal);
+  border-radius: 12px;
+  color: white;
+  font-weight: bold;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 20px;
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.2),
+    inset 0 2px 0 rgba(255,255,255,0.4),
+    inset 0 -2px 0 rgba(0,0,0,0.2);
+}
+
+.retro-btn-secondary::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid var(--charcoal);
+  border-radius: 10px;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.retro-btn-secondary:hover {
+  background: var(--mustard);
+  transform: translateY(-2px) rotate(0.5deg);
+}
+
+/* Success Button */
+.retro-btn-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 3px solid #2d3748;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    inset 0 -1px 0 rgba(0,0,0,0.2);
+}
+
+.retro-btn-success:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+}
+
+/* 📝 Cartoon Input Fields */
+.retro-input {
+  border: 4px solid var(--charcoal);
+  border-radius: 10px;
+  background: var(--paper);
+  padding: 12px 16px;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.15),
+    inset 0 2px 0 rgba(255,255,255,0.6),
+    inset 0 -2px 0 rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.retro-input::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid var(--charcoal);
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.retro-input:focus {
+  outline: none;
+  border-color: var(--sky-blue);
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.2),
+    0 0 0 4px rgba(135, 206, 235, 0.3),
+    inset 0 2px 0 rgba(255,255,255,0.7),
+    inset 0 -2px 0 rgba(0,0,0,0.1);
+}
+
+/* 📋 Cartoon Cards/Panels */
+.retro-card {
+  background: var(--paper);
+  border: 4px solid var(--charcoal);
+  border-radius: 16px;
+  box-shadow:
+    0 6px 12px rgba(0,0,0,0.15),
+    inset 0 2px 0 rgba(255,255,255,0.6),
+    inset 0 -2px 0 rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.retro-card::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid var(--charcoal);
+  border-radius: 14px;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+/* 🎯 Cartoon Icons */
+.retro-icon {
+  filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.3));
+  stroke-width: 3px;
+}
+
+/* ✍️ Cartoon Typography */
+.retro-title {
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-weight: bold;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+  color: var(--charcoal);
+  letter-spacing: 0.5px;
+}
+
+.retro-text {
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-weight: 600;
+  color: var(--charcoal);
+  line-height: 1.4;
+}
+
+/* 📊 Cartoon Progress Bars */
+.retro-progress {
+  background: var(--paper);
+  border: 3px solid var(--charcoal);
+  border-radius: 8px;
+  height: 24px;
+  overflow: hidden;
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.15),
+    inset 0 2px 0 rgba(255,255,255,0.6);
+}
+
+.retro-progress-fill {
+  background: var(--sky-blue);
+  height: 100%;
+  border-radius: 6px;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.4);
+}
+
+/* 🎭 Cartoon Modal Styles */
+.retro-modal {
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(2px);
+}
+
+.retro-modal-content {
+  background: rgba(245, 242, 232, 0.95);
+  border: 6px solid var(--charcoal);
+  border-radius: 20px;
+  box-shadow:
+    0 12px 24px rgba(0,0,0,0.3),
+    inset 0 2px 0 rgba(255,255,255,0.6);
+}
+
+/* 🪟 Floating Window Effect */
+.retro-floating {
+  transform: rotate(-0.8deg) scale(1.02);
+  box-shadow:
+    0 8px 16px rgba(0,0,0,0.2),
+    0 0 0 3px rgba(255,255,255,0.8),
+    inset 0 2px 0 rgba(255,255,255,0.7);
+}
+
+.retro-floating:nth-child(2n) {
+  transform: rotate(0.6deg) scale(1.01);
+}
+
+.retro-floating:nth-child(3n) {
+  transform: rotate(-0.4deg) scale(1.03);
+}
+
+/* 🧭 Cartoon Navigation */
+.retro-nav {
+  background: var(--mustard);
+  border: 4px solid var(--charcoal);
+  border-radius: 16px;
+  box-shadow:
+    0 6px 12px rgba(0,0,0,0.2),
+    inset 0 2px 0 rgba(255,255,255,0.5);
+}
+
+/* 🏷️ Cartoon Status Badges */
+.retro-badge {
+  background: var(--muted-teal);
+  border: 3px solid var(--charcoal);
+  border-radius: 16px;
+  color: white;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.2),
+    inset 0 2px 0 rgba(255,255,255,0.4);
+}
+
+/* 🌀 Cartoon Loading Spinner */
+.retro-spinner {
+  border: 6px solid var(--paper);
+  border-top: 6px solid var(--sky-blue);
+  border-radius: 50%;
+  animation: retro-spin 1s linear infinite;
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.15),
+    inset 0 2px 0 rgba(255,255,255,0.5);
+}
+
+@keyframes retro-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 🎮 Cartoon Hover Effects */
+.retro-hover:hover {
+  transform: translateY(-3px) rotate(0.5deg) scale(1.02);
+  box-shadow:
+    0 8px 16px rgba(0,0,0,0.25),
+    0 0 0 4px rgba(255,255,255,0.9);
+  transition: all 0.2s ease;
+}
+
+/* 🎯 Cartoon Focus States */
+.retro-focus:focus {
+  outline: none;
+  box-shadow:
+    0 0 0 6px rgba(135, 206, 235, 0.4),
+    0 6px 12px rgba(0,0,0,0.3);
+}
+
+/* 🎚️ Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--paper);
+  border: 3px solid var(--charcoal);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sky-blue);
+  border: 2px solid var(--charcoal);
+  border-radius: 6px;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mustard);
+  transform: scale(1.05);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--paper);
+  border: 2px solid var(--charcoal);
+}
+
+/* 🌟 Cool Modal Effects */
+@keyframes modalGlow {
+  0%, 100% {
+    box-shadow:
+      0 12px 24px rgba(0,0,0,0.3),
+      inset 0 2px 0 rgba(255,255,255,0.6),
+      0 0 20px rgba(135, 206, 235, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 12px 24px rgba(0,0,0,0.3),
+      inset 0 2px 0 rgba(255,255,255,0.6),
+      0 0 30px rgba(135, 206, 235, 0.2);
+  }
+}
+
+.retro-modal-content {
+  animation: modalGlow 3s ease-in-out infinite;
+  position: relative;
+}
+
+.retro-modal-content::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  background: linear-gradient(45deg,
+    transparent 0%,
+    rgba(135, 206, 235, 0.1) 25%,
+    rgba(255, 215, 0, 0.1) 50%,
+    rgba(135, 206, 235, 0.1) 75%,
+    transparent 100%);
+  border-radius: 24px;
+  z-index: -1;
+  animation: modalGlow 3s ease-in-out infinite;
+}
+
+/* ✨ Enhanced Floating Effects */
+@keyframes enhancedFloat {
+  0%, 100% {
+    transform: rotate(-0.8deg) scale(1.02) translateY(0);
+  }
+  33% {
+    transform: rotate(-0.4deg) scale(1.01) translateY(-2px);
+  }
+  66% {
+    transform: rotate(-1.2deg) scale(1.03) translateY(1px);
+  }
+}
+
+.retro-floating-enhanced {
+  animation: enhancedFloat 6s ease-in-out infinite;
+}
+
+/* 🎨 Dynamic Background Pattern */
+.retro-bg-enhanced {
+  background:
+    radial-gradient(circle at 20% 80%, rgba(0,0,0,0.03) 1px, transparent 1px),
+    radial-gradient(circle at 80% 20%, rgba(0,0,0,0.03) 1px, transparent 1px),
+    radial-gradient(circle at 40% 40%, rgba(0,0,0,0.02) 1px, transparent 1px),
+    linear-gradient(45deg, rgba(135, 206, 235, 0.02) 0%, transparent 50%, rgba(255, 215, 0, 0.02) 100%);
+  background-size: 30px 30px, 50px 50px, 70px 70px, 100% 100%;
+  background-position: 0 0, 15px 15px, 35px 35px, 0 0;
+  animation: bgShift 20s ease-in-out infinite;
+}
+
+@keyframes bgShift {
+  0%, 100% { background-position: 0 0, 15px 15px, 35px 35px, 0 0; }
+  50% { background-position: 10px 10px, 25px 25px, 45px 45px, 10px 10px; }
+}
+
+/* 📱 Responsive Cartoon Adjustments */
+@media (max-width: 768px) {
+  .retro-window {
+    border-width: 3px;
+    border-radius: 12px;
+  }
+
+  .retro-btn {
+    font-size: 14px;
+    padding: 10px 16px;
+    border-width: 3px;
+  }
+
+  .retro-card {
+    margin: 4px;
+    border-width: 3px;
+  }
+
+  .retro-floating {
+    transform: rotate(-0.4deg) scale(1.01);
+  }
+}

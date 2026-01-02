@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { ShoppingCart, Heart, Star, Filter, Search, Shirt, Coffee, Book, Music, Gem, Home } from 'lucide-react';
+import { ShoppingCart, Heart, Star, Filter, Search, Shirt, Coffee, Book, Music, Gem, Home, X } from 'lucide-react';
 
 interface Product {
   _id: string;
@@ -178,64 +178,73 @@ const KebeleSouq: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative mb-8">
-            <div className="w-20 h-20 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <ShoppingCart className="w-10 h-10 text-amber-600" />
+      <div className="flex justify-center">
+        <div className="retro-window retro-floating text-center p-8 max-w-sm w-full">
+          <div className="retro-titlebar retro-titlebar-teal mb-4">
+            <div className="flex items-center justify-center">
+              <ShoppingCart className="w-5 h-5 retro-icon" />
             </div>
-            <div className="absolute -top-2 -right-2 w-6 h-6 bg-amber-400 rounded-full animate-pulse"></div>
-          </div>
-          <div className="space-y-4">
-            <div className="w-48 h-2 bg-gray-200 rounded-full mx-auto overflow-hidden">
-              <div className="w-full h-full bg-amber-400 rounded-full animate-pulse"></div>
-            </div>
-            <div className="w-32 h-2 bg-gray-200 rounded-full mx-auto overflow-hidden">
-              <div className="w-3/4 h-full bg-amber-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-            </div>
-            <div className="w-40 h-2 bg-gray-200 rounded-full mx-auto overflow-hidden">
-              <div className="w-1/2 h-full bg-amber-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+            <div className="retro-window-controls">
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
             </div>
           </div>
-          <p className="mt-8 text-gray-600 font-medium">Loading marketplace...</p>
+          <div className="retro-spinner w-16 h-16 mx-auto mb-6"></div>
+          <div className="retro-title text-lg font-bold uppercase tracking-wider">Loading Souq...</div>
+          <p className="retro-text text-sm mt-4 opacity-80">Discovering amazing Ethiopian products</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Simple header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Kebele <span className="text-green-600">Souq</span>
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover authentic Ethiopian craftsmanship and cultural treasures. Support local artisans and bring home pieces of Ethiopian heritage.
-          </p>
+    <div className="min-h-screen retro-bg retro-bg-enhanced">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Hero Section - Smaller */}
+        <div className="retro-window mb-8">
+          <div className="retro-titlebar retro-titlebar-teal">
+            <div className="flex items-center space-x-3">
+              <ShoppingCart className="w-4 h-4 retro-icon" />
+              <span className="retro-title text-xs font-bold uppercase">KEBELE SOUQ</span>
+            </div>
+            <div className="retro-window-controls">
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+            </div>
+          </div>
+          <div className="p-4 text-center">
+            <h1 className="text-xl md:text-2xl retro-title mb-3 leading-tight uppercase tracking-tight">
+              DISCOVER ETHIOPIAN CRAFTSMANSHIP
+            </h1>
+            <p className="text-xs md:text-sm retro-text max-w-2xl mx-auto leading-relaxed">
+              Discover authentic Ethiopian craftsmanship and cultural treasures. Support local artisans and bring home pieces of Ethiopian heritage.
+            </p>
+          </div>
         </div>
 
-        {/* Search and Filters */}
-        <div className="mb-12">
-          <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Search and Filters - Minimal */}
+        <div className="retro-window mb-8">
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Search Products</label>
-                <input
-                  type="text"
-                  placeholder="Search by name, description, or category..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
-                />
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-charcoal w-4 h-4 retro-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-8 pr-3 py-2 retro-input text-xs"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
+                  className="w-full px-3 py-2 retro-input bg-paper text-xs"
                 >
                   <option value="">All Categories</option>
                   {categories.map(category => (
@@ -243,11 +252,11 @@ const KebeleSouq: React.FC = () => {
                   ))}
                 </select>
               </div>
-              <div className="flex items-end">
-                <div className="bg-white rounded-xl p-4 border border-gray-200 w-full">
-                  <div className="text-sm text-gray-600 mb-1">Cart Summary</div>
-                  <div className="text-lg font-semibold text-gray-900">{cart.length} items</div>
-                  <div className="text-amber-600 font-medium">${cartTotal.toFixed(2)}</div>
+              <div>
+                <div className="bg-paper p-3 w-full rounded-lg border-2 border-charcoal retro-title text-xs">
+                  <div className="text-charcoal mb-1 uppercase tracking-wide font-bold">Cart</div>
+                  <div className="text-charcoal text-sm font-semibold">{cart.length} items</div>
+                  <div className="text-charcoal font-bold">${cartTotal.toFixed(2)}</div>
                 </div>
               </div>
             </div>
@@ -257,65 +266,78 @@ const KebeleSouq: React.FC = () => {
         {/* Products Grid */}
         <div className="mb-8">
           {products.length === 0 ? (
-            <div className="text-center py-12">
-              <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
-              <p className="text-gray-600">Try adjusting your search criteria or check back later for new arrivals.</p>
+            <div className="retro-window retro-floating text-center p-12">
+              <div className="retro-titlebar retro-titlebar-teal mb-6">
+                <div className="flex items-center space-x-3">
+                  <ShoppingCart className="w-5 h-5 retro-icon" />
+                  <span className="retro-title text-sm font-bold uppercase">NO PRODUCTS FOUND</span>
+                </div>
+                <div className="retro-window-controls">
+                  <div className="retro-window-dot"></div>
+                  <div className="retro-window-dot"></div>
+                  <div className="retro-window-dot"></div>
+                </div>
+              </div>
+              <div className="w-16 h-16 bg-mustard rounded-lg flex items-center justify-center mx-auto mb-6 border-2 border-charcoal">
+                <ShoppingCart className="w-8 h-8 text-charcoal retro-icon" />
+              </div>
+              <h3 className="retro-title text-xl font-bold mb-4 uppercase tracking-wide">No Products Found</h3>
+              <p className="retro-text text-base">Try adjusting your search criteria or check back later for new arrivals.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product) => (
-                <div key={product._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div key={product._id} className="retro-window retro-floating overflow-hidden">
                   {/* Product Image */}
-                  <div className="aspect-square overflow-hidden">
+                  <div className="aspect-[3/2] overflow-hidden relative">
                     <img
                       src={product.images[0]?.url}
                       alt={product.name}
                       className="w-full h-full object-cover"
                     />
+                    {/* Semi-transparent background overlay for better tag visibility */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10"></div>
+
                     {product.isFeatured && (
-                      <div className="absolute top-4 right-4">
-                        <span className="px-2 py-1 bg-orange-500 text-white rounded text-xs font-medium">
-                          Featured
+                      <div className="absolute top-3 left-3">
+                        <span className="px-2 py-1 bg-green-600 text-white rounded-md retro-title text-xs font-bold uppercase border-2 border-white shadow-lg transform -rotate-3">
+                          FEATURED
                         </span>
                       </div>
                     )}
                   </div>
 
                   {/* Product Content */}
-                  <div className="p-4">
+                  <div className="p-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                      <span className="px-2 py-1 bg-purple-600 text-white rounded-md retro-title text-xs font-bold uppercase border-2 border-white shadow-sm">
                         {product.category}
                       </span>
-                      <span className="text-sm text-gray-600">{product.inventory.quantity} in stock</span>
+                      <span className="retro-title text-sm font-bold text-charcoal">
+                        ${product.price}
+                      </span>
                     </div>
 
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="retro-title text-sm font-bold mb-1 leading-tight uppercase line-clamp-2">
                       {product.name}
                     </h3>
 
-                    <p className="text-gray-600 text-sm mb-4">
-                      {product.description}
+                    <p className="retro-text text-xs mb-3 leading-relaxed">
+                      {product.description.length > 60 ? `${product.description.substring(0, 60)}...` : product.description}
                     </p>
-
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-xl font-bold text-gray-900">${product.price}</span>
-                    </div>
 
                     <div className="flex space-x-2">
                       <button
                         onClick={() => addToCart(product)}
-                        className="flex-1 bg-green-600 text-white py-2 px-3 rounded hover:bg-green-700 transition-colors flex items-center justify-center text-sm font-medium"
+                        className="flex-1 retro-btn text-xs py-1 font-bold uppercase"
                       >
-                        <ShoppingCart className="h-4 w-4 mr-1" />
-                        Add to Cart
+                        ADD TO CART
                       </button>
                       <button
                         onClick={() => handlePurchase(product)}
-                        className="flex-1 bg-orange-600 text-white py-2 px-3 rounded hover:bg-orange-700 transition-colors text-sm font-medium"
+                        className="flex-1 bg-orange-500 text-white px-2 py-1 rounded-lg retro-title text-xs font-bold uppercase border-2 border-white hover:bg-orange-600 transition-colors"
                       >
-                        Buy Now
+                        BUY NOW
                       </button>
                     </div>
                   </div>
@@ -323,6 +345,35 @@ const KebeleSouq: React.FC = () => {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Call to Action */}
+        <div className="retro-window retro-floating text-center">
+          <div className="retro-titlebar retro-titlebar-teal">
+            <div className="flex items-center space-x-3">
+              <Heart className="w-5 h-5 retro-icon" />
+              <span className="retro-title text-sm font-bold uppercase">SUPPORT ETHIOPIAN ARTISANS</span>
+            </div>
+            <div className="retro-window-controls">
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+            </div>
+          </div>
+          <div className="p-8">
+            <h2 className="retro-title text-2xl font-bold mb-4 uppercase tracking-wide">READY TO SHOP ETHIOPIAN?</h2>
+            <p className="retro-text text-base mb-6 max-w-2xl mx-auto leading-relaxed">
+              Every purchase helps preserve Ethiopian cultural heritage and supports local communities. Shop with purpose.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="retro-btn text-lg py-4 px-8 font-bold uppercase">
+                BROWSE ALL PRODUCTS
+              </button>
+              <button className="bg-paper text-charcoal px-8 py-4 rounded-lg retro-title text-lg font-bold uppercase border-2 border-charcoal hover:bg-mustard hover:text-charcoal transition-colors">
+                BECOME A SELLER
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

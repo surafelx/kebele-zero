@@ -69,7 +69,7 @@ import introDevCollisionSource from '/models/intro/dev/collision.glb'
 
 // Crossroads
 import crossroadsStaticFloorShadowSource from '/models/crossroads/static/nk/floorShadow.png'
-import crossroadsStaticBaseSource from '/models/crossroads/static/nk/base.glb'
+import crossroadsStaticBaseSource from '/models/crossroads/static/nnk/base.glb'
 import crossroadsStaticCollisionSource from '/models/crossroads/static/nk/collision.glb'
 
 // Car sam

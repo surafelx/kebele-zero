@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Heart, Share2, ThumbsUp, Music, Film, Coffee, Mic, Radio, Headphones, Star } from 'lucide-react';
+ import React, { useState, useEffect } from 'react';
+import { Play, Pause, Volume2, VolumeX, Heart, Share2, ThumbsUp, Music, Film, Coffee, Mic, Radio, Headphones, Star, Search } from 'lucide-react';
 
 interface Video {
   _id: string;
@@ -218,46 +218,73 @@ const KebeleRadio: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-          <div className="text-white font-bold text-lg">Loading...</div>
+      <div className="flex justify-center">
+        <div className="retro-window retro-floating text-center p-8 max-w-sm w-full">
+          <div className="retro-titlebar retro-titlebar-teal mb-4">
+            <div className="flex items-center justify-center">
+              <Radio className="w-5 h-5 retro-icon" />
+            </div>
+            <div className="retro-window-controls">
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+            </div>
+          </div>
+          <div className="retro-spinner w-16 h-16 mx-auto mb-6"></div>
+          <div className="retro-title text-lg font-bold uppercase tracking-wider">Loading Radio...</div>
+          <p className="retro-text text-sm mt-4 opacity-80">Discovering amazing Ethiopian content</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Simple header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Kebele <span className="text-pink-600">Radio</span>
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover Ethiopian music, culture, and stories through our curated radio experience.
-          </p>
+    <div className="min-h-screen retro-bg retro-bg-enhanced">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Hero Section - Smaller */}
+        <div className="retro-window mb-8">
+          <div className="retro-titlebar retro-titlebar-teal">
+            <div className="flex items-center space-x-3">
+              <Radio className="w-4 h-4 retro-icon" />
+              <span className="retro-title text-xs font-bold uppercase">KEBELE RADIO</span>
+            </div>
+            <div className="retro-window-controls">
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+            </div>
+          </div>
+          <div className="p-4 text-center">
+            <h1 className="text-xl md:text-2xl retro-title mb-3 leading-tight uppercase tracking-tight">
+              ETHIOPIAN CULTURE & MUSIC
+            </h1>
+            <p className="text-xs md:text-sm retro-text max-w-2xl mx-auto leading-relaxed">
+              Discover Ethiopian music, culture, and stories through our curated collection of videos and audio content.
+            </p>
+          </div>
         </div>
 
         {/* Search and Filters - Minimal */}
-        <div className="mb-12">
-          <div className="bg-gray-50 rounded-xl p-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="Search videos..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors"
-                />
+        <div className="retro-window mb-8">
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-charcoal w-4 h-4 retro-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search videos..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-8 pr-3 py-2 retro-input text-xs"
+                  />
+                </div>
               </div>
               <div>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors"
+                  className="w-full px-3 py-2 retro-input bg-paper text-xs"
                 >
                   <option value="">All Categories</option>
                   {categories.map(category => (
@@ -269,60 +296,114 @@ const KebeleRadio: React.FC = () => {
           </div>
         </div>
 
-
         {/* Videos Grid */}
         <div className="mb-8">
           {videos.length === 0 ? (
-            <div className="text-center py-12">
-              <Radio className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No videos found</h3>
-              <p className="text-gray-600">Try adjusting your search criteria.</p>
+            <div className="retro-window retro-floating text-center p-12">
+              <div className="retro-titlebar retro-titlebar-teal mb-6">
+                <div className="flex items-center space-x-3">
+                  <Radio className="w-5 h-5 retro-icon" />
+                  <span className="retro-title text-sm font-bold uppercase">NO CONTENT FOUND</span>
+                </div>
+                <div className="retro-window-controls">
+                  <div className="retro-window-dot"></div>
+                  <div className="retro-window-dot"></div>
+                  <div className="retro-window-dot"></div>
+                </div>
+              </div>
+              <div className="w-16 h-16 bg-mustard rounded-lg flex items-center justify-center mx-auto mb-6 border-2 border-charcoal">
+                <Radio className="w-8 h-8 text-charcoal retro-icon" />
+              </div>
+              <h3 className="retro-title text-xl font-bold mb-4 uppercase tracking-wide">No Content Found</h3>
+              <p className="retro-text text-base">Try adjusting your search criteria or check back later for new content.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {videos.map((video) => (
-                <div key={video._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                  {/* Video Thumbnail */}
-                  <div className="aspect-video overflow-hidden relative">
-                    <img
-                      src={video.thumbnail?.url}
-                      alt={video.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-4 left-4 bg-black/80 text-white rounded px-2 py-1 text-xs">
-                      {video.formattedDuration}
-                    </div>
-                    {video.isFeatured && (
-                      <div className="absolute top-4 right-4">
-                        <span className="px-2 py-1 bg-pink-500 text-white rounded text-xs font-medium">
-                          Featured
-                        </span>
-                      </div>
-                    )}
+                <div key={video._id} className="retro-window retro-floating overflow-hidden">
+                  {/* Embedded YouTube Video */}
+                  <div className="aspect-video bg-black rounded-t-lg overflow-hidden">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${video.youtubeId}`}
+                      title={video.title}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
                   </div>
 
                   {/* Video Content */}
                   <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {video.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-3">
-                      {video.description}
-                    </p>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span className="px-2 py-1 bg-pink-100 text-pink-800 rounded-full text-xs">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="px-3 py-1 bg-mustard text-charcoal rounded-lg retro-title text-sm font-bold uppercase border-2 border-charcoal">
                         {video.category}
                       </span>
-                      <div className="flex items-center space-x-1">
-                        <Play className="w-4 h-4" />
-                        <span>{video.formattedViewCount}</span>
+                      <div className="flex items-center space-x-2 text-sm">
+                        <div className="flex items-center space-x-1 retro-text text-charcoal">
+                          <Play className="w-4 h-4 retro-icon" />
+                          <span className="retro-title text-sm font-bold">{video.formattedViewCount}</span>
+                        </div>
                       </div>
+                    </div>
+
+                    <h3 className="retro-title text-lg font-bold mb-2 leading-tight uppercase">
+                      {video.title}
+                    </h3>
+
+                    <p className="retro-text text-sm mb-4 leading-relaxed opacity-90">
+                      {video.description.length > 100 ? `${video.description.substring(0, 100)}...` : video.description}
+                    </p>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-1">
+                          <Heart className="w-4 h-4 text-coral-red retro-icon" />
+                          <span className="retro-text text-sm font-bold">{video.statistics.likeCount}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <ThumbsUp className="w-4 h-4 text-sky-blue retro-icon" />
+                          <span className="retro-text text-sm font-bold">{video.statistics.commentCount}</span>
+                        </div>
+                      </div>
+                      <button className="retro-btn text-sm py-2 px-4 font-bold uppercase">
+                        FULLSCREEN
+                      </button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
+        </div>
+
+        {/* Call to Action */}
+        <div className="retro-window retro-floating text-center">
+          <div className="retro-titlebar retro-titlebar-teal">
+            <div className="flex items-center space-x-3">
+              <Radio className="w-5 h-5 retro-icon" />
+              <span className="retro-title text-sm font-bold uppercase">EXPERIENCE ETHIOPIAN CULTURE</span>
+            </div>
+            <div className="retro-window-controls">
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+            </div>
+          </div>
+          <div className="p-8">
+            <h2 className="retro-title text-2xl font-bold mb-4 uppercase tracking-wide">VISUAL STORYTELLING</h2>
+            <p className="retro-text text-base mb-6 max-w-2xl mx-auto leading-relaxed">
+              Immerse yourself in the rich sounds and stories of Ethiopia through our carefully curated media collection.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="retro-btn text-lg py-4 px-8 font-bold uppercase">
+                BROWSE ALL CONTENT
+              </button>
+              <button className="bg-paper text-charcoal px-8 py-4 rounded-lg retro-title text-lg font-bold uppercase border-2 border-charcoal hover:bg-mustard hover:text-charcoal transition-colors">
+                SUBMIT CONTENT
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
