@@ -369,6 +369,30 @@
     inset 0 2px 0 rgba(255,255,255,0.5);
 }
 
+/* 🍔 Hamburger Menu Dropdown */
+.retro-menu-dropdown {
+  background: var(--mustard);
+  border: 4px solid var(--charcoal);
+  border-radius: 16px;
+  position: relative;
+  box-shadow:
+    0 6px 12px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.retro-menu-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid var(--charcoal);
+  border-radius: 14px;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
 /* 🏷️ Cartoon Status Badges */
 .retro-badge {
   background: var(--muted-teal);
