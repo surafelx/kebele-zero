@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Users, Calendar, ShoppingBag, Radio, Image, Settings, BarChart3, Edit3, Trash2, Plus, ArrowLeft, Save, X, LogOut, LogIn, CreditCard, MessageSquare, Trophy, Gamepad2, Filter, Search, MoreVertical, Eye, Ban, CheckCircle, Info, Upload, Camera, Menu, PanelLeftClose, ChevronDown, User } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';

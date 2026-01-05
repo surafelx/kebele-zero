@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Leva } from "leva";
 import { Info, Calendar, ShoppingBag, Radio, Image, Menu, X, MessageSquare, Trophy, User, LayoutDashboard, Settings, Music, Play, Pause } from 'lucide-react';
 import "./App.css";
@@ -540,6 +540,7 @@ function App() {
                <Route path="/admin/forum" element={<AdminForum />} />
                <Route path="/admin/overview" element={<AdminOverview />} />
                <Route path="/admin/login" element={<AdminLogin />} />
+               <Route path="*" element={<MainApp />} />
             </Routes>
           </Router>
         </CartProvider>

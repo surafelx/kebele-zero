@@ -3,3 +3,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Hide Vercel preview banner */
+#vercel-banner, .vercel-banner, [data-vercel-banner] {
+  display: none !important;
+}
+
+/* Hide Vercel preview card */
+.vercel-preview-card, #vercel-preview-card {
+  display: none !important;
+}
