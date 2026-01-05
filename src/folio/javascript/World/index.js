@@ -75,7 +75,6 @@ export default class
         this.setTiles()
         // this.setWalls()
         this.setSections()
-        this.setEasterEggs()
 
         // Position car for reveal after everything is set up
         this.physics.car.chassis.body.sleep()
@@ -291,6 +290,8 @@ export default class
         })
 
         this.container.add(this.areas.container)
+
+         
     }
 
     setTiles()
@@ -418,54 +419,34 @@ export default class
         // Projects
         // this.sections.projects = new ProjectsSection({
         //     ...options,
-        //     x: 30,
+        //     x: 35,
         //     y: - 30
         //     // x: 0,
         //     // y: 0
         // })
         // this.container.add(this.sections.projects.container)
 
-        // Information
-        // this.sections.information = new InformationSection({
+        //  this.sections.projects = new ProjectsSection({
         //     ...options,
-        //     x: 1.2,
-        //     y: - 55
+        //     x: -230,
+        //     y: -65
         //     // x: 0,
-        //     // y: - 10
+        //     // y: 0
         // })
-        // this.container.add(this.sections.information.container)
+        // this.container.add(this.sections.projects.container)
+        // Information
+        this.sections.information = new InformationSection({
+            ...options,
+            x: 1.2,
+            y: -75
+            // x: 0,
+            // y: - 10
+        })
+        this.container.add(this.sections.information.container)
 
         // Playground
-        this.sections.playground = new PlaygroundSection({
-            ...options,
-            x: - 38,
-            y: - 34
-            // x: - 15,
-            // y: - 4
-        })
-        this.container.add(this.sections.playground.container)
-
-        // Kebele Section
-        // this.sections.kebele = new KebeleSection({
-        //     ...options,
-        //     x: 0,
-        //     y: - 80
-        // })
-        // this.container.add(this.sections.kebele.container)
+      
     }
 
-    setEasterEggs()
-    {
-        this.easterEggs = new EasterEggs({
-            resources: this.resources,
-            car: this.car,
-            walls: this.walls,
-            objects: this.objects,
-            materials: this.materials,
-            areas: this.areas,
-            config: this.config,
-            physics: this.physics
-        })
-        this.container.add(this.easterEggs.container)
-    }
+ 
 }

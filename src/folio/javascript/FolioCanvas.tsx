@@ -33,7 +33,6 @@ export default function FolioCanvas() {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center text-white p-8">
-          <div className="text-6xl mb-4">🚗</div>
           <h2 className="text-2xl font-bold mb-4">WebGL Not Supported</h2>
           <p className="text-gray-300 mb-6">
             Your browser doesn't support WebGL, which is required for the 3D experience.

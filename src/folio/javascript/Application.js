@@ -259,12 +259,7 @@ export default class Application
             }
         })
 
-        window.setInterval(() =>
-        {
-            this.title.position = Math.round(this.title.absolutePosition % this.title.width)
-
-            document.title = `${'_'.repeat(this.title.width - this.title.position)}🚗${'_'.repeat(this.title.position)}`
-        }, this.title.frequency)
+       
     }
 
     /**

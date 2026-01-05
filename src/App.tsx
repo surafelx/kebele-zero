@@ -16,6 +16,8 @@ import KebeleMedia from './pages/KebeleMedia';
 import KebeleForum from './pages/KebeleForum';
 import KebeleGames from './pages/KebeleGames';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminForum from './pages/AdminForum';
+import AdminOverview from './pages/AdminOverview';
 import AdminLogin from './pages/AdminLogin';
 
 // Import components
@@ -204,11 +206,11 @@ function MainApp() {
         {/* Header with Logo and Navigation */}
         <div className="absolute top-6 left-8 right-8 z-[100] flex justify-between items-center">
           {/* Logo */}
-          <div className="retro-nav px-6 py-3 font-bold text-lg flex items-center space-x-2 retro-floating">
-            <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center border-2 border-gray-800 retro-icon">
-              <span className="text-gray-800 font-bold text-sm retro-title">K</span>
+          <div className="retro-nav px-6 py-3 font-bold text-lg flex items-center space-x-3 retro-floating">
+            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center border-2 border-gray-800 retro-icon overflow-hidden p-1">
+              <img src="/logo.png" alt="Kebele Zero Logo" className="w-full h-full object-cover rounded-full" />
             </div>
-            <span className="retro-title text-gray-800">KEBELE</span>
+            <span className="retro-title text-gray-800">KEBELE ZERO</span>
           </div>
 
           {/* Navigation */}
@@ -533,9 +535,11 @@ function App() {
         <CartProvider>
           <Router>
             <Routes>
-              <Route path="/" element={<MainApp />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
+               <Route path="/" element={<MainApp />} />
+               <Route path="/admin" element={<AdminDashboard />} />
+               <Route path="/admin/forum" element={<AdminForum />} />
+               <Route path="/admin/overview" element={<AdminOverview />} />
+               <Route path="/admin/login" element={<AdminLogin />} />
             </Routes>
           </Router>
         </CartProvider>

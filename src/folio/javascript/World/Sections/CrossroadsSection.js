@@ -18,7 +18,9 @@ export default class CrossroadsSection
         this.container = new THREE.Object3D()
         this.container.matrixAutoUpdate = false
 
+        
         this.setStatic()
+        this.setAreas()
         this.setTiles()
     }
 
@@ -35,82 +37,109 @@ export default class CrossroadsSection
 
      setAreas()
         {
-            // Kebele Souq Area
-            this.souqArea = this.areas.add({
-                position: new THREE.Vector2(this.x + 5, this.y + 5),
-                halfExtents: new THREE.Vector2(3, 2),
-                hasKey: true,
-                testCar: true,
-                active: true
-            })
-    
-            // Kebele Radio Area
-            this.radioArea = this.areas.add({
-                position: new THREE.Vector2(this.x - 5, this.y + 5),
-                halfExtents: new THREE.Vector2(3, 2),
-                hasKey: true,
-                testCar: true,
-                active: true
-            })
-    
-            // Kebele Events Area
-            this.eventsArea = this.areas.add({
-                position: new THREE.Vector2(this.x + 5, this.y - 5),
-                halfExtents: new THREE.Vector2(3, 2),
-                hasKey: true,
-                testCar: true,
-                active: true
-            })
-    
-            // About Kebele Area
-            this.aboutArea = this.areas.add({
-                position: new THREE.Vector2(this.x - 5, this.y - 5),
-                halfExtents: new THREE.Vector2(3, 2),
-                hasKey: true,
-                testCar: true,
-                active: true
-            })
-    
-            // Set up area interactions
-            this.souqArea.on('interact', () => {
-                console.log('Souq area clicked');
-                if (window.openKebeleModal) {
-                    window.openKebeleModal('souq');
-                } else {
-                    // Fallback to custom event
-                    window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'souq' }));
-                }
-            })
-    
-            this.radioArea.on('interact', () => {
-                console.log('Radio area clicked');
-                if (window.openKebeleModal) {
-                    window.openKebeleModal('radio');
-                } else {
-                    // Fallback to custom event
-                    window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'radio' }));
-                }
-            })
-    
-            this.eventsArea.on('interact', () => {
-                console.log('Events area clicked');
-                if (window.openKebeleModal) {
-                    window.openKebeleModal('events');
-                } else {
-                    // Fallback to custom event
-                    window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'events' }));
-                }
-            })
-    
-            this.aboutArea.on('interact', () => {
-                console.log('About area clicked');
-                if (window.openKebeleModal) {
-                    window.openKebeleModal('about');
-                } else {
-                    // Fallback to custom event
-                    window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'about' }));
-                }
-            })
+               // Kebele Souq Area
+                    this.souqArea = this.areas.add({
+                        position: new THREE.Vector2(this.x + 20, this.y - 8),
+                        halfExtents: new THREE.Vector2(3, 2),
+                        hasKey: true,
+                        testCar: true,
+                        active: true
+                    })
+            
+                    // Kebele Radio Area
+                    this.radioArea = this.areas.add({
+                        position: new THREE.Vector2(this.x + 20, this.y + 5),
+                        halfExtents: new THREE.Vector2(3, 2),
+                        hasKey: true,
+                        testCar: true,
+                        active: true
+                    })
+            
+                    // Kebele Events Area
+                    this.eventsArea = this.areas.add({
+                        position: new THREE.Vector2(this.x - 16 , this.y + 15),
+                        halfExtents: new THREE.Vector2(3, 2),
+                        hasKey: true,
+                        testCar: true,
+                        active: true
+                    })
+
+                      // Kebele Games Area
+                    this.gamesArea = this.areas.add({
+                        position: new THREE.Vector2(this.x - 22 , this.y-3),
+                        halfExtents: new THREE.Vector2(3, 2),
+                        hasKey: true,
+                        testCar: true,
+                        active: true
+                    })
+
+                    // Kebele Media Area
+                    this.mediaArea = this.areas.add({
+                        position: new THREE.Vector2(this.x - 23, this.y-22),
+                        halfExtents: new THREE.Vector2(3, 2),
+                        hasKey: true,
+                        testCar: true,
+                        active: true
+                    })
+
+                    // Kebele Forum Area
+                    this.aboutArea = this.areas.add({
+                        position: new THREE.Vector2(this.x, this.y - 8),
+                        halfExtents: new THREE.Vector2(3, 2),
+                        hasKey: true,
+                        testCar: true,
+                        active: true
+                    })
+            
+                    // About Kebele Area
+                    this.forumArea = this.areas.add({
+                        position: new THREE.Vector2(this.x, this.y - 25),
+                        halfExtents: new THREE.Vector2(3, 2),
+                        hasKey: true,
+                        testCar: true,
+                        active: true
+                    })
+            
+                    // Set up area interactions
+                    this.souqArea.on('interact', () => {
+                        console.log('Souq area clicked');
+                        if (window.openKebeleModal) {
+                            window.openKebeleModal('souq');
+                        } else {
+                            // Fallback to custom event
+                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'souq' }));
+                        }
+                    })
+            
+                    this.radioArea.on('interact', () => {
+                        console.log('Radio area clicked');
+                        if (window.openKebeleModal) {
+                            window.openKebeleModal('radio');
+                        } else {
+                            // Fallback to custom event
+                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'radio' }));
+                        }
+                    })
+            
+                    this.eventsArea.on('interact', () => {
+                        console.log('Events area clicked');
+                        if (window.openKebeleModal) {
+                            window.openKebeleModal('events');
+                        } else {
+                            // Fallback to custom event
+                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'events' }));
+                        }
+                    })
+            
+                    this.aboutArea.on('interact', () => {
+                        console.log('About area clicked');
+                        if (window.openKebeleModal) {
+                            window.openKebeleModal('about');
+                        } else {
+                            // Fallback to custom event
+                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'about' }));
+                        }
+                    })
         }
     
 
@@ -119,44 +148,59 @@ export default class CrossroadsSection
         // To intro
         this.tiles.add({
             start: new THREE.Vector2(this.x, - 10),
-            delta: new THREE.Vector2(0, this.y + 14)
+            delta: new THREE.Vector2(0, this.y + 10)
         })
 
          // To events
         this.tiles.add({
-            start: new THREE.Vector2(this.x - 13, this.y + 12),
+            start: new THREE.Vector2(this.x - 13, this.y + 15),
             delta: new THREE.Vector2(13, 0)
         })
 
 
-        // To kebele
+        // To Radio
         this.tiles.add({
-            start: new THREE.Vector2(this.x + 5, this.y - 1),
+            start: new THREE.Vector2(this.x + 2, this.y + 4),
+            delta: new THREE.Vector2(15, 0)
+        })
+
+         this.tiles.add({
+            start: new THREE.Vector2(this.x+15, -25),
+            delta: new THREE.Vector2(0,  4)
+        })
+        // To souq
+        this.tiles.add({
+            start: new THREE.Vector2(this.x + 2, this.y - 17),
+            delta: new THREE.Vector2(18, 0)
+        })
+
+        
+         this.tiles.add({
+            start: new THREE.Vector2(this.x+15, -45),
+            delta: new THREE.Vector2(0,  18)
+        })
+
+         this.tiles.add({
+            start: new THREE.Vector2(this.x, -20),
+            delta: new THREE.Vector2(0, this.y + 8)
+        })
+
+
+        // To Games
+        this.tiles.add({
+            start: new THREE.Vector2(this.x - 20, this.y - 4),
             delta: new THREE.Vector2(20, 0)
         })
 
-        // To souq
-        this.tiles.add({
-            start: new THREE.Vector2(this.x + 2, this.y - 16),
-            delta: new THREE.Vector2(10, 0)
-        })
-
-         this.tiles.add({
-            start: new THREE.Vector2(this.x, - 36),
-            delta: new THREE.Vector2(0, this.y + 14)
-        })
-
+        
         
         // To Media
         this.tiles.add({
-            start: new THREE.Vector2(this.x - 13, this.y - 22),
-            delta: new THREE.Vector2(14, 0)
+            start: new THREE.Vector2(this.x - 18, this.y - 17),
+            delta: new THREE.Vector2(15, 0)
         })
 
         
-         this.tiles.add({
-            start: new THREE.Vector2(this.x - 14, - 50),
-            delta: new THREE.Vector2(0, 5)
-        })
+        
     }
 }

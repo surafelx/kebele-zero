@@ -19,7 +19,6 @@ export default class KebeleSection
         this.container.matrixAutoUpdate = false
 
         this.setAreas()
-        this.setTiles()
     }
 
     setAreas()
@@ -35,7 +34,7 @@ export default class KebeleSection
 
         // Kebele Radio Area
         this.radioArea = this.areas.add({
-            position: new THREE.Vector2(this.x - 5, this.y + 5),
+            position: new THREE.Vector2(this.x - 25, this.y + 5),
             halfExtents: new THREE.Vector2(3, 2),
             hasKey: true,
             testCar: true,
@@ -102,24 +101,5 @@ export default class KebeleSection
         })
     }
 
-    setTiles()
-    {
-        // Tiles connecting to crossroads
-        this.tiles.add({
-            start: new THREE.Vector2(this.x, this.y + 15),
-            delta: new THREE.Vector2(0, -10)
-        })
-
-        // Horizontal tiles for navigation between areas
-        this.tiles.add({
-            start: new THREE.Vector2(this.x - 10, this.y),
-            delta: new THREE.Vector2(20, 0)
-        })
-
-        // Vertical tiles for navigation between areas
-        this.tiles.add({
-            start: new THREE.Vector2(this.x, this.y - 10),
-            delta: new THREE.Vector2(0, 20)
-        })
-    }
+ 
 }

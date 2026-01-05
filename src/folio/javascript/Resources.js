@@ -69,8 +69,8 @@ import introDevCollisionSource from '/models/intro/dev/collision.glb'
 
 // Crossroads
 import crossroadsStaticFloorShadowSource from '/models/crossroads/static/nk/floorShadow.png'
-import crossroadsStaticBaseSource from '/models/crossroads/static/nnk/base.glb'
-import crossroadsStaticCollisionSource from '/models/crossroads/static/nk/collision.glb'
+import crossroadsStaticBaseSource from '/models/crossroads/static/nnk/base-2.glb'
+import crossroadsStaticCollisionSource from  '/models/crossroads/static/nnk/collision.glb'
 
 // Car sam
 import carDefaultChassisSource from '../models/car/lada/chassis.glb'
@@ -113,7 +113,7 @@ import projectsOranoFloorSource from '../models/projects/orano/floorTexture.png'
 import projectsKepplerFloorSource from '../models/projects/keppler/floorTexture.png'
 
 // Information
-import informationStaticBaseSource from '/models/information/static/base.glb'
+import informationStaticBaseSource from '/models/information/static/nk/base.glb'
 import informationStaticCollisionSource from '/models/information/static/collision.glb'
 import informationStaticFloorShadowSource from '/models/information/static/floorShadow.png'
 

@@ -1,0 +1,34 @@
+
+
+[APP]
+- test crud for everything 
+-- about x
+-- events
+-- souq
+-- radio
+-- media
+-- forum 
+-- user points
+-- user most played music
+- make sure everything that needs to be seen can be seen from home 
+- test auth for admin and user, and add role
+
+
+
+[3D]
+- fix collision
+- fix areas 
+- modify colors 
+-- fix greens 
+-- add shadows 
+- add more 3d stuff 
+-- add banners, billboards
+-- add stage equipment 
+-- add foosball and pool 
+
+
+[UI]
+- header in admin dashboard
+- sidebar in admin dashboard
+- searchbars in admin dashboard
+- fix white buttons and texts in modals 
