@@ -91,9 +91,9 @@ export default class CrossroadsSection
                         active: true
                     })
             
-                    // About Kebele Area
+                    // Forum Kebele Area
                     this.forumArea = this.areas.add({
-                        position: new THREE.Vector2(this.x, this.y - 25),
+                        position: new THREE.Vector2(this.x, this.y - 20),
                         halfExtents: new THREE.Vector2(3, 2),
                         hasKey: true,
                         testCar: true,
@@ -135,6 +135,26 @@ export default class CrossroadsSection
                         console.log('About area clicked');
                         if (window.openKebeleModal) {
                             window.openKebeleModal('about');
+                        } else {
+                            // Fallback to custom event
+                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'about' }));
+                        }
+                    })
+
+                     this.gameArea.on('interact', () => {
+                        console.log('Game area clicked');
+                        if (window.openKebeleModal) {
+                            window.openKebeleModal('games');
+                        } else {
+                            // Fallback to custom event
+                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'about' }));
+                        }
+                    })
+
+                    this.forumArea.on('interact', () => {
+                        console.log('Forum area clicked');
+                        if (window.openKebeleModal) {
+                            window.openKebeleModal('forum');
                         } else {
                             // Fallback to custom event
                             window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'about' }));
