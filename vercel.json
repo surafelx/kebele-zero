@@ -9,20 +9,14 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "/",
-      "status": 200
-    },
-    {
       "src": "/admin(.*)",
-      "dest": "/admin",
-      "status": 200
+      "dest": "/admin"
     }
   ],
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/"
+      "destination": "/index.html"
     }
   ]
 }

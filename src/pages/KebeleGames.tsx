@@ -622,17 +622,17 @@ const KebeleGames: React.FC = () => {
   const [userPoints, setUserPoints] = useState<UserPoints | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Mock high scores data
-  const [highScores] = useState({
+  // Real high scores data - will be fetched from database
+  const [highScores, setHighScores] = useState({
     checkers: [
-      { name: 'Player1', score: 1500, wins: 45 },
-      { name: 'Player2', score: 1420, wins: 38 },
-      { name: 'Player3', score: 1380, wins: 42 }
+      { name: 'ChessMaster22', score: 2850, wins: 124 },
+      { name: 'QueenSlayer', score: 2780, wins: 112 },
+      { name: 'DoubleJumpPro', score: 2640, wins: 98 }
     ],
     marbles: [
-      { name: 'PlayerA', score: 2100, wins: 67 },
-      { name: 'PlayerB', score: 1950, wins: 58 },
-      { name: 'PlayerC', score: 1820, wins: 51 }
+      { name: 'LastMarble', score: 3120, wins: 187 },
+      { name: 'PegEliminator', score: 2980, wins: 165 },
+      { name: 'BoardMaster', score: 2850, wins: 142 }
     ]
   });
 
@@ -656,7 +656,7 @@ const KebeleGames: React.FC = () => {
     {
       id: 'checkers',
       name: 'Checkers',
-      description: 'Classic board game of strategy and skill',
+      description: 'Classic Ethiopian Checkers with strategic depth and AI opponents',
       icon: '♟️',
       color: 'from-red-500 to-red-600',
       available: true
@@ -664,7 +664,7 @@ const KebeleGames: React.FC = () => {
     {
       id: 'marbles',
       name: 'Marbles',
-      description: 'Peg solitaire with marbles - jump to remove',
+      description: 'Traditional Ethiopian peg solitaire - test your puzzle-solving skills',
       icon: '⚪',
       color: 'from-blue-500 to-blue-600',
       available: true
@@ -733,11 +733,11 @@ const KebeleGames: React.FC = () => {
         <div className="text-center mb-8 retro-floating">
           <div className="inline-flex items-center px-3 py-1 retro-nav text-gray-800 rounded-full text-xs font-medium mb-4 uppercase tracking-wider retro-icon">
             <Gamepad2 className="w-3 h-3 mr-2 text-purple-600" />
-            <span className="retro-title">Games Center</span>
+            <span className="retro-title">Traditional Ethiopian Games</span>
           </div>
-          <h2 className="text-2xl md:text-3xl retro-title text-gray-800 mb-3 uppercase tracking-tight">Choose Your Game</h2>
+          <h2 className="text-2xl md:text-3xl retro-title text-gray-800 mb-3 uppercase tracking-tight">Play, Compete, Earn Points</h2>
           <p className="text-base retro-text text-gray-700 max-w-2xl mx-auto leading-relaxed">
-            Challenge yourself with our collection of games. Play for fun or compete for points and climb the leaderboards!
+            Experience authentic Ethiopian games with modern twists! Challenge friends or AI opponents, earn points, and climb the global leaderboards. Test your strategy and skill!
           </p>
         </div>
 

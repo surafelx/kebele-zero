@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { HashRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Leva } from "leva";
 import { Info, Calendar, ShoppingBag, Radio, Image, Menu, X, MessageSquare, Trophy, User, LayoutDashboard, Settings, Music, Play, Pause } from 'lucide-react';
 import "./App.css";

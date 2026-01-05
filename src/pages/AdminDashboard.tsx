@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { HashRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { Users, Calendar, ShoppingBag, Radio, Image, Settings, BarChart3, Edit3, Trash2, Plus, ArrowLeft, Save, X, LogOut, LogIn, CreditCard, MessageSquare, Trophy, Gamepad2, Filter, Search, MoreVertical, Eye, Ban, CheckCircle, Info, Upload, Camera, Menu, PanelLeftClose, ChevronDown, User } from 'lucide-react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { Users, Calendar, ShoppingBag, Radio, Image, Settings, BarChart3, Edit3, Trash2, Plus, ArrowLeft, Save, X, LogOut, LogIn, CreditCard, MessageSquare, Trophy, Gamepad2, Filter, Search, MoreVertical, Eye, Ban, CheckCircle, Info, Upload, Camera, Menu, PanelLeftClose, ChevronDown, User, ChevronRight, ChevronLeft } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { forumAPI } from '../services/forum';
@@ -900,13 +899,13 @@ const AdminDashboard = () => {
 
   return (
     <div>
-      {/* Top Header - Improved */}
-      <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 border-b-4 border-charcoal px-6 py-3 flex justify-between items-center shadow-lg z-40">
-        <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-amber-600 to-orange-600 rounded-lg flex items-center justify-center shadow-xl border-2 border-amber-400 overflow-hidden p-3">
+      {/* Top Header - Optimized */}
+      <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 border-b-4 border-charcoal px-4 py-2 flex justify-between items-center shadow-lg z-40">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-amber-600 to-orange-600 rounded-lg flex items-center justify-center shadow-md border border-amber-400 overflow-hidden p-1">
             <img src="/logo.png" alt="Kebele Logo" className="w-full h-full object-cover" />
           </div>
-          <h1 className="retro-title text-xl font-bold text-white">Admin Dashboard</h1>
+          <h1 className="retro-title text-lg font-bold text-white">Admin Dashboard</h1>
         </div>
         <div className="flex items-center space-x-4">
           <div className="relative profile-dropdown">
@@ -1136,7 +1135,7 @@ const AdminDashboard = () => {
         <div className="p-4 border-b-4 border-charcoal bg-gradient-to-r from-amber-500 to-orange-500">
           <div className="flex items-center justify-between">
             <div className={`flex items-center space-x-3 ${sidebarCollapsed ? 'justify-center flex-1' : ''}`}>
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-600 to-orange-600 rounded-lg flex items-center justify-center retro-icon shadow-xl border-2 border-amber-400 overflow-hidden p-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-amber-600 to-orange-600 rounded-lg flex items-center justify-center retro-icon shadow-md border border-amber-400 overflow-hidden p-1">
                 <img src="/logo.png" alt="Kebele Logo" className="w-full h-full object-cover" />
               </div>
               {!sidebarCollapsed && (
@@ -1146,17 +1145,21 @@ const AdminDashboard = () => {
                 </div>
               )}
             </div>
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="retro-btn p-2 cursor-pointer hover:scale-110 transition-transform ml-2 bg-white/20 backdrop-blur-sm"
-              title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            >
-              <PanelLeftClose className={`w-5 h-5 retro-icon transition-transform duration-300 text-white ${
-                sidebarCollapsed ? 'rotate-180' : ''
-              }`} />
-            </button>
           </div>
         </div>
+
+        {/* Sidebar Toggle Button - Always visible at the edge */}
+        <button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="absolute top-4 -right-3 w-6 h-6 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg border-2 border-charcoal hover:scale-110 transition-transform z-50"
+          title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+        >
+          {sidebarCollapsed ? (
+            <ChevronRight className="w-4 h-4 text-white" />
+          ) : (
+            <ChevronLeft className="w-4 h-4 text-white" />
+          )}
+        </button>
 
         {/* Navigation */}
         <nav className="p-2">
@@ -1253,7 +1256,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className={`flex flex-col min-h-screen transition-all duration-500 ease-in-out mt-20 ${
+      <div className={`flex flex-col min-h-screen transition-all duration-500 ease-in-out mt-16 ${
         sidebarCollapsed ? 'ml-20' : 'ml-72'
       }`}>
         {/* Page Content */}
