@@ -207,7 +207,7 @@ function MainApp() {
         <div className="absolute top-6 left-8 right-8 z-[100] flex justify-between items-center">
           {/* Logo */}
           <div className="retro-nav px-6 py-3 font-bold text-lg flex items-center space-x-3 retro-floating">
-            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center border-2 border-gray-800 retro-icon overflow-hidden p-1">
+            <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center border-2 border-gray-800 retro-icon overflow-hidden p-3">
               <img src="/logo.png" alt="Kebele Zero Logo" className="w-full h-full object-cover rounded-full" />
             </div>
             <span className="retro-title text-gray-800">KEBELE ZERO</span>

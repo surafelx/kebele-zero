@@ -902,7 +902,7 @@ const AdminDashboard = () => {
       {/* Top Header - Improved */}
       <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 border-b-4 border-charcoal px-6 py-3 flex justify-between items-center shadow-lg z-40">
         <div className="flex items-center space-x-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-amber-600 to-orange-600 rounded-lg flex items-center justify-center shadow-xl border-2 border-amber-400 overflow-hidden">
+          <div className="w-16 h-16 bg-gradient-to-br from-amber-600 to-orange-600 rounded-lg flex items-center justify-center shadow-xl border-2 border-amber-400 overflow-hidden p-3">
             <img src="/logo.png" alt="Kebele Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="retro-title text-xl font-bold text-white">Admin Dashboard</h1>
@@ -1135,7 +1135,7 @@ const AdminDashboard = () => {
         <div className="p-4 border-b-4 border-charcoal bg-gradient-to-r from-amber-500 to-orange-500">
           <div className="flex items-center justify-between">
             <div className={`flex items-center space-x-3 ${sidebarCollapsed ? 'justify-center flex-1' : ''}`}>
-              <div className="w-9 h-9 bg-gradient-to-br from-amber-600 to-orange-600 rounded-lg flex items-center justify-center retro-icon shadow-xl border-2 border-amber-400 overflow-hidden">
+              <div className="w-16 h-16 bg-gradient-to-br from-amber-600 to-orange-600 rounded-lg flex items-center justify-center retro-icon shadow-xl border-2 border-amber-400 overflow-hidden p-3">
                 <img src="/logo.png" alt="Kebele Logo" className="w-full h-full object-cover" />
               </div>
               {!sidebarCollapsed && (

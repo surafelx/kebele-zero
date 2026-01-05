@@ -435,13 +435,13 @@ export default class
         // })
         // this.container.add(this.sections.projects.container)
         // Information
-        this.sections.information = new InformationSection({
-            ...options,
-            x: 1.2,
-            y: -75
-            // x: 0,
-            // y: - 10
-        })
+        // this.sections.information = new InformationSection({
+        //     ...options,
+        //     x: 1.2,
+        //     y: -75
+        //     // x: 0,
+        //     // y: - 10
+        // })
         this.container.add(this.sections.information.container)
 
         // Playground
