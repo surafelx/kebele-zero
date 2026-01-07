@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Users, Trophy, ArrowLeft, Plus, Search, Filter, Heart, Reply, Flag } from 'lucide-react';
+import { MessageSquare, Eye, Trophy, ArrowLeft, Plus, Search, Filter, Heart, Reply, Flag } from 'lucide-react';
 import { forumAPI } from '../services/forum';
 import { pointsAPI } from '../services/points';
 import { useAuth } from '../contexts/AuthContext';
