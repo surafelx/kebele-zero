@@ -92,7 +92,6 @@ const isLevaDebug = window.location.hash === "#leva";
 
 function MainApp() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [activePage, setActivePage] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cart, cartTotal } = useCart();
   const [authModalFeature, setAuthModalFeature] = useState<string>('');
@@ -102,7 +101,6 @@ function MainApp() {
   const [modalLoading, setModalLoading] = useState<string | null>(null);
   const [isMusicPlayerOpen, setIsMusicPlayerOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [is3DLoaded, setIs3DLoaded] = useState(false);
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [userPoints, setUserPoints] = useState<any>(null);
@@ -207,7 +205,7 @@ function MainApp() {
         <div className="absolute top-6 left-8 right-8 z-[100] flex justify-between items-center">
           {/* Logo */}
           <div className="retro-nav px-6 py-3 font-bold text-lg flex items-center space-x-3 retro-floating">
-            <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center border-2 border-gray-800 retro-icon overflow-hidden p-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center border-2 border-gray-800 retro-icon overflow-hidden p-2">
               <img src="/logo.png" alt="Kebele Zero Logo" className="w-full h-full object-cover rounded-full" />
             </div>
             <span className="retro-title text-gray-800">KEBELE ZERO</span>

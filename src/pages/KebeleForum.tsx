@@ -733,7 +733,7 @@ const KebeleForum: React.FC = () => {
                         </span>
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{getUserDisplayName(post.created_by)}</div>
+                        <div className="text-sm font-medium retro-text">{getUserDisplayName(post.created_by)}</div>
                         <div className="text-xs text-gray-500">{new Date(post.created_at).toLocaleDateString()}</div>
                       </div>
                     </div>
@@ -811,120 +811,115 @@ const KebeleForum: React.FC = () => {
     if (!selectedPost) return null;
 
     return (
-      <div className="space-y-6">
-        {/* Back Button */}
+      <div className="space-y-4">
+        {/* Back Button - More compact */}
         <button
           onClick={() => {
             setSelectedPost(null);
             setActiveTab('posts');
           }}
-          className="retro-btn-secondary text-xs py-2 px-3 font-bold uppercase"
+          className="retro-btn-secondary text-xs py-2 px-3 font-bold uppercase mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2 inline" />
-          Back to Discussions
+          Back
         </button>
 
-        {/* Post Content */}
+        {/* Post Content - Cleaner and more compact */}
         <div className="retro-window">
-          <div className="retro-titlebar retro-titlebar-blue p-4">
+          <div className="retro-titlebar retro-titlebar-blue p-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <MessageSquare className="w-5 h-5 retro-icon" />
-                <span className="retro-title text-base uppercase font-bold">{selectedPost.category}</span>
+              <div className="flex items-center space-x-2">
+                <MessageSquare className="w-4 h-4 retro-icon" />
+                <span className="retro-title text-sm uppercase font-bold">{selectedPost.category}</span>
                 {selectedPost.is_pinned && (
-                  <span className="px-3 py-1 bg-yellow-400 text-black rounded-full text-sm font-bold uppercase tracking-wide">
-                    📌 Pinned
+                  <span className="px-2 py-1 bg-yellow-400 text-black rounded-full text-xs font-bold uppercase tracking-wide">
+                    📌
                   </span>
                 )}
               </div>
-              <div className="flex items-center space-x-1 text-xs text-gray-700 font-medium">
-                <span>💬{comments.filter(c => c.post_id === selectedPost.id).length}</span>
-                <span>❤️{selectedPost.likes || 0}</span>
-                <span>👁️{selectedPost.views || 0}</span>
+              <div className="flex items-center space-x-2 text-xs text-gray-700 font-medium">
+                <span className="flex items-center space-x-1"><MessageSquare className="w-3 h-3" /><span>{comments.filter(c => c.post_id === selectedPost.id).length}</span></span>
+                <span className="flex items-center space-x-1"><Heart className="w-3 h-3" /><span>{selectedPost.likes || 0}</span></span>
+                <span className="flex items-center space-x-1"><Eye className="w-3 h-3" /><span>{selectedPost.views || 0}</span></span>
               </div>
             </div>
           </div>
-          <div className="p-6">
-            <h1 className="retro-title text-3xl font-bold mb-4 leading-tight text-gray-800">{selectedPost.title}</h1>
-            <p className="retro-text text-base leading-relaxed mb-6 text-gray-700">{selectedPost.content}</p>
+          <div className="p-4">
+            <h1 className="retro-title text-xl font-bold mb-3 leading-tight text-gray-800">{selectedPost.title}</h1>
+            <p className="retro-text text-sm leading-relaxed mb-4 text-gray-700">{selectedPost.content}</p>
 
-            <div className="flex items-center space-x-4 pt-4 border-t-2 border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold text-gray-700">
+            <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-gray-700">
                     {selectedPost.created_by.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-gray-900">{getUserDisplayName(selectedPost.created_by)}</div>
-                  <div className="text-xs text-gray-500 uppercase tracking-wide">
-                    {new Date(selectedPost.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
+                  <div className="text-xs font-medium retro-text">{getUserDisplayName(selectedPost.created_by)}</div>
+                  <div className="text-xs text-gray-500">
+                    {new Date(selectedPost.created_at).toLocaleDateString()}
                   </div>
                 </div>
               </div>
 
               {selectedPost.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {selectedPost.tags.map((tag, index) => (
-                    <span key={index} className="px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 rounded-full text-sm font-medium hover:bg-purple-200 cursor-pointer transition-colors">
+                <div className="flex flex-wrap gap-1">
+                  {selectedPost.tags.slice(0, 3).map((tag, index) => (
+                    <span key={index} className="px-2 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 rounded-full text-xs font-medium hover:bg-purple-200 cursor-pointer transition-colors">
                       #{tag}
                     </span>
                   ))}
+                  {selectedPost.tags.length > 3 && (
+                    <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                      +{selectedPost.tags.length - 3}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Comments */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="retro-title text-lg font-bold uppercase tracking-wide">Comments ({comments.length})</h3>
+        {/* Comments - More compact */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="retro-title text-base font-bold uppercase tracking-wide">Comments ({comments.length})</h3>
             <div className="retro-text text-xs opacity-80 uppercase tracking-wide">
-              Join the conversation
+              Join conversation
             </div>
           </div>
 
           {comments.length === 0 ? (
-            <div className="retro-window text-center py-8">
-              <MessageSquare className="w-8 h-8 text-gray-400 mx-auto mb-4 retro-icon" />
-              <p className="retro-text text-sm opacity-80">No comments yet. Be the first to share your thoughts!</p>
+            <div className="retro-window text-center py-6">
+              <MessageSquare className="w-6 h-6 text-gray-400 mx-auto mb-3 retro-icon" />
+              <p className="retro-text text-xs opacity-80">No comments yet. Be the first!</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {comments.map((comment) => (
-                <div key={comment.id} className="retro-window">
-                  <div className="p-4">
-                    <p className="retro-text text-sm leading-relaxed mb-4 text-gray-700">{comment.content}</p>
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-6 h-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-bold text-gray-600">
-                            {comment.created_by.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <span className="font-medium text-gray-900">{getUserDisplayName(comment.created_by)}</span>
-                        <span className="text-gray-500">•</span>
-                        <span className="text-gray-500 uppercase tracking-wide">
-                          {new Date(comment.created_at).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
+                <div key={comment.id} className="retro-window p-3">
+                  <p className="retro-text text-xs leading-relaxed mb-2 text-gray-700">{comment.content}</p>
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-5 h-5 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+                        <span className="text-xs font-bold text-gray-600">
+                          {comment.created_by.charAt(0).toUpperCase()}
                         </span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                          <Heart className="w-3 h-3" />
-                        </button>
-                        <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                          <Reply className="w-3 h-3" />
-                        </button>
-                      </div>
+                      <span className="font-medium retro-text">{getUserDisplayName(comment.created_by)}</span>
+                      <span className="text-gray-500">•</span>
+                      <span className="text-gray-500">
+                        {new Date(comment.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                        <Heart className="w-3 h-3" />
+                      </button>
+                      <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                        <Reply className="w-3 h-3" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -932,39 +927,39 @@ const KebeleForum: React.FC = () => {
             </div>
           )}
 
-          {/* Add Comment */}
+          {/* Add Comment - More compact */}
           <div className="retro-window">
-            <div className="retro-titlebar retro-titlebar-green p-3">
-              <h4 className="retro-title text-sm font-bold uppercase tracking-wide">
-                {user ? 'Share your thoughts' : 'Sign in to comment'}
+            <div className="retro-titlebar retro-titlebar-green p-2">
+              <h4 className="retro-title text-xs font-bold uppercase tracking-wide">
+                {user ? 'Add Comment' : 'Sign in to comment'}
               </h4>
             </div>
-            <div className="p-4">
+            <div className="p-3">
               {user ? (
                 <form onSubmit={handleCreateComment}>
                   <textarea
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Write a thoughtful comment..."
-                    rows={3}
-                    className="retro-input w-full resize-none text-sm mb-4"
+                    placeholder="Write a comment..."
+                    rows={2}
+                    className="retro-input w-full resize-none text-xs mb-2"
                     required
                   />
                   <div className="flex justify-end">
                     <button
                       type="submit"
-                      className="retro-btn text-sm py-2 px-4 font-bold uppercase"
+                      className="retro-btn text-xs py-1 px-3 font-bold uppercase"
                     >
-                      Post Comment
+                      Post
                     </button>
                   </div>
                 </form>
               ) : (
-                <div className="text-center py-4">
-                  <p className="retro-text text-sm opacity-80 mb-4">Join the conversation by signing in</p>
+                <div className="text-center py-3">
+                  <p className="retro-text text-xs opacity-80 mb-2">Sign in to comment</p>
                   <button
                     onClick={() => navigate('/admin/login')}
-                    className="retro-btn text-sm py-2 px-4 font-bold uppercase"
+                    className="retro-btn text-xs py-1 px-3 font-bold uppercase"
                   >
                     Sign In
                   </button>
@@ -978,35 +973,30 @@ const KebeleForum: React.FC = () => {
   };
 
   const renderCreateForm = () => (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-lg mx-auto">
       <div className="retro-window">
-        <div className="retro-titlebar retro-titlebar-blue">
+        <div className="retro-titlebar retro-titlebar-blue p-2">
           <div className="flex items-center space-x-2">
             <Plus className="w-4 h-4 retro-icon" />
-            <span className="retro-title text-sm uppercase">Create New Post</span>
-          </div>
-          <div className="retro-window-controls">
-            <div className="retro-window-dot"></div>
-            <div className="retro-window-dot"></div>
-            <div className="retro-window-dot"></div>
+            <span className="retro-title text-sm uppercase">New Post</span>
           </div>
         </div>
-        <div className="p-4">
-          <div className="text-center mb-4">
-            <h2 className="retro-title text-lg font-bold uppercase tracking-tight">Start a Discussion</h2>
-            <p className="retro-text text-xs opacity-80">Share your thoughts with the community</p>
+        <div className="p-3">
+          <div className="text-center mb-3">
+            <h2 className="retro-title text-base font-bold uppercase tracking-tight">Start Discussion</h2>
+            <p className="retro-text text-xs opacity-80">Share with community</p>
           </div>
 
-          <form onSubmit={handleCreatePost} className="space-y-3">
+          <form onSubmit={handleCreatePost} className="space-y-2">
             <div className="space-y-1">
-              <label className="block text-xs font-semibold retro-text uppercase tracking-wide">Post Title</label>
+              <label className="block text-xs font-semibold retro-text uppercase tracking-wide">Title</label>
               <input
                 type="text"
                 required
                 value={newPost.title}
                 onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-                className="retro-input w-full text-sm py-2"
-                placeholder="What's your discussion about?"
+                className="retro-input w-full text-xs py-2"
+                placeholder="Discussion topic..."
               />
             </div>
 
@@ -1015,13 +1005,13 @@ const KebeleForum: React.FC = () => {
               <select
                 value={newPost.category}
                 onChange={(e) => setNewPost({ ...newPost, category: e.target.value })}
-                className="retro-input w-full bg-paper text-sm py-2"
+                className="retro-input w-full bg-paper text-xs py-2"
               >
-                <option value="general">General Discussion</option>
+                <option value="general">General</option>
                 <option value="games">Games</option>
                 <option value="events">Events</option>
                 <option value="culture">Culture</option>
-                <option value="help">Help & Support</option>
+                <option value="help">Help</option>
               </select>
             </div>
 
@@ -1029,26 +1019,26 @@ const KebeleForum: React.FC = () => {
               <label className="block text-xs font-semibold retro-text uppercase tracking-wide">Content</label>
               <textarea
                 required
-                rows={3}
+                rows={2}
                 value={newPost.content}
                 onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                className="retro-input w-full resize-none text-sm"
-                placeholder="Share your thoughts..."
+                className="retro-input w-full resize-none text-xs"
+                placeholder="Your thoughts..."
               />
             </div>
 
-            <div className="flex gap-2 pt-3 border-t-2 border-charcoal">
+            <div className="flex gap-2 pt-2 border-t border-charcoal">
               <button
                 type="submit"
-                className="flex-1 retro-btn text-sm py-2 px-4 font-bold uppercase"
+                className="flex-1 retro-btn text-xs py-2 px-3 font-bold uppercase"
               >
-                <Plus className="w-4 h-4 mr-1 inline" />
-                Create Post
+                <Plus className="w-3 h-3 mr-1 inline" />
+                Create
               </button>
               <button
                 type="button"
                 onClick={() => setShowCreateForm(false)}
-                className="retro-btn text-sm py-2 px-4 font-bold uppercase"
+                className="retro-btn text-xs py-2 px-3 font-bold uppercase"
                 style={{ backgroundColor: '#4B5563', borderColor: '#374151' }}
               >
                 Cancel
@@ -1096,9 +1086,9 @@ const KebeleForum: React.FC = () => {
           </div>
         </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex flex-col 2xl:flex-row gap-8">
+      {/* Main Content - More compact */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Main Forum Content */}
           <div className="flex-1 min-w-0">
             {activeTab === 'posts' && !showCreateForm && renderPostsList()}
@@ -1106,8 +1096,8 @@ const KebeleForum: React.FC = () => {
             {showCreateForm && renderCreateForm()}
           </div>
 
-          {/* Sidebar */}
-          <div className="2xl:w-64 space-y-3 2xl:order-last">
+          {/* Sidebar - More compact */}
+          <div className="lg:w-56 space-y-2 lg:order-last">
 
             {/* Recent Activity */}
             <div className="retro-window">
@@ -1121,7 +1111,7 @@ const KebeleForum: React.FC = () => {
                       <MessageSquare className="w-2 h-2 text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-900 truncate">{post.title}</p>
+                      <p className="text-xs font-medium retro-text truncate">{post.title}</p>
                       <p className="text-xs text-gray-500">{new Date(post.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>

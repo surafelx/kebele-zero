@@ -141,25 +141,6 @@ export default class CrossroadsSection
                         }
                     })
 
-                     this.gameArea.on('interact', () => {
-                        console.log('Game area clicked');
-                        if (window.openKebeleModal) {
-                            window.openKebeleModal('games');
-                        } else {
-                            // Fallback to custom event
-                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'about' }));
-                        }
-                    })
-
-                    this.forumArea.on('interact', () => {
-                        console.log('Forum area clicked');
-                        if (window.openKebeleModal) {
-                            window.openKebeleModal('forum');
-                        } else {
-                            // Fallback to custom event
-                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'about' }));
-                        }
-                    })
         }
     
 

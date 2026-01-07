@@ -32,7 +32,7 @@ import AdminSettings from '../pages/AdminSettings';
 
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('analytics');
+  const [activeTab, setActiveTab] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
   const { user, logout, login, loading: authLoading } = useAuth();
@@ -814,7 +814,7 @@ const AdminDashboard = () => {
 
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'forum', label: 'Forum', icon: MessageSquare },
@@ -1138,12 +1138,6 @@ const AdminDashboard = () => {
               <div className="w-8 h-8 bg-gradient-to-br from-amber-600 to-orange-600 rounded-lg flex items-center justify-center retro-icon shadow-md border border-amber-400 overflow-hidden p-1">
                 <img src="/logo.png" alt="Kebele Logo" className="w-full h-full object-cover" />
               </div>
-              {!sidebarCollapsed && (
-                <div>
-                  <h1 className="retro-title text-lg font-bold text-white">Admin Panel</h1>
-                  <p className="retro-text text-xs text-yellow-100">Kebele Zero</p>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -1151,7 +1145,7 @@ const AdminDashboard = () => {
         {/* Sidebar Toggle Button - Always visible at the edge */}
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="absolute top-4 -right-3 w-6 h-6 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg border-2 border-charcoal hover:scale-110 transition-transform z-50"
+          className="absolute top-4 -right-2 w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center shadow-xl border-2 border-charcoal hover:scale-125 transition-transform z-50"
           title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
         >
           {sidebarCollapsed ? (

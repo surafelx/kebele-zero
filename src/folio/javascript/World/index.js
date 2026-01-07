@@ -442,7 +442,7 @@ export default class
         //     // x: 0,
         //     // y: - 10
         // })
-        this.container.add(this.sections.information.container)
+        // this.container.add(this.sections.information.container)
 
         // Playground
       
