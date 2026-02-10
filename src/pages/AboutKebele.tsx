@@ -265,9 +265,23 @@ const AboutKebele: React.FC = () => {
 
   return (
     <div className="min-h-screen retro-bg retro-bg-enhanced">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Modal Header */}
+      <div className="bg-white border-b-4 border-black py-4 px-6 sticky top-0 z-10 shadow-lg">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl retro-title text-gray-800 uppercase tracking-tight font-bold">ABOUT MODAL</h1>
+            <p className="retro-text text-gray-600 uppercase tracking-wide text-sm">Learn more about Kebele</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center border-2 border-black shadow-md">
+              <span className="text-white font-bold">K</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Hero Section with Image - Now at the top */}
-        <div className="retro-window retro-floating mb-12">
+        <div className="retro-window retro-floating mb-12 border-4 border-white shadow-2xl">
           <div className="retro-titlebar retro-titlebar-coral">
             <div className="flex items-center space-x-3">
               <div className="w-6 h-6 bg-white rounded border-2 border-black flex items-center justify-center text-xs font-bold retro-icon">K</div>
@@ -306,9 +320,9 @@ const AboutKebele: React.FC = () => {
         </div>
 
         {/* Mission & Vision - Side by Side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
           {/* Mission */}
-          <div className="retro-window retro-floating">
+          <div className="retro-window retro-floating border-4 border-white shadow-xl">
             <div className="retro-titlebar retro-titlebar-sky">
               <div className="flex items-center space-x-3">
                 <Target className="w-5 h-5 retro-icon" />
@@ -328,7 +342,7 @@ const AboutKebele: React.FC = () => {
           </div>
 
           {/* Vision */}
-          <div className="retro-window retro-floating">
+          <div className="retro-window retro-floating border-4 border-white shadow-xl">
             <div className="retro-titlebar retro-titlebar-teal">
               <div className="flex items-center space-x-3">
                 <Eye className="w-5 h-5 retro-icon" />
@@ -349,7 +363,7 @@ const AboutKebele: React.FC = () => {
         </div>
 
         {/* Our Story */}
-        <div className="retro-window retro-floating mb-12">
+        <div className="retro-window retro-floating mb-12 border-4 border-white shadow-2xl">
           <div className="retro-titlebar retro-titlebar-mustard">
             <div className="flex items-center space-x-3">
               <BookOpen className="w-5 h-5 retro-icon" />
@@ -385,9 +399,9 @@ const AboutKebele: React.FC = () => {
         </div>
 
         {/* Stats & Values - Better Layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-10 mb-12">
           {/* Stats - Full Width on Large Screens */}
-          <div className="xl:col-span-2 retro-window retro-floating">
+          <div className="xl:col-span-2 retro-window retro-floating border-4 border-white shadow-2xl">
             <div className="retro-titlebar">
               <div className="flex items-center space-x-3">
                 <Trophy className="w-5 h-5 retro-icon" />
@@ -413,7 +427,7 @@ const AboutKebele: React.FC = () => {
           </div>
 
           {/* Core Values */}
-          <div className="retro-window retro-floating">
+          <div className="retro-window retro-floating border-4 border-white shadow-xl">
             <div className="retro-titlebar retro-titlebar-coral">
               <div className="flex items-center space-x-3">
                 <Star className="w-5 h-5 retro-icon" />
@@ -451,7 +465,7 @@ const AboutKebele: React.FC = () => {
         </div>
 
         {/* Team Section - Compact */}
-        <div className="retro-window retro-floating mb-12">
+        <div className="retro-window retro-floating mb-12 border-4 border-white shadow-2xl">
           <div className="retro-titlebar retro-titlebar-teal">
             <div className="flex items-center space-x-3">
               <Users className="w-5 h-5 retro-icon" />
@@ -485,7 +499,7 @@ const AboutKebele: React.FC = () => {
         {/* Recent Activity Sections */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {/* Recent Media */}
-          <div className="retro-window retro-floating">
+          <div className="retro-window retro-floating border-4 border-white shadow-lg">
             <div className="retro-titlebar retro-titlebar-coral">
               <div className="flex items-center space-x-3">
                 <div className="w-5 h-5 bg-white rounded border-2 border-black flex items-center justify-center text-xs font-bold retro-icon">📹</div>
@@ -510,7 +524,7 @@ const AboutKebele: React.FC = () => {
           </div>
 
           {/* Recent Events */}
-          <div className="retro-window retro-floating">
+          <div className="retro-window retro-floating border-4 border-white shadow-lg">
             <div className="retro-titlebar retro-titlebar-mustard">
               <div className="flex items-center space-x-3">
                 <Calendar className="w-5 h-5 retro-icon" />
@@ -535,7 +549,7 @@ const AboutKebele: React.FC = () => {
           </div>
 
           {/* Recent Merch */}
-          <div className="retro-window retro-floating">
+          <div className="retro-window retro-floating border-4 border-white shadow-lg">
             <div className="retro-titlebar retro-titlebar-sky">
               <div className="flex items-center space-x-3">
                 <ShoppingBag className="w-5 h-5 retro-icon" />
@@ -560,7 +574,7 @@ const AboutKebele: React.FC = () => {
           </div>
 
           {/* Radio */}
-          <div className="retro-window retro-floating">
+          <div className="retro-window retro-floating border-4 border-white shadow-lg">
             <div className="retro-titlebar retro-titlebar-teal">
               <div className="flex items-center space-x-3">
                 <Radio className="w-5 h-5 retro-icon" />
@@ -586,7 +600,7 @@ const AboutKebele: React.FC = () => {
         </div>
 
         {/* Image Gallery Section */}
-        <div className="retro-window retro-floating mb-12">
+        <div className="retro-window retro-floating mb-12 border-4 border-white shadow-2xl">
           <div className="retro-titlebar retro-titlebar-sky">
             <div className="flex items-center space-x-3">
               <div className="w-5 h-5 bg-white rounded border-2 border-black flex items-center justify-center text-xs font-bold retro-icon">📸</div>
@@ -628,7 +642,7 @@ const AboutKebele: React.FC = () => {
         </div>
 
         {/* Quick Contact */}
-        <div className="retro-window retro-floating">
+        <div className="retro-window retro-floating border-4 border-white shadow-2xl">
           <div className="retro-titlebar retro-titlebar-mustard">
             <div className="flex items-center space-x-3">
               <Mail className="w-5 h-5 retro-icon" />

@@ -1,158 +1,117 @@
  import React, { useState, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, Heart, Share2, ThumbsUp, Music, Film, Coffee, Mic, Radio, Headphones, Star, Search } from 'lucide-react';
+import { videosAPI, radioAPI } from '../services/content';
 
 interface Video {
-  _id: string;
+  id: string;
   title: string;
   description: string;
-  youtubeId: string;
-  youtubeUrl: string;
+  youtube_id: string;
+  youtube_url: string;
   category: string;
   tags: string[];
-  thumbnail: {
-    url: string;
-    width: number;
-    height: number;
-  };
   duration: string;
-  publishedAt: string;
+  published_at: string;
   statistics: {
-    viewCount: number;
-    likeCount: number;
-    commentCount: number;
+    view_count: number;
+    like_count: number;
+    comment_count: number;
   };
-  isActive: boolean;
-  isFeatured: boolean;
-  formattedDuration: string;
-  formattedViewCount: string;
+  is_active: boolean;
+  is_featured: boolean;
 }
 
-// Mock videos data
+// Mock videos data - Fallback when no Supabase data
 const mockVideos: Video[] = [
   {
-    _id: "1",
+    id: "1",
     title: "Traditional Ethiopian Music: Azmari Performance",
     description: "Experience the soulful sounds of traditional Ethiopian azmari music performed by master musicians in Addis Ababa.",
-    youtubeId: "dQw4w9WgXcQ",
-    youtubeUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ",
+    youtube_id: "dQw4w9WgXcQ",
+    youtube_url: "https://youtube.com/watch?v=dQw4w9WgXcQ",
     category: "Music",
     tags: ["azmari", "traditional", "ethiopian music", "live performance"],
-    thumbnail: {
-      url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=480&h=360&fit=crop",
-      width: 480,
-      height: 360
-    },
     duration: "12:34",
-    publishedAt: "2024-11-15T10:00:00Z",
+    published_at: "2024-11-15T10:00:00Z",
     statistics: {
-      viewCount: 15420,
-      likeCount: 892,
-      commentCount: 45
+      view_count: 15420,
+      like_count: 892,
+      comment_count: 45
     },
-    isActive: true,
-    isFeatured: true,
-    formattedDuration: "12:34",
-    formattedViewCount: "15K"
+    is_active: true,
+    is_featured: true
   },
   {
-    _id: "2",
+    id: "2",
     title: "Ethiopian Coffee Ceremony Documentary",
     description: "A deep dive into the cultural significance and ritual of the traditional Ethiopian coffee ceremony.",
-    youtubeId: "dQw4w9WgXcQ",
-    youtubeUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ",
+    youtube_id: "dQw4w9WgXcQ",
+    youtube_url: "https://youtube.com/watch?v=dQw4w9WgXcQ",
     category: "Culture",
     tags: ["coffee", "ceremony", "culture", "documentary"],
-    thumbnail: {
-      url: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=480&h=360&fit=crop",
-      width: 480,
-      height: 360
-    },
     duration: "18:45",
-    publishedAt: "2024-11-10T14:30:00Z",
+    published_at: "2024-11-10T14:30:00Z",
     statistics: {
-      viewCount: 28340,
-      likeCount: 1245,
-      commentCount: 78
+      view_count: 28340,
+      like_count: 1245,
+      comment_count: 78
     },
-    isActive: true,
-    isFeatured: true,
-    formattedDuration: "18:45",
-    formattedViewCount: "28K"
+    is_active: true,
+    is_featured: true
   },
   {
-    _id: "3",
+    id: "3",
     title: "Modern Ethiopian Hip Hop: New Generation",
     description: "Exploring the fusion of traditional Ethiopian sounds with contemporary hip hop from Addis Ababa's underground scene.",
-    youtubeId: "dQw4w9WgXcQ",
-    youtubeUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ",
+    youtube_id: "dQw4w9WgXcQ",
+    youtube_url: "https://youtube.com/watch?v=dQw4w9WgXcQ",
     category: "Music",
     tags: ["hip hop", "modern", "fusion", "addis ababa"],
-    thumbnail: {
-      url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=480&h=360&fit=crop",
-      width: 480,
-      height: 360
-    },
     duration: "8:22",
-    publishedAt: "2024-11-08T16:15:00Z",
+    published_at: "2024-11-08T16:15:00Z",
     statistics: {
-      viewCount: 9876,
-      likeCount: 567,
-      commentCount: 23
+      view_count: 9876,
+      like_count: 567,
+      comment_count: 23
     },
-    isActive: true,
-    isFeatured: false,
-    formattedDuration: "8:22",
-    formattedViewCount: "9.8K"
+    is_active: true,
+    is_featured: false
   },
   {
-    _id: "4",
+    id: "4",
     title: "Ethiopian Orthodox Church Chants",
     description: "Sacred chants from the Ethiopian Orthodox Church, performed during traditional ceremonies and holidays.",
-    youtubeId: "dQw4w9WgXcQ",
-    youtubeUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ",
+    youtube_id: "dQw4w9WgXcQ",
+    youtube_url: "https://youtube.com/watch?v=dQw4w9WgXcQ",
     category: "Religious",
     tags: ["orthodox", "chants", "religious", "sacred"],
-    thumbnail: {
-      url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=480&h=360&fit=crop",
-      width: 480,
-      height: 360
-    },
     duration: "15:12",
-    publishedAt: "2024-11-05T09:45:00Z",
+    published_at: "2024-11-05T09:45:00Z",
     statistics: {
-      viewCount: 19234,
-      likeCount: 756,
-      commentCount: 34
+      view_count: 19234,
+      like_count: 756,
+      comment_count: 34
     },
-    isActive: true,
-    isFeatured: true,
-    formattedDuration: "15:12",
-    formattedViewCount: "19K"
+    is_active: true,
+    is_featured: true
   },
   {
-    _id: "5",
+    id: "5",
     title: "Ethiopian Storytelling: Oral Traditions",
     description: "Traditional Ethiopian storytelling and oral traditions passed down through generations.",
-    youtubeId: "dQw4w9WgXcQ",
-    youtubeUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ",
+    youtube_id: "dQw4w9WgXcQ",
+    youtube_url: "https://youtube.com/watch?v=dQw4w9WgXcQ",
     category: "Culture",
     tags: ["storytelling", "oral", "traditions", "folklore"],
-    thumbnail: {
-      url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=480&h=360&fit=crop",
-      width: 480,
-      height: 360
-    },
     duration: "22:18",
-    publishedAt: "2024-11-03T11:20:00Z",
+    published_at: "2024-11-03T11:20:00Z",
     statistics: {
-      viewCount: 7654,
-      likeCount: 432,
-      commentCount: 18
+      view_count: 7654,
+      like_count: 432,
+      comment_count: 18
     },
-    isActive: true,
-    isFeatured: false,
-    formattedDuration: "22:18",
-    formattedViewCount: "7.6K"
+    is_active: true,
+    is_featured: false
   }
 ];
 
@@ -172,26 +131,56 @@ const KebeleRadio: React.FC = () => {
 
   const loadVideos = async () => {
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-
+      // Fetch from Supabase
+      const data = await videosAPI.getVideos({
+        category: selectedCategory || undefined
+      });
+      
+      // Transform Supabase data to match component format
+      if (data && data.length > 0) {
+        const transformedVideos: Video[] = data.map(video => ({
+          id: video.id,
+          title: video.title,
+          description: video.description,
+          youtube_id: video.youtube_id,
+          youtube_url: video.youtube_url,
+          category: video.category,
+          tags: video.tags || [],
+          duration: video.duration || '0:00',
+          published_at: video.published_at,
+          statistics: video.statistics || { view_count: 0, like_count: 0, comment_count: 0 },
+          is_active: video.is_active,
+          is_featured: video.is_featured
+        }));
+        setVideos(transformedVideos);
+      } else {
+        // Fallback to mock data
+        let filteredVideos = mockVideos;
+        if (searchTerm) {
+          filteredVideos = filteredVideos.filter(video =>
+            video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            video.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            video.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+          );
+        }
+        if (selectedCategory) {
+          filteredVideos = filteredVideos.filter(video => video.category === selectedCategory);
+        }
+        setVideos(filteredVideos);
+      }
+    } catch (error) {
+      console.error('Error loading videos:', error);
+      // Fallback to mock data on error
       let filteredVideos = mockVideos;
-
       if (searchTerm) {
         filteredVideos = filteredVideos.filter(video =>
-          video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          video.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          video.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+          video.title.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
-
       if (selectedCategory) {
         filteredVideos = filteredVideos.filter(video => video.category === selectedCategory);
       }
-
       setVideos(filteredVideos);
-    } catch (error) {
-      console.error('Error loading videos:', error);
     } finally {
       setLoading(false);
     }
@@ -199,11 +188,16 @@ const KebeleRadio: React.FC = () => {
 
   const loadCategories = async () => {
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setCategories(mockCategories);
+      // Fetch categories from Supabase
+      const data = await videosAPI.getCategories();
+      if (data && data.length > 0) {
+        setCategories(data);
+      } else {
+        setCategories(mockCategories);
+      }
     } catch (error) {
       console.error('Error loading categories:', error);
+      setCategories(mockCategories);
     }
   };
 
@@ -240,7 +234,22 @@ const KebeleRadio: React.FC = () => {
 
   return (
     <div className="min-h-screen retro-bg retro-bg-enhanced">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Modal Header */}
+      <div className="bg-white border-b-4 border-black py-4 px-6 sticky top-0 z-10 shadow-lg">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl retro-title text-gray-800 uppercase tracking-tight font-bold">RADIO MODAL</h1>
+            <p className="retro-text text-gray-600 uppercase tracking-wide text-sm">Ethiopian music, culture & stories</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center border-2 border-black shadow-md">
+              <Radio className="w-5 h-5 text-white" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Hero Section - Smaller */}
         <div className="retro-window mb-8">
           <div className="retro-titlebar retro-titlebar-teal">
@@ -320,11 +329,11 @@ const KebeleRadio: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {videos.map((video) => (
-                <div key={video._id} className="retro-window retro-floating overflow-hidden">
+                <div key={video.id} className="retro-window retro-floating overflow-hidden">
                   {/* Embedded YouTube Video */}
                   <div className="aspect-video bg-black rounded-t-lg overflow-hidden">
                     <iframe
-                      src={`https://www.youtube.com/embed/${video.youtubeId}`}
+                      src={`https://www.youtube.com/embed/${video.youtube_id}`}
                       title={video.title}
                       className="w-full h-full"
                       frameBorder="0"
@@ -342,7 +351,7 @@ const KebeleRadio: React.FC = () => {
                       <div className="flex items-center space-x-2 text-sm">
                         <div className="flex items-center space-x-1 retro-text text-charcoal">
                           <Play className="w-4 h-4 retro-icon" />
-                          <span className="retro-title text-sm font-bold">{video.formattedViewCount}</span>
+                          <span className="retro-title text-sm font-bold">{video.statistics.view_count.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -359,11 +368,11 @@ const KebeleRadio: React.FC = () => {
                       <div className="flex items-center space-x-3">
                         <div className="flex items-center space-x-1">
                           <Heart className="w-4 h-4 text-coral-red retro-icon" />
-                          <span className="retro-text text-sm font-bold">{video.statistics.likeCount}</span>
+                          <span className="retro-text text-sm font-bold">{video.statistics.like_count}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <ThumbsUp className="w-4 h-4 text-sky-blue retro-icon" />
-                          <span className="retro-text text-sm font-bold">{video.statistics.commentCount}</span>
+                          <span className="retro-text text-sm font-bold">{video.statistics.comment_count}</span>
                         </div>
                       </div>
                       <button className="retro-btn text-sm py-2 px-4 font-bold uppercase">

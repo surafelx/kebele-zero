@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ShoppingCart, Heart, Star, Filter, Search, Shirt, Coffee, Book, Music, Gem, Home, X } from 'lucide-react';
+import { productsAPI } from '../services/content';
 
 interface Product {
-  _id: string;
+  id: string;
   name: string;
   description: string;
   price: number;
   images: Array<{ url: string; alt: string }>;
   category: string;
-  inventory: { quantity: number };
-  isActive: boolean;
-  isFeatured: boolean;
+  stock_quantity: number;
+  is_active: boolean;
+  is_featured: boolean;
 }
 
-// Mock products data
+// Mock products data - Fallback when no Supabase data
 const mockProducts: Product[] = [
   {
-    _id: "1",
+    id: "1",
     name: "Handwoven Ethiopian Scarf",
     description: "Beautiful handwoven scarf made with traditional Ethiopian techniques, perfect for cultural events and daily wear.",
     price: 45,
@@ -26,12 +27,12 @@ const mockProducts: Product[] = [
       { url: "https://images.unsplash.com/photo-1582582494368-986c84ba9a0d?w=400&h=400&fit=crop", alt: "Scarf detail" }
     ],
     category: "Textiles",
-    inventory: { quantity: 25 },
-    isActive: true,
-    isFeatured: true
+    stock_quantity: 25,
+    is_active: true,
+    is_featured: true
   },
   {
-    _id: "2",
+    id: "2",
     name: "Ethiopian Coffee Beans",
     description: "Premium single-origin coffee beans from the highlands of Ethiopia, known for their unique flavor profile.",
     price: 28,
@@ -39,12 +40,12 @@ const mockProducts: Product[] = [
       { url: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=400&fit=crop", alt: "Coffee beans" }
     ],
     category: "Food",
-    inventory: { quantity: 50 },
-    isActive: true,
-    isFeatured: true
+    stock_quantity: 50,
+    is_active: true,
+    is_featured: true
   },
   {
-    _id: "3",
+    id: "3",
     name: "Traditional Mesob Basket",
     description: "Handcrafted mesob basket used for traditional Ethiopian dining, made from local materials.",
     price: 35,
@@ -52,12 +53,12 @@ const mockProducts: Product[] = [
       { url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop", alt: "Mesob basket" }
     ],
     category: "Home",
-    inventory: { quantity: 15 },
-    isActive: true,
-    isFeatured: false
+    stock_quantity: 15,
+    is_active: true,
+    is_featured: false
   },
   {
-    _id: "4",
+    id: "4",
     name: "Ethiopian Music CD Collection",
     description: "Curated collection of traditional Ethiopian music featuring various regional styles and instruments.",
     price: 22,
@@ -65,12 +66,12 @@ const mockProducts: Product[] = [
       { url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop", alt: "Music collection" }
     ],
     category: "Music",
-    inventory: { quantity: 30 },
-    isActive: true,
-    isFeatured: true
+    stock_quantity: 30,
+    is_active: true,
+    is_featured: true
   },
   {
-    _id: "5",
+    id: "5",
     name: "Handmade Beaded Jewelry",
     description: "Beautiful beaded jewelry crafted by Ethiopian artisans, featuring traditional patterns and colors.",
     price: 18,
@@ -78,12 +79,12 @@ const mockProducts: Product[] = [
       { url: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop", alt: "Beaded jewelry" }
     ],
     category: "Jewelry",
-    inventory: { quantity: 40 },
-    isActive: true,
-    isFeatured: false
+    stock_quantity: 40,
+    is_active: true,
+    is_featured: false
   },
   {
-    _id: "6",
+    id: "6",
     name: "Injera Baking Kit",
     description: "Complete kit for making traditional Ethiopian injera at home, includes special pan and starter culture.",
     price: 65,
@@ -91,9 +92,9 @@ const mockProducts: Product[] = [
       { url: "https://images.unsplash.com/photo-1551782450-17144efb5723?w=400&h=400&fit=crop", alt: "Injera kit" }
     ],
     category: "Food",
-    inventory: { quantity: 12 },
-    isActive: true,
-    isFeatured: true
+    stock_quantity: 12,
+    is_active: true,
+    is_featured: true
   }
 ];
 
@@ -115,26 +116,54 @@ const KebeleSouq: React.FC = () => {
 
   const loadProducts = async () => {
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-
+      // Fetch from Supabase
+      const data = await productsAPI.getProducts({
+        category: selectedCategory || undefined,
+        search: searchTerm || undefined
+      });
+      
+      // Transform Supabase data to match component format
+      if (data && data.length > 0) {
+        const transformedProducts: Product[] = data.map(product => ({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          images: product.image_url ? [{ url: product.image_url, alt: product.name }] : [],
+          category: product.category,
+          stock_quantity: product.stock_quantity || 0,
+          is_active: product.is_active,
+          is_featured: product.is_featured
+        }));
+        setProducts(transformedProducts);
+      } else {
+        // Fallback to mock data
+        let filteredProducts = mockProducts;
+        if (searchTerm) {
+          filteredProducts = filteredProducts.filter(product =>
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.category.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+        }
+        if (selectedCategory) {
+          filteredProducts = filteredProducts.filter(product => product.category === selectedCategory);
+        }
+        setProducts(filteredProducts);
+      }
+    } catch (error) {
+      console.error('Error loading products:', error);
+      // Fallback to mock data on error
       let filteredProducts = mockProducts;
-
       if (searchTerm) {
         filteredProducts = filteredProducts.filter(product =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.category.toLowerCase().includes(searchTerm.toLowerCase())
+          product.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
-
       if (selectedCategory) {
         filteredProducts = filteredProducts.filter(product => product.category === selectedCategory);
       }
-
       setProducts(filteredProducts);
-    } catch (error) {
-      console.error('Error loading products:', error);
     } finally {
       setLoading(false);
     }
@@ -142,20 +171,25 @@ const KebeleSouq: React.FC = () => {
 
   const loadCategories = async () => {
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setCategories(mockCategories);
+      // Fetch categories from Supabase
+      const data = await productsAPI.getCategories();
+      if (data && data.length > 0) {
+        setCategories(data);
+      } else {
+        setCategories(mockCategories);
+      }
     } catch (error) {
       console.error('Error loading categories:', error);
+      setCategories(mockCategories);
     }
   };
 
   const addToCart = (product: Product) => {
     setCart(prev => {
-      const existing = prev.find(item => item.product._id === product._id);
+      const existing = prev.find(item => item.product.id === product.id);
       if (existing) {
         return prev.map(item =>
-          item.product._id === product._id
+          item.product.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -200,7 +234,22 @@ const KebeleSouq: React.FC = () => {
 
   return (
     <div className="min-h-screen retro-bg retro-bg-enhanced">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Modal Header */}
+      <div className="bg-white border-b-4 border-black py-4 px-6 sticky top-0 z-10 shadow-lg">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl retro-title text-gray-800 uppercase tracking-tight font-bold">SOUQ MODAL</h1>
+            <p className="retro-text text-gray-600 uppercase tracking-wide text-sm">Discover Ethiopian crafts and products</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center border-2 border-black shadow-md">
+              <ShoppingCart className="w-5 h-5 text-white" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Hero Section - Smaller */}
         <div className="retro-window mb-8">
           <div className="retro-titlebar retro-titlebar-teal">
@@ -287,7 +336,7 @@ const KebeleSouq: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product) => (
-                <div key={product._id} className="retro-window retro-floating overflow-hidden">
+                <div key={product.id} className="retro-window retro-floating overflow-hidden">
                   {/* Product Image */}
                   <div className="aspect-[3/2] overflow-hidden relative">
                     <img
@@ -298,7 +347,7 @@ const KebeleSouq: React.FC = () => {
                     {/* Semi-transparent background overlay for better tag visibility */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10"></div>
 
-                    {product.isFeatured && (
+                    {product.is_featured && (
                       <div className="absolute top-3 left-3">
                         <span className="px-2 py-1 bg-green-600 text-white rounded-md retro-title text-xs font-bold uppercase border-2 border-white shadow-lg transform -rotate-3">
                           FEATURED

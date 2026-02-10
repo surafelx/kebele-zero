@@ -1,5 +1,5 @@
- import React, { useState, useEffect } from 'react';
-import { Users, CheckCircle, Settings, Trophy, MessageSquare, Gamepad2, Plus, Search } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Users, CheckCircle, Settings, Trophy, MessageSquare, Gamepad2, Plus, Search, Filter, X, Mail, User as UserIcon, Shield, Eye, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 
 const AdminUsers: React.FC = () => {
@@ -47,6 +47,7 @@ const AdminUsers: React.FC = () => {
 
     fetchData();
   }, []);
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = userSearchTerm === '' ||
       user.email?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
@@ -68,86 +69,96 @@ const AdminUsers: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="bg-white border-b-4 border-charcoal px-4 py-3 flex justify-between items-center shadow-sm">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="retro-title text-xl">User Management</h2>
-          <p className="retro-text text-base opacity-80 mt-2">Manage platform users and their roles</p>
+          <h2 className="text-xl font-semibold text-gray-800">User Management</h2>
+          <p className="text-gray-500 mt-1">Manage platform users and their roles</p>
         </div>
         <button
           onClick={() => { setShowUserForm(true); setEditingUser(null); setUserFormData({ email: '', username: '', role: 'user', is_active: true }); }}
-          className="retro-btn px-6 py-3 flex items-center space-x-2"
+          className="flex items-center space-x-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
         >
-          <Plus className="w-5 h-5 retro-icon" />
+          <Plus className="w-5 h-5" />
           <span>Add User</span>
         </button>
       </div>
 
-      {/* User Stats Cards */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="retro-card retro-hover">
-          <div className="p-4 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md border-2 border-blue-400 retro-icon mx-auto mb-2">
-              <Users className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 mb-3">
+              <Users className="w-6 h-6 text-white" />
             </div>
-            <p className="text-lg font-bold text-blue-900 retro-title">{totalUsers}</p>
-            <p className="text-xs text-blue-700 uppercase tracking-wide retro-text">Total Users</p>
+            <p className="text-2xl font-bold text-gray-800">{totalUsers}</p>
+            <p className="text-xs text-gray-500 font-medium">Total Users</p>
           </div>
         </div>
-        <div className="retro-card retro-hover">
-          <div className="p-4 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-md border-2 border-green-400 retro-icon mx-auto mb-2">
-              <CheckCircle className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-200 mb-3">
+              <CheckCircle className="w-6 h-6 text-white" />
             </div>
-            <p className="text-lg font-bold text-green-900 retro-title">{activeUsers}</p>
-            <p className="text-xs text-green-700 uppercase tracking-wide retro-text">Active</p>
+            <p className="text-2xl font-bold text-gray-800">{activeUsers}</p>
+            <p className="text-xs text-gray-500 font-medium">Active</p>
           </div>
         </div>
-        <div className="retro-card retro-hover">
-          <div className="p-4 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md border-2 border-purple-400 retro-icon mx-auto mb-2">
-              <Settings className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200 mb-3">
+              <Shield className="w-6 h-6 text-white" />
             </div>
-            <p className="text-lg font-bold text-purple-900 retro-title">{adminUsers}</p>
-            <p className="text-xs text-purple-700 uppercase tracking-wide retro-text">Admins</p>
+            <p className="text-2xl font-bold text-gray-800">{adminUsers}</p>
+            <p className="text-xs text-gray-500 font-medium">Admins</p>
           </div>
         </div>
-        <div className="retro-card retro-hover">
-          <div className="p-4 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md border-2 border-orange-400 retro-icon mx-auto mb-2">
-              <Trophy className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-200 mb-3">
+              <Trophy className="w-6 h-6 text-white" />
             </div>
-            <p className="text-lg font-bold text-orange-900 retro-title">{totalPoints}</p>
-            <p className="text-xs text-orange-700 uppercase tracking-wide retro-text">Total Points</p>
+            <p className="text-2xl font-bold text-gray-800">{totalPoints.toLocaleString()}</p>
+            <p className="text-xs text-gray-500 font-medium">Total Points</p>
           </div>
         </div>
-        <div className="retro-card retro-hover">
-          <div className="p-4 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md border-2 border-teal-400 retro-icon mx-auto mb-2">
-              <MessageSquare className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-200 mb-3">
+              <MessageSquare className="w-6 h-6 text-white" />
             </div>
-            <p className="text-lg font-bold text-teal-900 retro-title">{totalPosts}</p>
-            <p className="text-xs text-teal-700 uppercase tracking-wide retro-text">Forum Posts</p>
+            <p className="text-2xl font-bold text-gray-800">{totalPosts}</p>
+            <p className="text-xs text-gray-500 font-medium">Forum Posts</p>
           </div>
         </div>
-        <div className="retro-card retro-hover">
-          <div className="p-4 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md border-2 border-pink-400 retro-icon mx-auto mb-2">
-              <Gamepad2 className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-pink-200 mb-3">
+              <Gamepad2 className="w-6 h-6 text-white" />
             </div>
-            <p className="text-lg font-bold text-pink-900 retro-title">{totalGames}</p>
-            <p className="text-xs text-pink-700 uppercase tracking-wide retro-text">Games Played</p>
+            <p className="text-2xl font-bold text-gray-800">{totalGames}</p>
+            <p className="text-xs text-gray-500 font-medium">Games Played</p>
           </div>
         </div>
       </div>
 
       {/* User Form Modal */}
       {showUserForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="retro-window w-full max-w-md mx-4">
-            <div className="retro-titlebar retro-titlebar-blue p-4 flex justify-between items-center">
-              <h3 className="retro-title text-lg">{editingUser ? 'Edit User' : 'Add New User'}</h3>
-              <button onClick={() => { setShowUserForm(false); setEditingUser(null); }} className="retro-btn-secondary p-1">
-                ✕
+        <div 
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => { setShowUserForm(false); setEditingUser(null); }}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-800">{editingUser ? 'Edit User' : 'Add New User'}</h3>
+              <button 
+                onClick={() => { setShowUserForm(false); setEditingUser(null); }}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors group"
+              >
+                <X className="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
               </button>
             </div>
             <div className="p-6">
@@ -178,37 +189,46 @@ const AdminUsers: React.FC = () => {
                 }
               }} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold retro-text">Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={userFormData.email}
-                    onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
-                    className="retro-input w-full"
-                    placeholder="user@example.com"
-                  />
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="email"
+                      required
+                      value={userFormData.email}
+                      onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="user@example.com"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold retro-text">Username</label>
-                  <input
-                    type="text"
-                    required
-                    value={userFormData.username}
-                    onChange={(e) => setUserFormData({ ...userFormData, username: e.target.value })}
-                    className="retro-input w-full"
-                    placeholder="username"
-                  />
+                  <label className="block text-sm font-medium text-gray-700">Username</label>
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      required
+                      value={userFormData.username}
+                      onChange={(e) => setUserFormData({ ...userFormData, username: e.target.value })}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="username"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold retro-text">Role</label>
-                  <select
-                    value={userFormData.role}
-                    onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
-                    className="retro-input w-full bg-white"
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                  </select>
+                  <label className="block text-sm font-medium text-gray-700">Role</label>
+                  <div className="relative">
+                    <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <select
+                      value={userFormData.role}
+                      onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
@@ -216,18 +236,18 @@ const AdminUsers: React.FC = () => {
                     id="is_active"
                     checked={userFormData.is_active}
                     onChange={(e) => setUserFormData({ ...userFormData, is_active: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500"
                   />
-                  <label htmlFor="is_active" className="text-sm font-semibold retro-text">Active</label>
+                  <label htmlFor="is_active" className="text-sm font-medium text-gray-700">Active</label>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t-2 border-mustard">
-                  <button type="submit" className="flex-1 retro-btn-success py-2 px-4">
+                <div className="flex gap-3 pt-4">
+                  <button type="submit" className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-colors">
                     {editingUser ? 'Update User' : 'Add User'}
                   </button>
                   <button
                     type="button"
                     onClick={() => { setShowUserForm(false); setEditingUser(null); setUserFormData({ email: '', username: '', role: 'user', is_active: true }); }}
-                    className="retro-btn-secondary py-2 px-4"
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
                   >
                     Cancel
                   </button>
@@ -239,28 +259,29 @@ const AdminUsers: React.FC = () => {
       )}
 
       {/* Search and Filter */}
-      <div className="retro-window">
-        <div className="p-4">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-semibold retro-text mb-2">Search Users</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search by email or username..."
-                  value={userSearchTerm}
-                  onChange={(e) => setUserSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 retro-input"
-                />
-              </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Search Users</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by email or username..."
+                value={userSearchTerm}
+                onChange={(e) => setUserSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              />
             </div>
-            <div className="lg:w-64">
-              <label className="block text-sm font-semibold retro-text mb-2">Filter</label>
+          </div>
+          <div className="lg:w-64">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Filter</label>
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <select
                 value={userFilterStatus}
                 onChange={(e) => setUserFilterStatus(e.target.value)}
-                className="w-full px-4 py-2 bg-white retro-input"
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
               >
                 <option value="">All Users</option>
                 <option value="active">Active Users</option>
@@ -273,32 +294,33 @@ const AdminUsers: React.FC = () => {
         </div>
       </div>
 
+      {/* Users Table */}
       {loading ? (
-        <div className="retro-window text-center py-16">
-          <div className="retro-spinner w-16 h-16 mx-auto mb-6"></div>
-          <p className="retro-text text-lg">Loading users...</p>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center py-16">
+          <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading users...</p>
         </div>
       ) : filteredUsers.length === 0 ? (
-        <div className="retro-window text-center py-16">
-          <Users className="w-20 h-20 text-gray-300 mx-auto mb-6 retro-icon" />
-          <p className="retro-text text-xl">No users found</p>
-          <p className="retro-text text-base opacity-70 mt-3">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center py-16">
+          <Users className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+          <p className="text-xl font-semibold text-gray-800">No users found</p>
+          <p className="text-gray-500 mt-2">
             {users.length === 0 ? 'Users will appear here' : 'No users match your search criteria'}
           </p>
         </div>
       ) : (
-        <div className="retro-window">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b-2 border-charcoal">
-                  <th className="text-left p-4 retro-title text-sm">User</th>
-                  <th className="text-left p-4 retro-title text-sm">Role</th>
-                  <th className="text-left p-4 retro-title text-sm">Points</th>
-                  <th className="text-left p-4 retro-title text-sm">Posts</th>
-                  <th className="text-left p-4 retro-title text-sm">Games</th>
-                  <th className="text-left p-4 retro-title text-sm">Joined</th>
-                  <th className="text-left p-4 retro-title text-sm">Actions</th>
+                <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="text-left p-4 text-sm font-semibold text-gray-600">User</th>
+                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Role</th>
+                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Points</th>
+                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Posts</th>
+                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Games</th>
+                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Joined</th>
+                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -307,17 +329,17 @@ const AdminUsers: React.FC = () => {
                   const userPostsCount = forumPosts.filter(p => p.created_by === user.id).length;
                   const userGamesCount = gameScores.filter(g => g.user_id === user.id).length;
                   return (
-                    <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50">
+                    <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-md border-2 border-blue-400 retro-icon">
-                            <span className="text-white font-bold text-sm retro-title">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-md">
+                            <span className="text-white font-bold text-sm">
                               {user.email?.charAt(0).toUpperCase()}
                             </span>
                           </div>
                           <div>
-                            <p className="font-semibold text-gray-900 retro-title">{user.username || user.email?.split('@')[0]}</p>
-                            <p className="text-sm text-gray-600 retro-text">{user.email}</p>
+                            <p className="font-medium text-gray-800">{user.username || user.email?.split('@')[0]}</p>
+                            <p className="text-sm text-gray-500">{user.email}</p>
                           </div>
                         </div>
                       </td>
@@ -338,23 +360,23 @@ const AdminUsers: React.FC = () => {
                               alert('Error updating user role');
                             }
                           }}
-                          className="retro-input text-sm px-2 py-1"
+                          className="px-3 py-1 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
                         >
                           <option value="user">User</option>
                           <option value="admin">Admin</option>
                         </select>
                       </td>
                       <td className="p-4">
-                        <span className="retro-title font-bold text-orange-600">{userStats?.total_points || 0}</span>
+                        <span className="font-bold text-amber-600">{userStats?.total_points || 0}</span>
                       </td>
                       <td className="p-4">
-                        <span className="retro-title font-bold text-blue-600">{userPostsCount}</span>
+                        <span className="font-bold text-blue-600">{userPostsCount}</span>
                       </td>
                       <td className="p-4">
-                        <span className="retro-title font-bold text-green-600">{userGamesCount}</span>
+                        <span className="font-bold text-green-600">{userGamesCount}</span>
                       </td>
                       <td className="p-4">
-                        <span className="retro-text text-sm">{new Date(user.created_at).toLocaleDateString()}</span>
+                        <span className="text-sm text-gray-500">{new Date(user.created_at).toLocaleDateString()}</span>
                       </td>
                       <td className="p-4">
                         <div className="flex space-x-2">
@@ -369,9 +391,10 @@ const AdminUsers: React.FC = () => {
                               });
                               setShowUserForm(true);
                             }}
-                            className="retro-btn-secondary px-3 py-1 text-xs"
+                            className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                            title="Edit"
                           >
-                            Edit
+                            <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={async () => {
@@ -389,10 +412,11 @@ const AdminUsers: React.FC = () => {
                                 alert('Error deactivating user');
                               }
                             }}
-                            className="retro-btn-secondary px-3 py-1 text-xs"
+                            className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
                             disabled={!user.is_active}
+                            title="Deactivate"
                           >
-                            Deactivate
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>

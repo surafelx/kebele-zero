@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Plus, Edit3, Trash2, Search, Filter, Eye, Trophy } from 'lucide-react';
+import { MessageSquare, Plus, Edit3, Trash2, Search, Eye, ThumbsUp, MessageCircle, Calendar } from 'lucide-react';
 import Modal from './Modal';
 import { forumAPI } from '../services/forum';
 
@@ -15,10 +15,10 @@ const AdminForum: React.FC = () => {
     tags: [] as string[]
   });
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 10;
+  const [filterCategory, setFilterCategory] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,7 +26,6 @@ const AdminForum: React.FC = () => {
         const posts = await forumAPI.getPosts();
         setForumPosts(posts);
 
-        // Fetch comments for all posts
         const allComments: any[] = [];
         for (const post of posts) {
           const comments = await forumAPI.getComments(post.id);
@@ -66,120 +65,263 @@ const AdminForum: React.FC = () => {
       alert('Error updating post');
     }
   };
+
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    try {
+      await forumAPI.deletePost(postId);
+      setForumPosts(forumPosts.filter(p => p.id !== postId));
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      alert('Error deleting post');
+    }
+  };
+
+  const filteredPosts = forumPosts.filter(post => {
+    const matchesSearch = !searchTerm || 
+      post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.content?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = !filterCategory || post.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const categories = ['general', 'culture', 'events', 'games', 'help'];
+
+  const totalPages = Math.ceil(filteredPosts.length / itemsPerPage);
+  const paginatedPosts = filteredPosts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reset to page 1 when search/filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterCategory]);
+
   return (
-    <div className="space-y-8">
-      <div className="bg-white border-b-4 border-charcoal px-4 py-3 flex justify-between items-center shadow-sm">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="retro-title text-xl">Forum Management</h2>
-          <p className="retro-text text-base opacity-80 mt-2">Manage forum posts and community discussions</p>
+          <h2 className="text-2xl font-bold text-gray-800">Forum Management</h2>
+          <p className="text-gray-500 mt-1">Manage forum posts and community discussions</p>
         </div>
         <button
-          onClick={() => { setShowPostForm(true); setEditingPost(null); setPostFormData({ title: '', content: '', category: 'general', tags: [] }); }}
-          className="retro-btn px-6 py-3 flex items-center space-x-2"
+          onClick={() => { 
+            setShowPostForm(true); 
+            setEditingPost(null); 
+            setPostFormData({ title: '', content: '', category: 'general', tags: [] }); 
+          }}
+          className="inline-flex items-center space-x-2 bg-teal-500 hover:bg-teal-600 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
         >
-          <Plus className="w-5 h-5 retro-icon" />
+          <Plus className="w-5 h-5" />
           <span>Add Post</span>
         </button>
       </div>
 
-  {/* Forum Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="retro-card retro-hover">
-          <div className="p-3 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md border-2 border-blue-400 retro-icon mx-auto mb-2">
-              <MessageSquare className="w-4 h-4 text-white" />
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Total Posts</p>
+              <p className="text-3xl font-bold text-gray-800">{forumPosts.length}</p>
             </div>
-            <p className="text-lg font-bold text-blue-900 retro-title">{forumPosts.length}</p>
-            <p className="text-xs text-blue-700 uppercase tracking-wide retro-text">Total Posts</p>
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
+              <MessageSquare className="w-6 h-6 text-white" />
+            </div>
           </div>
         </div>
-
-        <div className="retro-card retro-hover">
-          <div className="p-3 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-md border-2 border-green-400 retro-icon mx-auto mb-2">
-              <MessageSquare className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">This Week</p>
+              <p className="text-3xl font-bold text-gray-800">
+                {forumPosts.filter(p => new Date(p.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
+              </p>
             </div>
-            <p className="text-lg font-bold text-green-900 retro-title">
-              {forumPosts.filter(p => new Date(p.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
-            </p>
-            <p className="text-xs text-green-700 uppercase tracking-wide retro-text">This Week</p>
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-200">
+              <Calendar className="w-6 h-6 text-white" />
+            </div>
           </div>
         </div>
-
-        <div className="retro-card retro-hover">
-          <div className="p-3 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md border-2 border-purple-400 retro-icon mx-auto mb-2">
-              <MessageSquare className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Comments</p>
+              <p className="text-3xl font-bold text-gray-800">{forumComments.length}</p>
             </div>
-            <p className="text-lg font-bold text-purple-900 retro-title">
-              {forumComments.length}
-            </p>
-            <p className="text-xs text-purple-700 uppercase tracking-wide retro-text">Comments</p>
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200">
+              <MessageCircle className="w-6 h-6 text-white" />
+            </div>
           </div>
         </div>
-
-        <div className="retro-card retro-hover">
-          <div className="p-3 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md border-2 border-orange-400 retro-icon mx-auto mb-2">
-              <Eye className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Total Views</p>
+              <p className="text-3xl font-bold text-gray-800">
+                {forumPosts.reduce((sum, p) => sum + (p.views || 0), 0).toLocaleString()}
+              </p>
             </div>
-            <p className="text-lg font-bold text-orange-900 retro-title">
-              {forumPosts.reduce((sum, p) => sum + (p.views || 0), 0)}
-            </p>
-            <p className="text-xs text-orange-700 uppercase tracking-wide retro-text">Total Views</p>
+            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-200">
+              <Eye className="w-6 h-6 text-white" />
+            </div>
           </div>
         </div>
-
-        <div className="retro-card retro-hover">
-          <div className="p-3 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md border-2 border-teal-400 retro-icon mx-auto mb-2">
-              <Trophy className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Total Likes</p>
+              <p className="text-3xl font-bold text-gray-800">
+                {forumPosts.reduce((sum, p) => sum + (p.likes || 0), 0).toLocaleString()}
+              </p>
             </div>
-            <p className="text-lg font-bold text-teal-900 retro-title">
-              {forumPosts.reduce((sum, p) => sum + (p.likes || 0), 0)}
-            </p>
-            <p className="text-xs text-teal-700 uppercase tracking-wide retro-text">Total Likes</p>
+            <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-pink-200">
+              <ThumbsUp className="w-6 h-6 text-white" />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Search and Filter */}
-      <div className="retro-window">
-        <div className="p-4">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-semibold retro-text mb-2">Search Posts</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search by title, content, or tags..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 retro-input"
-                />
+      {/* Search & Filter */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search posts..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            />
+          </div>
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+          >
+            <option value="">All Categories</option>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Posts Grid with Pagination */}
+      {loading ? (
+        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+          <div className="w-12 h-12 border-4 border-teal-200 border-t-teal-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading posts...</p>
+        </div>
+      ) : filteredPosts.length === 0 ? (
+        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+          <MessageSquare className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+          <p className="text-xl font-medium text-gray-800">No posts found</p>
+          <p className="text-gray-500 mt-1">Create the first post to get started</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {paginatedPosts.map((post) => (
+              <div key={post.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                <div className="p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <span className="inline-flex items-center px-2.5 py-1 bg-teal-100 text-teal-700 text-xs font-medium rounded-full capitalize mb-2">
+                        {post.category || 'General'}
+                      </span>
+                      <h3 className="font-bold text-gray-800 text-lg mb-2">{post.title}</h3>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          setEditingPost(post);
+                          setPostFormData({
+                            title: post.title,
+                            content: post.content,
+                            category: post.category,
+                            tags: post.tags || []
+                          });
+                          setShowPostForm(true);
+                        }}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      >
+                        <Edit3 className="w-4 h-4 text-gray-500" />
+                      </button>
+                      <button
+                        onClick={() => handleDeletePost(post.id)}
+                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-600 text-sm line-clamp-3 mb-4">{post.content}</p>
+                  
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center space-x-4">
+                      <span className="flex items-center space-x-1">
+                        <MessageCircle className="w-4 h-4" />
+                        <span>{forumComments.filter(c => c.post_id === post.id).length}</span>
+                      </span>
+                      <span className="flex items-center space-x-1">
+                        <ThumbsUp className="w-4 h-4" />
+                        <span>{post.likes || 0}</span>
+                      </span>
+                      <span className="flex items-center space-x-1">
+                        <Eye className="w-4 h-4" />
+                        <span>{post.views || 0}</span>
+                      </span>
+                    </div>
+                    <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                  </div>
+                  
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-3">
+                      {post.tags.map((tag: string, index: number) => (
+                        <span key={index} className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-100 rounded-b-2xl">
+              <p className="text-sm text-gray-500">
+                Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, filteredPosts.length)} of {filteredPosts.length} posts
+              </p>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-sm bg-white border border-gray-200 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 text-sm bg-white border border-gray-200 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Next
+                </button>
               </div>
             </div>
-            <div className="lg:w-64">
-              <label className="block text-sm font-semibold retro-text mb-2">Filter by Category</label>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-4 py-2 bg-white retro-input"
-              >
-                <option value="">All Categories</option>
-                <option value="general">General</option>
-                <option value="culture">Culture</option>
-                <option value="events">Events</option>
-                <option value="games">Games</option>
-                <option value="help">Help</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-    
+          )}
+        </>
+      )}
 
+      {/* Modal */}
       <Modal
         isOpen={showPostForm}
         onClose={() => { setShowPostForm(false); setEditingPost(null); }}
@@ -193,207 +335,71 @@ const AdminForum: React.FC = () => {
             handleCreatePost(postFormData);
           }
           setShowPostForm(false);
-        }} className="space-y-6">
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold retro-text">Title</label>
+        }} className="space-y-5">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Title</label>
             <input
               type="text"
               required
               value={postFormData.title}
               onChange={(e) => setPostFormData({ ...postFormData, title: e.target.value })}
-              className="retro-input w-full"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
               placeholder="Enter post title"
             />
           </div>
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold retro-text">Category</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Category</label>
             <select
               value={postFormData.category}
               onChange={(e) => setPostFormData({ ...postFormData, category: e.target.value })}
-              className="retro-input w-full bg-white"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
-              <option value="general">General</option>
-              <option value="culture">Culture</option>
-              <option value="events">Events</option>
-              <option value="games">Games</option>
-              <option value="help">Help</option>
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
             </select>
           </div>
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold retro-text">Content</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Content</label>
             <textarea
               rows={4}
               required
               value={postFormData.content}
               onChange={(e) => setPostFormData({ ...postFormData, content: e.target.value })}
-              className="retro-input w-full resize-none"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
               placeholder="Write your post content"
             />
           </div>
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold retro-text">Tags (optional)</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Tags (optional)</label>
             <input
               type="text"
               value={postFormData.tags.join(', ')}
               onChange={(e) => setPostFormData({ ...postFormData, tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag) })}
-              className="retro-input w-full"
-              placeholder="Comma-separated tags (e.g., culture, discussion, help)"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+              placeholder="Comma-separated tags"
             />
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t-4 border-mustard">
+          <div className="flex space-x-3 pt-4">
             <button
               type="submit"
-              className="flex-1 retro-btn-success py-3 px-6"
+              className="flex-1 bg-teal-500 hover:bg-teal-600 text-white py-3 px-5 rounded-xl font-medium transition-colors"
             >
-              📝 Create Post
+              {editingPost ? 'Update Post' : 'Create Post'}
             </button>
             <button
               type="button"
-              onClick={() => { setShowPostForm(false); setPostFormData({ title: '', content: '', category: 'general', tags: [] }); }}
-              className="retro-btn-secondary py-3 px-6"
+              onClick={() => { 
+                setShowPostForm(false); 
+                setPostFormData({ title: '', content: '', category: 'general', tags: [] }); 
+              }}
+              className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
             >
               Cancel
             </button>
           </div>
         </form>
       </Modal>
-
-      {loading ? (
-        <div className="retro-window text-center py-16">
-          <div className="retro-spinner w-16 h-16 mx-auto mb-6"></div>
-          <p className="retro-text text-lg">Loading forum posts...</p>
-        </div>
-      ) : forumPosts.length === 0 ? (
-        <div className="retro-window text-center py-16">
-          <MessageSquare className="w-20 h-20 text-gray-300 mx-auto mb-6 retro-icon" />
-          <p className="retro-text text-xl">No forum posts found</p>
-          <p className="retro-text text-base opacity-70 mt-3">Create the first post to get started</p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {(() => {
-            const filteredPosts = forumPosts.filter(post =>
-              (searchTerm === '' ||
-                post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (post.tags && post.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase())))) &&
-              (filterStatus === '' || post.category === filterStatus)
-            );
-    
-            const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-            const startIndex = (currentPage - 1) * postsPerPage;
-            const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
-    
-            return (
-              <>
-                {/* Posts List */}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {paginatedPosts.map((post) => (
-                    <div key={post.id} className="retro-window retro-hover">
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <h3 className="font-bold text-gray-900 text-lg retro-title">{post.title}</h3>
-                              <span className="retro-badge px-2 py-1 text-xs bg-green-100 text-green-800 capitalize">
-                                {post.category}
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-4 text-xs retro-text opacity-70 mb-2">
-                              <span>💬 {forumComments.filter(c => c.post_id === post.id).length}</span>
-                              <span>❤️ {post.likes || 0}</span>
-                              <span>👁️ {post.views || 0}</span>
-                              <span>📅 {new Date(post.created_at).toLocaleDateString()}</span>
-                            </div>
-                            <p className="text-gray-600 text-sm retro-text line-clamp-2 mb-2">{post.content}</p>
-                            {post.tags && post.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
-                                {post.tags.map((tag: string, index: number) => (
-                                  <span key={index} className="retro-badge px-1 py-0.5 text-xs bg-blue-100 text-blue-800">
-                                    #{tag}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex space-x-1 ml-4">
-                            <button
-                              onClick={() => {
-                                setEditingPost(post);
-                                setPostFormData({
-                                  title: post.title,
-                                  content: post.content,
-                                  category: post.category,
-                                  tags: post.tags || []
-                                });
-                                setShowPostForm(true);
-                              }}
-                              className="retro-btn-secondary p-1.5 hover:scale-105 transition-transform"
-                              title="Edit Post"
-                            >
-                              <Edit3 className="w-3 h-3 retro-icon" />
-                            </button>
-                            <button
-                              onClick={async () => {
-                                if (!confirm('Delete this post?')) return;
-                                try {
-                                  await forumAPI.deletePost(post.id);
-                                  setForumPosts(forumPosts.filter(p => p.id !== post.id));
-                                } catch (error) {
-                                  alert('Error deleting post');
-                                }
-                              }}
-                              className="retro-btn-secondary p-1.5 hover:scale-105 transition-transform"
-                              title="Delete Post"
-                            >
-                              <Trash2 className="w-3 h-3 retro-icon" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-    
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center items-center space-x-2 mt-6">
-                    <button
-                      onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
-                      disabled={currentPage === 1}
-                      className="retro-btn-secondary px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ← Previous
-                    </button>
-    
-                    <div className="flex space-x-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
-                        <button
-                          key={pageNum}
-                          onClick={() => setCurrentPage(pageNum)}
-                          className={`px-3 py-2 rounded retro-btn-secondary ${
-                            currentPage === pageNum ? 'bg-yellow-500 text-white' : ''
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      ))}
-                    </div>
-    
-                    <button
-                      onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
-                      disabled={currentPage === totalPages}
-                      className="retro-btn-secondary px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next →
-                    </button>
-                  </div>
-                )}
-              </>
-            );
-          })()}
-        </div>
-      )}
     </div>
   );
 };

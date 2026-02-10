@@ -692,12 +692,12 @@ const KebeleForum: React.FC = () => {
       ) : (
         <div className="space-y-6">
           {/* Posts Grid */}
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-4">
             {paginatedPosts.map((post) => (
               <div
                 key={post.id}
                 onClick={() => handlePostClick(post)}
-                className="retro-window retro-floating cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white border-2 border-gray-100"
+                className="retro-window cursor-pointer hover:-translate-y-1 transition-all duration-300 bg-white border-2 border-gray-100"
               >
                 <div className="retro-titlebar retro-titlebar-blue p-3">
                   <div className="flex items-center justify-between">
@@ -717,11 +717,11 @@ const KebeleForum: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="retro-title text-lg font-bold mb-3 leading-tight text-gray-800">
+                <div className="p-3">
+                  <h3 className="retro-title text-lg font-bold mb-2 leading-tight text-gray-800">
                     {post.title}
                   </h3>
-                  <p className="retro-text text-sm leading-relaxed line-clamp-3 mb-4 text-gray-700">
+                  <p className="retro-text text-sm leading-relaxed line-clamp-3 mb-3 text-gray-700">
                     {post.content}
                   </p>
 
@@ -1052,39 +1052,20 @@ const KebeleForum: React.FC = () => {
 
   return (
     <div className="min-h-screen retro-bg">
-      {/* Header */}
-      <div className="retro-window-header mx-6 mt-6 mb-8 retro-floating">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <div>
-              <h1 className="text-3xl retro-title text-gray-800 uppercase tracking-tight">Community Forum</h1>
-              <p className="retro-text text-gray-700 uppercase tracking-wide">Connect, share, and learn together</p>
+      {/* Modal Header */}
+      <div className="bg-white border-b-4 border-black py-4 px-6 sticky top-0 z-10 shadow-lg">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl retro-title text-gray-800 uppercase tracking-tight font-bold">FORUM MODAL</h1>
+            <p className="retro-text text-gray-600 uppercase tracking-wide text-sm">Connect, share, and learn together</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center border-2 border-black shadow-md">
+              <MessageSquare className="w-5 h-5 text-white" />
             </div>
           </div>
-
-            {/* User Info & Points */}
-            {user && userPoints && (
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-3 retro-card px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-3 border-yellow-600">
-                  <Trophy className="w-5 h-5 retro-icon" />
-                  <span className="retro-title text-lg">{userPoints.total_points}</span>
-                  <span className="text-yellow-100 text-sm retro-text">pts</span>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-blue-500 rounded-xl flex items-center justify-center border-3 border-sky-600 retro-icon">
-                    <span className="text-white retro-title text-base">
-                      {user.email?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="retro-title text-gray-800 uppercase">{user.email}</span>
-                    <div className="retro-text text-gray-700 uppercase tracking-wide">Community Member</div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
+      </div>
 
       {/* Main Content - More compact */}
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -1097,7 +1078,7 @@ const KebeleForum: React.FC = () => {
           </div>
 
           {/* Sidebar - More compact */}
-          <div className="lg:w-56 space-y-2 lg:order-last">
+          <div className="lg:w-64 space-y-2 lg:order-last">
 
             {/* Recent Activity */}
             <div className="retro-window">

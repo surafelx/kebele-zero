@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from '../components/AuthModal';
 import { Calendar, MapPin, Clock, Users, Ticket, Star, Heart, Share2, Music, Film, BookOpen, Coffee, Zap, Sparkles, Search, X } from 'lucide-react';
+import { eventsAPI } from '../services/content';
 
 interface Event {
-  _id: string;
+  id: string;
   title: string;
   description: string;
-  shortDescription: string;
+  short_description: string;
   category: string;
-  startDate: string;
-  endDate: string;
+  start_date: string;
+  end_date: string;
   location: {
     venue: string;
     address: {
@@ -18,128 +19,123 @@ interface Event {
       country: string;
     };
   };
-  images: Array<{ url: string; alt: string; isMain: boolean }>;
+  images: Array<{ url: string; alt: string }>;
   tickets: Array<{
     type: string;
     name: string;
     price: number;
     quantity: number;
     sold: number;
-    maxPerOrder: number;
+    max_per_order: number;
   }>;
   organizer: {
     name: string;
   };
   tags: string[];
-  isActive: boolean;
-  isFeatured: boolean;
+  is_active: boolean;
+  is_featured: boolean;
   capacity: number;
-  status: string;
 }
 
-// Mock events data
+// Mock events data - Fallback when no Supabase data
 const mockEvents: Event[] = [
   {
-    _id: "1",
+    id: "1",
     title: "Ethiopian Cultural Festival 2024",
     description: "A celebration of Ethiopian culture featuring traditional music, dance, food, and art from all regions of Ethiopia.",
-    shortDescription: "Celebrate Ethiopian culture with music, dance, and traditional cuisine",
+    short_description: "Celebrate Ethiopian culture with music, dance, and traditional cuisine",
     category: "Cultural",
-    startDate: "2024-12-15T18:00:00Z",
-    endDate: "2024-12-15T23:00:00Z",
+    start_date: "2024-12-15T18:00:00Z",
+    end_date: "2024-12-15T23:00:00Z",
     location: {
       venue: "Addis Ababa Convention Center",
       address: { city: "Addis Ababa", country: "Ethiopia" }
     },
     images: [
-      { url: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop", alt: "Cultural festival", isMain: true },
-      { url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop", alt: "Traditional dance", isMain: false }
+      { url: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop", alt: "Cultural festival" },
+      { url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop", alt: "Traditional dance" }
     ],
     tickets: [
-      { type: "general", name: "General Admission", price: 25, quantity: 500, sold: 120, maxPerOrder: 4 },
-      { type: "vip", name: "VIP Experience", price: 75, quantity: 100, sold: 45, maxPerOrder: 2 }
+      { type: "general", name: "General Admission", price: 25, quantity: 500, sold: 120, max_per_order: 4 },
+      { type: "vip", name: "VIP Experience", price: 75, quantity: 100, sold: 45, max_per_order: 2 }
     ],
     organizer: { name: "Ethiopian Cultural Society" },
     tags: ["culture", "music", "dance", "food"],
-    isActive: true,
-    isFeatured: true,
-    capacity: 600,
-    status: "upcoming"
+    is_active: true,
+    is_featured: true,
+    capacity: 600
   },
   {
-    _id: "2",
+    id: "2",
     title: "Jazz Night: Ethiopian Fusion",
     description: "Experience the unique blend of traditional Ethiopian melodies with modern jazz improvisation.",
-    shortDescription: "Ethiopian jazz fusion with renowned musicians",
+    short_description: "Ethiopian jazz fusion with renowned musicians",
     category: "Music",
-    startDate: "2024-12-20T20:00:00Z",
-    endDate: "2024-12-20T23:00:00Z",
+    start_date: "2024-12-20T20:00:00Z",
+    end_date: "2024-12-20T23:00:00Z",
     location: {
       venue: "Blue Nile Jazz Club",
       address: { city: "Addis Ababa", country: "Ethiopia" }
     },
     images: [
-      { url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop", alt: "Jazz performance", isMain: true }
+      { url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop", alt: "Jazz performance" }
     ],
     tickets: [
-      { type: "general", name: "General Admission", price: 35, quantity: 150, sold: 89, maxPerOrder: 4 }
+      { type: "general", name: "General Admission", price: 35, quantity: 150, sold: 89, max_per_order: 4 }
     ],
     organizer: { name: "Blue Nile Entertainment" },
     tags: ["jazz", "music", "fusion", "live"],
-    isActive: true,
-    isFeatured: true,
-    capacity: 150,
-    status: "upcoming"
+    is_active: true,
+    is_featured: true,
+    capacity: 150
   },
   {
-    _id: "3",
+    id: "3",
     title: "Coffee Ceremony Workshop",
     description: "Learn the art of traditional Ethiopian coffee ceremony and the cultural significance of coffee in Ethiopian society.",
-    shortDescription: "Master the traditional Ethiopian coffee ceremony",
+    short_description: "Master the traditional Ethiopian coffee ceremony",
     category: "Workshop",
-    startDate: "2024-12-10T14:00:00Z",
-    endDate: "2024-12-10T17:00:00Z",
+    start_date: "2024-12-10T14:00:00Z",
+    end_date: "2024-12-10T17:00:00Z",
     location: {
       venue: "Cultural Heritage Center",
       address: { city: "Addis Ababa", country: "Ethiopia" }
     },
     images: [
-      { url: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&h=600&fit=crop", alt: "Coffee ceremony", isMain: true }
+      { url: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&h=600&fit=crop", alt: "Coffee ceremony" }
     ],
     tickets: [
-      { type: "workshop", name: "Workshop Ticket", price: 45, quantity: 30, sold: 18, maxPerOrder: 2 }
+      { type: "workshop", name: "Workshop Ticket", price: 45, quantity: 30, sold: 18, max_per_order: 2 }
     ],
     organizer: { name: "Ethiopian Coffee Association" },
     tags: ["coffee", "ceremony", "culture", "workshop"],
-    isActive: true,
-    isFeatured: false,
-    capacity: 30,
-    status: "upcoming"
+    is_active: true,
+    is_featured: false,
+    capacity: 30
   },
   {
-    _id: "4",
+    id: "4",
     title: "Timket Celebration",
     description: "Join the grand celebration of Timket, the Ethiopian Orthodox Christmas, with traditional processions and ceremonies.",
-    shortDescription: "Celebrate Ethiopian Orthodox Christmas with traditional ceremonies",
+    short_description: "Celebrate Ethiopian Orthodox Christmas with traditional ceremonies",
     category: "Religious",
-    startDate: "2025-01-19T06:00:00Z",
-    endDate: "2025-01-19T18:00:00Z",
+    start_date: "2025-01-19T06:00:00Z",
+    end_date: "2025-01-19T18:00:00Z",
     location: {
       venue: "Holy Trinity Cathedral",
       address: { city: "Addis Ababa", country: "Ethiopia" }
     },
     images: [
-      { url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop", alt: "Religious celebration", isMain: true }
+      { url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop", alt: "Religious celebration" }
     ],
     tickets: [
-      { type: "free", name: "Free Entry", price: 0, quantity: 1000, sold: 234, maxPerOrder: 6 }
+      { type: "free", name: "Free Entry", price: 0, quantity: 1000, sold: 234, max_per_order: 6 }
     ],
     organizer: { name: "Ethiopian Orthodox Church" },
     tags: ["timket", "christmas", "religious", "tradition"],
-    isActive: true,
-    isFeatured: true,
-    capacity: 1000,
-    status: "upcoming"
+    is_active: true,
+    is_featured: true,
+    capacity: 1000
   }
 ];
 
@@ -165,30 +161,60 @@ const KebeleEvents: React.FC = () => {
 
   const loadEvents = async () => {
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-
+      // Fetch from Supabase
+      const data = await eventsAPI.getEvents({
+        category: selectedCategory || undefined
+      });
+      
+      // Transform Supabase data to match component format
+      if (data && data.length > 0) {
+        const transformedEvents: Event[] = data.map(event => ({
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          short_description: event.short_description || '',
+          category: event.category,
+          start_date: event.start_date,
+          end_date: event.end_date,
+          location: event.location || { venue: '', address: { city: '', country: '' } },
+          images: event.images || [{ url: '', alt: event.title }],
+          tickets: event.tickets || [],
+          organizer: event.organizer || { name: '' },
+          tags: event.tags || [],
+          is_active: event.is_active,
+          is_featured: event.is_featured,
+          capacity: event.capacity || 0
+        }));
+        setEvents(transformedEvents);
+      } else {
+        // Fallback to mock data
+        let filteredEvents = mockEvents;
+        if (searchTerm) {
+          filteredEvents = filteredEvents.filter(event =>
+            event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            event.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+          );
+        }
+        if (selectedCategory) {
+          filteredEvents = filteredEvents.filter(event => event.category === selectedCategory);
+        }
+        setEvents(filteredEvents);
+      }
+    } catch (error) {
+      console.error('Error loading events:', error);
+      // Fallback to mock data on error
       let filteredEvents = mockEvents;
-
       if (searchTerm) {
         filteredEvents = filteredEvents.filter(event =>
           event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          event.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+          event.description.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
-
       if (selectedCategory) {
         filteredEvents = filteredEvents.filter(event => event.category === selectedCategory);
       }
-
-      if (selectedStatus) {
-        filteredEvents = filteredEvents.filter(event => event.status === selectedStatus);
-      }
-
       setEvents(filteredEvents);
-    } catch (error) {
-      console.error('Error loading events:', error);
     } finally {
       setLoading(false);
     }
@@ -196,11 +222,16 @@ const KebeleEvents: React.FC = () => {
 
   const loadCategories = async () => {
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setCategories(mockCategories);
+      // Fetch categories from Supabase
+      const data = await eventsAPI.getCategories();
+      if (data && data.length > 0) {
+        setCategories(data);
+      } else {
+        setCategories(mockCategories);
+      }
     } catch (error) {
       console.error('Error loading categories:', error);
+      setCategories(mockCategories);
     }
   };
 
@@ -218,6 +249,15 @@ const KebeleEvents: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const getEventStatus = (event: Event): string => {
+    const now = new Date();
+    const startDate = new Date(event.start_date);
+    const endDate = new Date(event.end_date);
+    if (now < startDate) return 'upcoming';
+    if (now > endDate) return 'past';
+    return 'ongoing';
   };
 
 
@@ -292,9 +332,9 @@ const KebeleEvents: React.FC = () => {
                   <div>
                     <div className="retro-title text-sm font-bold uppercase mb-1">Date & Time</div>
                     <div className="retro-text text-sm">
-                      {formatDate(event.startDate)} at {formatTime(event.startDate)}
-                      {event.endDate && event.endDate !== event.startDate && (
-                        <> - {formatDate(event.endDate)} at {formatTime(event.endDate)}</>
+                      {formatDate(event.start_date)} at {formatTime(event.start_date)}
+                      {event.end_date && event.end_date !== event.start_date && (
+                        <> - {formatDate(event.end_date)} at {formatTime(event.end_date)}</>
                       )}
                     </div>
                   </div>
@@ -376,7 +416,7 @@ const KebeleEvents: React.FC = () => {
                     </div>
                     <div className="flex justify-between items-center mb-2">
                       <div className="retro-title text-lg font-bold">${ticket.price}</div>
-                      <div className="retro-text text-xs">Max {ticket.maxPerOrder}</div>
+                      <div className="retro-text text-xs">Max {ticket.max_per_order}</div>
                     </div>
                   </div>
                   <button
@@ -446,7 +486,22 @@ const KebeleEvents: React.FC = () => {
 
   return (
     <div className="min-h-screen retro-bg retro-bg-enhanced">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Modal Header */}
+      <div className="bg-white border-b-4 border-black py-4 px-6 sticky top-0 z-10 shadow-lg">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl retro-title text-gray-800 uppercase tracking-tight font-bold">EVENTS MODAL</h1>
+            <p className="retro-text text-gray-600 uppercase tracking-wide text-sm">Discover Ethiopian cultural events</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center border-2 border-black shadow-md">
+              <Calendar className="w-5 h-5 text-white" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Hero Section - Smaller */}
         <div className="retro-window mb-8">
           <div className="retro-titlebar retro-titlebar-coral">
@@ -541,7 +596,7 @@ const KebeleEvents: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {events.map((event) => (
-                  <div key={event._id} className="retro-window retro-floating">
+                  <div key={event.id} className="retro-window retro-floating">
                     {/* Event Image */}
                     <div className="aspect-[3/2] overflow-hidden relative">
                       <img
@@ -554,10 +609,10 @@ const KebeleEvents: React.FC = () => {
 
                       <div className="absolute top-3 right-3">
                         <span className="px-2 py-1 rounded-md retro-title text-xs font-bold uppercase border-2 border-white shadow-lg transform rotate-3 bg-blue-600 text-white">
-                          {event.status}
+                          {getEventStatus(event)}
                         </span>
                       </div>
-                      {event.isFeatured && (
+                      {event.is_featured && (
                         <div className="absolute top-3 left-3">
                           <span className="px-2 py-1 bg-green-600 text-white rounded-md retro-title text-xs font-bold uppercase border-2 border-white shadow-lg transform -rotate-3">
                             FEATURED
@@ -584,7 +639,7 @@ const KebeleEvents: React.FC = () => {
                       <div className="space-y-0.5 mb-2">
                         <div className="flex items-center space-x-1">
                           <Calendar className="w-2.5 h-2.5 text-sky-blue retro-icon" />
-                          <span className="retro-text text-xs">{formatDate(event.startDate)}</span>
+                          <span className="retro-text text-xs">{formatDate(event.start_date)}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <MapPin className="w-2.5 h-2.5 text-coral-red retro-icon" />

@@ -25,6 +25,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   const [activeTab, setActiveTab] = useState<'overview' | 'games' | 'forum' | 'settings'>('overview');
 
   useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
     if (isOpen && user) {
       loadUserData();
     }
@@ -79,37 +93,57 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   const RankIcon = rank.icon;
 
   return (
-    <div className="fixed inset-0 z-[10002] bg-black bg-opacity-40 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[70vh] overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 relative">
+    <div 
+      className="fixed inset-0 z-[100002] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      {/* Retro Window Card */}
+      <div 
+        className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Retro Title Bar */}
+        <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-blue-600 to-purple-600">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
+              <User className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-white uppercase tracking-wide drop-shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                Your Profile
+              </h3>
+            </div>
+          </div>
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+            className="p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all active:translate-y-0.5"
           >
-            <X className="w-6 h-6" />
+            <X className="w-4 h-4 text-black" />
           </button>
+        </div>
 
+        {/* Profile Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-xl">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+              <span className="text-white font-bold text-xl" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                 {user.email?.charAt(0).toUpperCase()}
               </span>
             </div>
             <div>
-              <h2 className="text-xl font-bold">{user.username || user.email?.split('@')[0]}</h2>
-              <p className="text-blue-100">{user.email}</p>
+              <h2 className="text-xl font-black uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{user.username || user.email?.split('@')[0]}</h2>
+              <p className="text-blue-100 text-sm font-medium" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{user.email}</p>
               <div className={`flex items-center space-x-1 mt-1 ${rank.color}`}>
                 <RankIcon className="w-4 h-4" />
-                <span className="text-sm font-medium">{rank.name}</span>
+                <span className="text-sm font-bold uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{rank.name}</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="border-b border-gray-200">
-          <nav className="flex">
+        <div className="border-b-4 border-black bg-gray-100">
+          <nav className="flex flex-wrap">
             {[
               { id: 'overview', label: 'Overview', icon: User },
               { id: 'games', label: 'Games', icon: Gamepad2 },
@@ -121,11 +155,12 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center space-x-2 px-6 py-4 border-b-2 font-medium text-sm ${
+                  className={`flex items-center space-x-2 px-4 py-3 border-b-4 font-bold text-sm transition-all ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-black bg-white text-blue-600'
+                      : 'border-transparent text-gray-600 hover:bg-white/50'
                   }`}
+                  style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{tab.label}</span>
@@ -136,128 +171,124 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         </div>
 
         {/* Content */}
-        <div className="p-6 max-h-96 overflow-y-auto">
-          <>
-            {activeTab === 'overview' && userStats && (
-              <div className="space-y-6">
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-lg text-center">
-                    <Trophy className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-yellow-800">{userStats.totalPoints}</div>
-                    <div className="text-sm text-yellow-600">Total Points</div>
-                  </div>
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg text-center">
-                    <Gamepad2 className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-blue-800">{userStats.gamesPlayed}</div>
-                    <div className="text-sm text-blue-600">Games Played</div>
-                  </div>
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg text-center">
-                    <MessageSquare className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-green-800">{userStats.forumPosts}</div>
-                    <div className="text-sm text-green-600">Forum Posts</div>
-                  </div>
-                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg text-center">
-                    <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                    <div className="text-sm font-bold text-purple-800">
-                      {new Date(userStats.joinDate).toLocaleDateString()}
-                    </div>
-                    <div className="text-sm text-purple-600">Member Since</div>
-                  </div>
+        <div className="p-6 flex-1 overflow-y-auto">
+          {activeTab === 'overview' && userStats && (
+            <div className="space-y-6 animate-in fade-in duration-200">
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl text-center border-2 border-black">
+                  <Trophy className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                  <div className="text-2xl font-black text-yellow-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{userStats.totalPoints}</div>
+                  <div className="text-xs font-bold text-yellow-600 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Total Points</div>
                 </div>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl text-center border-2 border-black">
+                  <Gamepad2 className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                  <div className="text-2xl font-black text-blue-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{userStats.gamesPlayed}</div>
+                  <div className="text-xs font-bold text-blue-600 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Games Played</div>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl text-center border-2 border-black">
+                  <MessageSquare className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                  <div className="text-2xl font-black text-green-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{userStats.forumPosts}</div>
+                  <div className="text-xs font-bold text-green-600 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Forum Posts</div>
+                </div>
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl text-center border-2 border-black">
+                  <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                  <div className="text-sm font-black text-purple-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                    {new Date(userStats.joinDate).toLocaleDateString()}
+                  </div>
+                  <div className="text-xs font-bold text-purple-600 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Member Since</div>
+                </div>
+              </div>
 
-                {/* Game Wins */}
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-gray-900 mb-3">Game Statistics</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-red-600">{userStats.checkersWins}</div>
-                      <div className="text-sm text-gray-600">Checkers Wins</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">{userStats.marblesWins}</div>
-                      <div className="text-sm text-gray-600">Marbles Wins</div>
-                    </div>
+              {/* Game Wins */}
+              <div className="bg-gray-50 p-4 rounded-xl border-2 border-black">
+                <h3 className="font-bold text-gray-900 mb-3 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Game Statistics</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-3 bg-white rounded-lg border-2 border-black">
+                    <div className="text-lg font-black text-red-600" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{userStats.checkersWins}</div>
+                    <div className="text-sm font-bold text-gray-600 uppercase" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Checkers Wins</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg border-2 border-black">
+                    <div className="text-lg font-black text-blue-600" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{userStats.marblesWins}</div>
+                    <div className="text-sm font-bold text-gray-600 uppercase" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Marbles Wins</div>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {activeTab === 'games' && (
-              <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Recent Games</h3>
-                {recentGames.length === 0 ? (
-                  <p className="text-gray-600 text-center py-8">No games played yet</p>
-                ) : (
-                  <div className="space-y-3">
-                    {recentGames.map((game, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-3 h-3 rounded-full ${
-                            game.result === 'win' ? 'bg-green-500' :
-                            game.result === 'loss' ? 'bg-red-500' : 'bg-yellow-500'
-                          }`}></div>
-                          <div>
-                            <div className="font-medium text-gray-900 capitalize">{game.game_type}</div>
-                            <div className="text-sm text-gray-600">
-                              {new Date(game.played_at).toLocaleDateString()}
-                            </div>
+          {activeTab === 'games' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <h3 className="font-bold text-gray-900 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Recent Games</h3>
+              {recentGames.length === 0 ? (
+                <div className="text-center py-8">
+                  <Gamepad2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-600 font-medium" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>No games played yet</p>
+                  <p className="text-sm text-gray-500 mt-1 font-medium" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Start playing to see your history!</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentGames.map((game, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border-2 border-black hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-3 h-3 rounded-full border-2 border-black ${
+                          game.result === 'win' ? 'bg-green-500' :
+                          game.result === 'loss' ? 'bg-red-500' : 'bg-yellow-500'
+                        }`}></div>
+                        <div>
+                          <div className="font-bold text-gray-900 capitalize" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{game.game_type}</div>
+                          <div className="text-sm text-gray-600 font-medium" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                            {new Date(game.played_at).toLocaleDateString()}
                           </div>
                         </div>
-                        <div className={`px-2 py-1 rounded text-xs font-medium ${
-                          game.result === 'win' ? 'bg-green-100 text-green-800' :
-                          game.result === 'loss' ? 'bg-red-100 text-red-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {game.result.toUpperCase()}
-                        </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'forum' && (
-              <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Forum Activity</h3>
-                <div className="text-center py-8">
-                  <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-600">Forum activity will be displayed here</p>
-                  <p className="text-sm text-gray-500 mt-1">Coming soon!</p>
+                      <div className={`px-3 py-1 rounded-lg text-xs font-bold uppercase ${
+                        game.result === 'win' ? 'bg-green-100 text-green-800 border-2 border-black' :
+                        game.result === 'loss' ? 'bg-red-100 text-red-800 border-2 border-black' :
+                        'bg-yellow-100 text-yellow-800 border-2 border-black'
+                      }`}>
+                        {game.result.toUpperCase()}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          )}
 
-            {activeTab === 'settings' && (
-              <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Account Settings</h3>
-                <div className="space-y-3">
-                  <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <div className="flex items-center space-x-3">
-                      <Edit3 className="w-5 h-5 text-gray-600" />
-                      <span className="text-gray-900">Edit Profile</span>
-                    </div>
-                  </button>
-                  <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <div className="flex items-center space-x-3">
-                      <Settings className="w-5 h-5 text-gray-600" />
-                      <span className="text-gray-900">Preferences</span>
-                    </div>
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors text-red-700"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <LogOut className="w-5 h-5" />
-                      <span>Sign Out</span>
-                    </div>
-                  </button>
-                </div>
+          {activeTab === 'forum' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <h3 className="font-bold text-gray-900 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Forum Activity</h3>
+              <div className="text-center py-8">
+                <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-600 font-medium" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Forum activity will be displayed here</p>
+                <p className="text-sm text-gray-500 mt-1 font-medium" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Coming soon!</p>
               </div>
-            )}
-          </>
+            </div>
+          )}
+
+          {activeTab === 'settings' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <h3 className="font-bold text-gray-900 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Account Settings</h3>
+              <div className="space-y-2">
+                <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border-2 border-black hover:bg-gray-100 transition-colors">
+                  <Edit3 className="w-5 h-5 text-gray-600" />
+                  <span className="text-gray-900 font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Edit Profile</span>
+                </button>
+                <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border-2 border-black hover:bg-gray-100 transition-colors">
+                  <Settings className="w-5 h-5 text-gray-600" />
+                  <span className="text-gray-900 font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Preferences</span>
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-3 p-3 bg-red-50 rounded-xl border-2 border-black hover:bg-red-100 transition-colors text-red-700"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span className="font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Sign Out</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

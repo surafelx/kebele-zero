@@ -179,17 +179,8 @@ function MainApp() {
     // Allow forum access without authentication
     // Check authentication for other protected features if needed
 
-    // Show loading first for certain modals
-    if (['events', 'about', 'media', 'souq', 'radio'].includes(modalType)) {
-      setModalLoading(modalType);
-      // Simulate loading delay, then show modal
-      setTimeout(() => {
-        setModalLoading(null);
-        setActiveModal(modalType);
-      }, 1500);
-    } else {
-      setActiveModal(modalType);
-    }
+    // Show modal immediately without loading delay
+    setActiveModal(modalType);
   };
 
   const closeAuthModal = () => {
@@ -216,7 +207,7 @@ function MainApp() {
             {/* Circular Profile Button for Dashboard */}
             <button
               onClick={() => user ? setShowUserDashboardModal(true) : setShowAuthModal(true)}
-              className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:scale-110 transition-transform border-2 border-white/30 shadow-lg"
+              className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:scale-110 transition-transform border-2 border-white/30"
               title={user ? "Open Dashboard" : "Login to access Dashboard"}
             >
               <span className="text-white font-bold text-lg">
@@ -228,35 +219,35 @@ function MainApp() {
             <div className="hidden sm:flex space-x-4">
               <button
                 onClick={() => openModal('about')}
-                className="retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover"
+                className={`retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover ${activeModal === 'about' ? 'ring-4 ring-yellow-400 bg-yellow-400 text-black' : ''}`}
               >
                 <Info className="w-4 h-4 retro-icon" />
                 <span>ABOUT</span>
               </button>
               <button
                 onClick={() => openModal('events')}
-                className="retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover"
+                className={`retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover ${activeModal === 'events' ? 'ring-4 ring-green-400 bg-green-400 text-black' : ''}`}
               >
                 <Calendar className="w-4 h-4 retro-icon" />
                 <span>EVENTS</span>
               </button>
               <button
                 onClick={() => openModal('souq')}
-                className="retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover"
+                className={`retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover ${activeModal === 'souq' ? 'ring-4 ring-orange-400 bg-orange-400 text-black' : ''}`}
               >
                 <ShoppingBag className="w-4 h-4 retro-icon" />
                 <span>SOUQ</span>
               </button>
               <button
                 onClick={() => openModal('radio')}
-                className="retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover"
+                className={`retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover ${activeModal === 'radio' ? 'ring-4 ring-purple-400 bg-purple-400 text-white' : ''}`}
               >
                 <Radio className="w-4 h-4 retro-icon" />
                 <span>RADIO</span>
               </button>
               <button
                 onClick={() => openModal('media')}
-                className="retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover"
+                className={`retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover ${activeModal === 'media' ? 'ring-4 ring-pink-400 bg-pink-400 text-white' : ''}`}
               >
                 <Image className="w-4 h-4 retro-icon" />
                 <span>MEDIA</span>
@@ -337,84 +328,64 @@ function MainApp() {
             )}
           </div>
         </div>
-{/* Base 3D Portfolio */}
-<FolioCanvas />
 
-{/* Bottom Action Bar - Left Side */}
-<div className="absolute bottom-6 left-8 z-[90]">
-  <div className="flex items-center space-x-3">
+        {/* Base 3D Portfolio */}
+        <FolioCanvas />
 
-    {/* Music Player Button */}
-    <div className="flex items-center space-x-2">
-      <button
-        onClick={() => setIsMusicPlayerOpen(!isMusicPlayerOpen)}
-        className="retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover bg-purple-500"
-        title="Music Player"
-      >
-        <Music className="w-4 h-4 retro-icon" />
-        <span>MUSIC</span>
-      </button>
+        {/* Bottom Action Bar - Left Side */}
+        <div className="absolute bottom-6 left-8 z-[90]">
+          <div className="flex items-center space-x-3">
 
-      {/* Spectrum Visualizer */}
-      {isPlaying && (
-        <div className="flex items-end space-x-1 h-8">
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="w-1 bg-purple-400 rounded-full animate-pulse"
-              style={{
-                height: `${Math.random() * 100}%`,
-                animationDelay: `${i * 0.1}s`,
-                animationDuration: '0.5s'
-              }}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+            {/* Music Player Button */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setIsMusicPlayerOpen(!isMusicPlayerOpen)}
+                className={`retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover ${isMusicPlayerOpen ? 'ring-4 ring-purple-400 bg-purple-600 text-white' : 'bg-purple-500'}`}
+                title="Music Player"
+              >
+                <Music className="w-4 h-4 retro-icon" />
+                <span>MUSIC</span>
+              </button>
 
-    {/* Forum/Dashboard Button */}
-    <button
-      onClick={() => openModal('forum')}
-      className="retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover bg-sky-blue"
-      title="Forum & Games"
-    >
-      <MessageSquare className="w-4 h-4 retro-icon" />
-      <span>FORUM</span>
-    </button>
-
-    {/* Play/Games Button */}
-    <button
-      onClick={() => openModal('games')}
-      className="retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover bg-mustard"
-      title="Games & Scores"
-    >
-      <span className="w-4 h-4 flex items-center justify-center text-charcoal font-bold">🎮</span>
-      <span>PLAY</span>
-    </button>
-  </div>
-</div>
-
-{/* Modal Loading */}
-        {modalLoading && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="retro-window retro-floating text-center max-w-sm w-full">
-              <div className="retro-titlebar retro-titlebar-sky mb-4">
-                <div className="flex items-center justify-center">
-                  <Calendar className="w-5 h-5 retro-icon" />
+              {/* Spectrum Visualizer */}
+              {isPlaying && (
+                <div className="flex items-end space-x-1 h-8">
+                  {[...Array(8)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-1 bg-purple-400 rounded-full animate-pulse"
+                      style={{
+                        height: `${Math.random() * 100}%`,
+                        animationDelay: `${i * 0.1}s`,
+                        animationDuration: '0.5s'
+                      }}
+                    />
+                  ))}
                 </div>
-                <div className="retro-window-controls">
-                  <div className="retro-window-dot"></div>
-                  <div className="retro-window-dot"></div>
-                  <div className="retro-window-dot"></div>
-                </div>
-              </div>
-              <div className="retro-spinner w-16 h-16 mx-auto mb-6"></div>
-              <div className="retro-title text-lg font-bold uppercase tracking-wider">Loading {modalLoading}...</div>
-              <p className="retro-text text-sm mt-4 pb-6 opacity-80">Preparing your experience</p>
+              )}
             </div>
+
+            {/* Forum/Dashboard Button */}
+            <button
+              onClick={() => openModal('forum')}
+              className={`retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover ${activeModal === 'forum' ? 'ring-4 ring-sky-400 bg-sky-500 text-black' : 'bg-sky-blue'}`}
+              title="Forum & Games"
+            >
+              <MessageSquare className="w-4 h-4 retro-icon" />
+              <span>FORUM</span>
+            </button>
+
+            {/* Play/Games Button */}
+            <button
+              onClick={() => openModal('games')}
+              className={`retro-btn px-3 py-2 font-medium text-xs flex items-center space-x-2 retro-hover ${activeModal === 'games' ? 'ring-4 ring-yellow-400 bg-yellow-500 text-black' : 'bg-mustard'}`}
+              title="Games & Scores"
+            >
+              <span className="w-4 h-4 flex items-center justify-center text-charcoal font-bold">🎮</span>
+              <span>PLAY</span>
+            </button>
           </div>
-        )}
+        </div>
 
         {/* Modals */}
         {activeModal && (

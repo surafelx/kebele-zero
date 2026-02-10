@@ -355,7 +355,7 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
        </div>
 
        <div className="flex justify-center">
-         <div className="grid grid-cols-8 gap-1 border-4 border-amber-800 p-4 bg-amber-100 rounded-lg">
+         <div className="grid grid-cols-8 gap-1 border-4 border-amber-800 p-2 bg-amber-100 rounded-lg">
            {board.map((row, rowIndex) =>
              row.map((piece, colIndex) => {
                const isBlackSquare = (rowIndex + colIndex) % 2 === 1;
@@ -568,7 +568,7 @@ const MarblesGameComponent: React.FC<{ onClose: () => void; user?: any }> = ({ o
      </div>
 
      <div className="flex justify-center">
-       <div className="grid grid-cols-7 gap-1 border-4 border-blue-800 p-4 bg-blue-100 rounded-lg">
+       <div className="grid grid-cols-7 gap-1 border-4 border-blue-800 p-2 bg-blue-100 rounded-lg">
          {board.map((row, rowIndex) =>
            row.map((cell, colIndex) => {
              const isValid = isValidPosition(rowIndex, colIndex);
@@ -693,79 +693,71 @@ const KebeleGames: React.FC = () => {
 
   return (
     <div className="min-h-screen retro-bg">
-      {/* Header */}
-      <div className="retro-window-header mx-6 mt-6 mb-8 retro-floating">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <div>
-              <h1 className="text-3xl retro-title text-gray-800 uppercase tracking-tight">Games Arena</h1>
-              <p className="retro-text text-gray-700 uppercase tracking-wide">Play, compete, and earn points</p>
+      {/* Modal Header */}
+      <div className="bg-white border-b-4 border-black py-4 px-6 sticky top-0 z-10 shadow-lg">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl retro-title text-gray-800 uppercase tracking-tight font-bold">GAMES MODAL</h1>
+            <p className="retro-text text-gray-600 uppercase tracking-wide text-sm">Play, compete, and earn points</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center border-2 border-black shadow-md">
+              <Gamepad2 className="w-5 h-5 text-white" />
             </div>
           </div>
-
-          {/* User Points */}
-          {user && userPoints && (
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-3 retro-card px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-3 border-yellow-600">
-                <Trophy className="w-5 h-5 retro-icon" />
-                <span className="retro-title text-lg">{userPoints.total_points}</span>
-                <span className="text-yellow-100 text-sm retro-text">pts</span>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center border-3 border-sky-600 retro-icon">
-                  <span className="text-white retro-title text-base">
-                    {user.email?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div>
-                  <span className="retro-title text-gray-800 uppercase">{user.email}</span>
-                  <div className="retro-text text-gray-700 uppercase tracking-wide">Player</div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-8 retro-floating">
-          <div className="inline-flex items-center px-3 py-1 retro-nav text-gray-800 rounded-full text-xs font-medium mb-4 uppercase tracking-wider retro-icon">
-            <Gamepad2 className="w-3 h-3 mr-2 text-purple-600" />
-            <span className="retro-title">Traditional Ethiopian Games</span>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Hero Section - Styled like other modal cards */}
+        <div className="retro-window mb-8">
+          <div className="retro-titlebar retro-titlebar-purple">
+            <div className="flex items-center space-x-4">
+              <Gamepad2 className="w-5 h-5 retro-icon" />
+              <span className="retro-title text-sm font-bold uppercase">Play, Compete, Earn Points</span>
+            </div>
+            <div className="retro-window-controls">
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+              <div className="retro-window-dot"></div>
+            </div>
           </div>
-          <h2 className="text-2xl md:text-3xl retro-title text-gray-800 mb-3 uppercase tracking-tight">Play, Compete, Earn Points</h2>
-          <p className="text-base retro-text text-gray-700 max-w-2xl mx-auto leading-relaxed">
-            Experience authentic Ethiopian games with modern twists! Challenge friends or AI opponents, earn points, and climb the global leaderboards. Test your strategy and skill!
-          </p>
+          <div className="p-6 text-center">
+            <h2 className="text-xl md:text-2xl retro-title mb-3 leading-tight uppercase tracking-tight">
+              Traditional Ethiopian Games
+            </h2>
+            <p className="text-sm retro-text max-w-2xl mx-auto leading-relaxed">
+              Experience authentic Ethiopian games with modern twists! Challenge friends or AI opponents, earn points, and climb the global leaderboards. Test your strategy and skill!
+            </p>
+          </div>
         </div>
 
         {/* Games Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {games.map((game) => (
             <div key={game.id} className="retro-window retro-hover">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${game.color} rounded-xl flex items-center justify-center text-3xl retro-icon`}>
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-12 h-12 bg-gradient-to-br ${game.color} rounded-lg flex items-center justify-center text-2xl retro-icon`}>
                     {game.icon}
                   </div>
                   {game.available && (
                     <button
                       onClick={() => startGame(game.id)}
-                      className="retro-btn px-4 py-2 flex items-center space-x-2"
+                      className="retro-btn px-3 py-1 flex items-center space-x-1"
                     >
-                      <Play className="w-4 h-4 retro-icon" />
-                      <span>Play</span>
+                      <Play className="w-3 h-3 retro-icon" />
+                      <span className="text-sm">Play</span>
                     </button>
                   )}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 retro-title mb-2">{game.name}</h3>
-                <p className="text-gray-600 retro-text mb-4">{game.description}</p>
+                <h3 className="text-lg font-bold text-gray-900 retro-title mb-1">{game.name}</h3>
+                <p className="text-gray-600 retro-text text-sm mb-3">{game.description}</p>
                 {!game.available && (
-                  <div className="flex items-center space-x-2 text-gray-500">
-                    <Star className="w-4 h-4" />
-                    <span className="text-sm retro-text">Coming Soon</span>
+                  <div className="flex items-center space-x-1 text-gray-500">
+                    <Star className="w-3 h-3" />
+                    <span className="text-xs retro-text">Coming Soon</span>
                   </div>
                 )}
               </div>
@@ -791,18 +783,18 @@ const KebeleGames: React.FC = () => {
             <div className="p-6">
               <div className="space-y-4">
                 {highScores.checkers.map((player, index) => (
-                  <div key={index} className="flex items-center justify-between retro-window retro-hover p-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold retro-title">
+                  <div key={index} className="flex items-center justify-between retro-window retro-hover p-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold retro-title text-sm">
                         {index + 1}
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900 retro-title">{player.name}</p>
-                        <p className="text-sm text-gray-600 retro-text">{player.wins} wins</p>
+                        <p className="font-semibold text-gray-900 retro-title text-sm">{player.name}</p>
+                        <p className="text-xs text-gray-600 retro-text">{player.wins} wins</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-red-600 retro-title">{player.score}</p>
+                      <p className="font-bold text-red-600 retro-title text-sm">{player.score}</p>
                       <p className="text-xs text-gray-500 retro-text">points</p>
                     </div>
                   </div>
@@ -826,18 +818,18 @@ const KebeleGames: React.FC = () => {
               <div className="p-6">
                 <div className="space-y-4">
                   {highScores.marbles.map((player, index) => (
-                    <div key={index} className="flex items-center justify-between retro-window retro-hover p-4">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold retro-title">
+                    <div key={index} className="flex items-center justify-between retro-window retro-hover p-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold retro-title text-sm">
                           {index + 1}
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900 retro-title">{player.name}</p>
-                          <p className="text-sm text-gray-600 retro-text">{player.wins} wins</p>
+                          <p className="font-semibold text-gray-900 retro-title text-sm">{player.name}</p>
+                          <p className="text-xs text-gray-600 retro-text">{player.wins} wins</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-blue-600 retro-title">{player.score}</p>
+                        <p className="font-bold text-blue-600 retro-title text-sm">{player.score}</p>
                         <p className="text-xs text-gray-500 retro-text">points</p>
                       </div>
                     </div>
@@ -893,7 +885,7 @@ const KebeleGames: React.FC = () => {
       {/* Game Mode Selection Modal */}
       {showGameModeModal && currentGame && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black bg-opacity-70">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+          <div className="bg-white rounded-2xl shadow-lg max-w-md w-full">
             <div className="p-6">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold retro-title mb-2">
@@ -947,8 +939,8 @@ const KebeleGames: React.FC = () => {
       {/* Game Modal */}
       {currentGame && selectedGameMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden">
-            <div className="p-8">
+          <div className="bg-white rounded-2xl shadow-lg max-w-5xl w-full max-h-[95vh] overflow-hidden">
+            <div className="p-6">
               {currentGame === 'checkers' && <CheckersGameComponent onClose={closeGame} gameMode={selectedGameMode} user={user} />}
               {currentGame === 'marbles' && <MarblesGameComponent onClose={closeGame} user={user} />}
             </div>

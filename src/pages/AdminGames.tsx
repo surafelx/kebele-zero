@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Plus, Search, Filter, Gamepad2, Users, Target, Award, BarChart3, History, Settings, Edit, Trash2, Save } from 'lucide-react';
+import { Trophy, Plus, Search, Filter, Gamepad2, Users, Target, Award, BarChart3, History, Settings, Edit, Trash2, Save, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import Modal from '../components/Modal';
 
@@ -21,6 +21,10 @@ const AdminGames = () => {
   const [showGameScoreForm, setShowGameScoreForm] = useState(false);
   const [showLevelManagement, setShowLevelManagement] = useState(false);
   const [editingLevel, setEditingLevel] = useState<Level | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingLevel, setDeletingLevel] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
   const [newLevel, setNewLevel] = useState<Level>({
     level_name: '',
     min_points: 0,
@@ -200,212 +204,224 @@ const AdminGames = () => {
     return matchesSearch && matchesGameType && matchesResult;
   });
 
+  const totalPages = Math.ceil(filteredGameScores.length / itemsPerPage);
+  const paginatedScores = filteredGameScores.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reset to page 1 when search/filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterGameType, filterResult]);
+
   return (
-    <div className="space-y-8">
-      <div className="bg-white border-b-4 border-charcoal px-4 py-3 flex justify-between items-center shadow-sm">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="retro-title text-xl">Games Management</h2>
-          <p className="retro-text text-base opacity-80 mt-2">Manage game scores, leaderboard, and player levels</p>
+          <h2 className="text-2xl font-bold text-gray-800">Games Management</h2>
+          <p className="text-gray-500 mt-1">Manage game scores, leaderboard, and player levels</p>
         </div>
         <div className="flex space-x-3">
           <button
             onClick={() => setShowGameScoreForm(true)}
-            className="retro-btn px-6 py-3 flex items-center space-x-2"
+            className="inline-flex items-center space-x-2 bg-purple-500 hover:bg-purple-600 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
           >
-            <Plus className="w-5 h-5 retro-icon" />
+            <Plus className="w-5 h-5" />
             <span>Add Score</span>
           </button>
           <button
             onClick={() => setShowLevelManagement(true)}
-            className="retro-btn-secondary px-6 py-3 flex items-center space-x-2"
+            className="inline-flex items-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
           >
-            <Settings className="w-5 h-5 retro-icon" />
+            <Settings className="w-5 h-5" />
             <span>Manage Levels</span>
           </button>
         </div>
       </div>
 
       {/* Game Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <div className="retro-card retro-hover">
-          <div className="p-4 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md border-2 border-purple-400 retro-icon mx-auto mb-2">
-              <Gamepad2 className="w-4 h-4 text-white" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Total Games</p>
+              <p className="text-2xl font-bold text-gray-800">{totalGames}</p>
             </div>
-            <p className="text-lg font-bold text-purple-900 retro-title">{totalGames}</p>
-            <p className="text-xs text-purple-700 uppercase tracking-wide retro-text">Total Games</p>
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+              <Gamepad2 className="w-6 h-6 text-purple-600" />
+            </div>
           </div>
         </div>
 
-        <div className="retro-card retro-hover">
-          <div className="p-4 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md border-2 border-blue-400 retro-icon mx-auto mb-2">
-              <Users className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Active Players</p>
+              <p className="text-2xl font-bold text-gray-800">{activePlayers}</p>
             </div>
-            <p className="text-lg font-bold text-blue-900 retro-title">{activePlayers}</p>
-            <p className="text-xs text-blue-700 uppercase tracking-wide retro-text">Active Players</p>
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <Users className="w-6 h-6 text-blue-600" />
+            </div>
           </div>
         </div>
 
-        <div className="retro-card retro-hover">
-          <div className="p-4 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md border-2 border-orange-400 retro-icon mx-auto mb-2">
-              <Target className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Total Points</p>
+              <p className="text-2xl font-bold text-gray-800">{totalPoints}</p>
             </div>
-            <p className="text-lg font-bold text-orange-900 retro-title">{totalPoints}</p>
-            <p className="text-xs text-orange-700 uppercase tracking-wide retro-text">Total Points</p>
+            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+              <Target className="w-6 h-6 text-orange-600" />
+            </div>
           </div>
         </div>
 
-        <div className="retro-card retro-hover">
-          <div className="p-4 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-md border-2 border-green-400 retro-icon mx-auto mb-2">
-              <Award className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Games This Week</p>
+              <p className="text-2xl font-bold text-gray-800">{recentGames}</p>
             </div>
-            <p className="text-lg font-bold text-green-900 retro-title">{recentGames}</p>
-            <p className="text-xs text-green-700 uppercase tracking-wide retro-text">Games This Week</p>
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <Award className="w-6 h-6 text-green-600" />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Leaderboard Card */}
-      <div className="retro-window">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="retro-title text-lg font-bold flex items-center space-x-2">
-              <BarChart3 className="w-5 h-5" />
+      {/* Leaderboard & Recent History */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Leaderboard Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+            <h3 className="font-semibold text-gray-800 flex items-center space-x-2">
+              <BarChart3 className="w-5 h-5 text-purple-500" />
               <span>Leaderboard</span>
             </h3>
-            <span className="text-sm text-gray-600 retro-text">Top 5 Players</span>
+            <span className="text-sm text-gray-500">Top 5 Players</span>
           </div>
-          {topPlayers.length === 0 ? (
-            <p className="text-center text-gray-500 retro-text">No players found</p>
-          ) : (
-            <div className="space-y-3">
-              {topPlayers.map((player, index) => {
-                const user = users.find(u => u.id === player.user_id);
-                const level = userLevels.find(l => l.id === player.current_level_id);
-                return (
-                  <div key={player.id} className="flex items-center justify-between p-3 retro-card">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        #{index + 1}
+          <div className="p-5">
+            {topPlayers.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">No players found</p>
+            ) : (
+              <div className="space-y-3">
+                {topPlayers.map((player, index) => {
+                  const user = users.find(u => u.id === player.user_id);
+                  const level = userLevels.find(l => l.id === player.current_level_id);
+                  return (
+                    <div key={player.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                          #{index + 1}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-800">{user?.username || player.user_id}</p>
+                          <p className="text-sm text-gray-500">{player.total_points} points</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-gray-900 retro-title">{user?.username || player.user_id}</p>
-                        <p className="text-sm text-gray-600 retro-text">{player.total_points} points</p>
-                      </div>
+                      {level && (
+                        <div className="flex items-center space-x-2">
+                          <span className="text-2xl">{level.icon}</span>
+                          <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">{level.level_name}</span>
+                        </div>
+                      )}
                     </div>
-                    {level && (
-                      <div className="flex items-center space-x-2">
-                        <span className="text-2xl">{level.icon}</span>
-                        <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded retro-text">{level.level_name}</span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Recent History Card */}
-      <div className="retro-window">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="retro-title text-lg font-bold flex items-center space-x-2">
-              <History className="w-5 h-5" />
+        {/* Recent History Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+            <h3 className="font-semibold text-gray-800 flex items-center space-x-2">
+              <History className="w-5 h-5 text-blue-500" />
               <span>Recent History</span>
             </h3>
-            <span className="text-sm text-gray-600 retro-text">Latest 5 Games</span>
+            <span className="text-sm text-gray-500">Latest 5 Games</span>
           </div>
-          {recentHistory.length === 0 ? (
-            <p className="text-center text-gray-500 retro-text">No recent games</p>
-          ) : (
-            <div className="space-y-3">
-              {recentHistory.map((score) => (
-                <div key={score.id} className="flex items-center justify-between p-3 retro-card">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
-                      <span className="text-2xl">
-                        {score.game_type === 'checkers' ? '♟️' :
-                         score.game_type === 'marbles' ? '⚪' :
-                         score.game_type === 'pool' ? '🎱' :
-                         score.game_type === 'foosball' ? '⚽' : '🎮'}
+          <div className="p-5">
+            {recentHistory.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">No recent games</p>
+            ) : (
+              <div className="space-y-3">
+                {recentHistory.map((score) => (
+                  <div key={score.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
+                        <span className="text-xl">
+                          {score.game_type === 'checkers' ? '♟️' :
+                           score.game_type === 'marbles' ? '⚪' :
+                           score.game_type === 'pool' ? '🎱' :
+                           score.game_type === 'foosball' ? '⚽' : '🎮'}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">
+                          {users.find(u => u.id === score.user_id)?.username || score.user_id}
+                        </p>
+                        <p className="text-sm text-gray-500 capitalize">{score.game_type} • {score.score} pts</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className={`px-3 py-1 text-xs font-medium rounded-full capitalize ${
+                        score.result === 'win' ? 'bg-green-100 text-green-700' :
+                        score.result === 'loss' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {score.result}
                       </span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 retro-title">
-                        {users.find(u => u.id === score.user_id)?.username || score.user_id}
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(score.played_at).toLocaleDateString()}
                       </p>
-                      <p className="text-sm text-gray-600 retro-text capitalize">{score.game_type} • {score.score} pts</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className={`retro-badge px-3 py-1 text-sm font-medium ${
-                      score.result === 'win' ? 'bg-green-100 text-green-800' :
-                      score.result === 'loss' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {score.result.toUpperCase()}
-                    </span>
-                    <p className="text-xs text-gray-500 retro-text mt-1">
-                      {new Date(score.played_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Search and Filter */}
-      <div className="retro-window">
-        <div className="p-4">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-semibold retro-text mb-2">Search Games</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search by player, game type, or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 retro-input"
-                />
-              </div>
-            </div>
-            <div className="lg:w-48">
-              <label className="block text-sm font-semibold retro-text mb-2">Game Type</label>
-              <select
-                value={filterGameType}
-                onChange={(e) => setFilterGameType(e.target.value)}
-                className="w-full px-4 py-2 bg-white retro-input"
-              >
-                <option value="">All Games</option>
-                <option value="checkers">Checkers</option>
-                <option value="marbles">Marbles</option>
-                <option value="pool">Pool 9-Ball</option>
-                <option value="foosball">Foosball</option>
-              </select>
-            </div>
-            <div className="lg:w-48">
-              <label className="block text-sm font-semibold retro-text mb-2">Result</label>
-              <select
-                value={filterResult}
-                onChange={(e) => setFilterResult(e.target.value)}
-                className="w-full px-4 py-2 bg-white retro-input"
-              >
-                <option value="">All Results</option>
-                <option value="win">Win</option>
-                <option value="loss">Loss</option>
-                <option value="draw">Draw</option>
-              </select>
-            </div>
+      {/* Search & Filter */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by player, game type..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
           </div>
+          <select
+            value={filterGameType}
+            onChange={(e) => setFilterGameType(e.target.value)}
+            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <option value="">All Games</option>
+            <option value="checkers">Checkers</option>
+            <option value="marbles">Marbles</option>
+            <option value="pool">Pool 9-Ball</option>
+            <option value="foosball">Foosball</option>
+          </select>
+          <select
+            value={filterResult}
+            onChange={(e) => setFilterResult(e.target.value)}
+            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <option value="">All Results</option>
+            <option value="win">Win</option>
+            <option value="loss">Loss</option>
+            <option value="draw">Draw</option>
+          </select>
         </div>
       </div>
 
@@ -417,22 +433,22 @@ const AdminGames = () => {
         <form onSubmit={(e) => { e.preventDefault(); handleCreateGameScore(gameScoreFormData); setShowGameScoreForm(false); }} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <label className="block text-sm font-semibold retro-text">User ID</label>
+              <label className="block text-sm font-semibold text-gray-700">User ID</label>
               <input
                 type="text"
                 required
                 value={gameScoreFormData.user_id}
                 onChange={(e) => setGameScoreFormData({ ...gameScoreFormData, user_id: e.target.value })}
-                className="retro-input w-full"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 placeholder="User ID"
               />
             </div>
             <div className="space-y-3">
-              <label className="block text-sm font-semibold retro-text">Game Type</label>
+              <label className="block text-sm font-semibold text-gray-700">Game Type</label>
               <select
                 value={gameScoreFormData.game_type}
                 onChange={(e) => setGameScoreFormData({ ...gameScoreFormData, game_type: e.target.value })}
-                className="retro-input w-full bg-white"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               >
                 <option value="checkers">Checkers</option>
                 <option value="marbles">Marbles</option>
@@ -443,22 +459,22 @@ const AdminGames = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <label className="block text-sm font-semibold retro-text">Score</label>
+              <label className="block text-sm font-semibold text-gray-700">Score</label>
               <input
                 type="number"
                 required
                 value={gameScoreFormData.score}
                 onChange={(e) => setGameScoreFormData({ ...gameScoreFormData, score: parseInt(e.target.value) })}
-                className="retro-input w-full"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 placeholder="Score"
               />
             </div>
             <div className="space-y-3">
-              <label className="block text-sm font-semibold retro-text">Result</label>
+              <label className="block text-sm font-semibold text-gray-700">Result</label>
               <select
                 value={gameScoreFormData.result}
                 onChange={(e) => setGameScoreFormData({ ...gameScoreFormData, result: e.target.value })}
-                className="retro-input w-full bg-white"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               >
                 <option value="win">Win</option>
                 <option value="loss">Loss</option>
@@ -466,17 +482,18 @@ const AdminGames = () => {
               </select>
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t-4 border-mustard">
+          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-100">
             <button
               type="submit"
-              className="flex-1 retro-btn-success py-3 px-6"
+              className="flex-1 bg-purple-500 hover:bg-purple-600 text-white py-3 px-6 rounded-xl font-medium transition-colors flex items-center justify-center space-x-2"
             >
-              🏆 Add Score
+              <Trophy className="w-5 h-5" />
+              <span>Add Score</span>
             </button>
             <button
               type="button"
               onClick={() => { setShowGameScoreForm(false); setGameScoreFormData({ user_id: '', game_type: 'checkers', score: 0, result: 'win' }); }}
-              className="retro-btn-secondary py-3 px-6"
+              className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
             >
               Cancel
             </button>
@@ -491,205 +508,199 @@ const AdminGames = () => {
         size="xl"
       >
         <div className="space-y-6">
-          <div className="retro-window">
-            <div className="p-4">
-              <h4 className="retro-title font-semibold mb-4 flex items-center space-x-2">
-                <Plus className="w-5 h-5" />
-                <span>Add New Level</span>
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold retro-text">Level Name</label>
+          <div className="bg-gray-50 rounded-2xl p-5">
+            <h4 className="font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+              <Plus className="w-5 h-5 text-purple-500" />
+              <span>Add New Level</span>
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">Level Name</label>
+                <input
+                  type="text"
+                  value={newLevel.level_name}
+                  onChange={(e) => setNewLevel({ ...newLevel, level_name: e.target.value })}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="e.g., Beginner"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">Min Points</label>
+                <input
+                  type="number"
+                  value={newLevel.min_points}
+                  onChange={(e) => setNewLevel({ ...newLevel, min_points: parseInt(e.target.value) })}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="0"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">Max Points</label>
+                <input
+                  type="number"
+                  value={newLevel.max_points ?? ''}
+                  onChange={(e) => setNewLevel({ ...newLevel, max_points: e.target.value ? parseInt(e.target.value) : null })}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="Optional"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">Color</label>
+                <div className="flex items-center space-x-2">
                   <input
-                    type="text"
-                    value={newLevel.level_name}
-                    onChange={(e) => setNewLevel({ ...newLevel, level_name: e.target.value })}
-                    className="retro-input w-full"
-                    placeholder="e.g., Beginner"
+                    type="color"
+                    value={newLevel.color}
+                    onChange={(e) => setNewLevel({ ...newLevel, color: e.target.value })}
+                    className="w-12 h-12 p-1 bg-white border border-gray-200 rounded-xl cursor-pointer"
                   />
+                  <span className="text-sm text-gray-600 font-mono">{newLevel.color}</span>
                 </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold retro-text">Min Points</label>
-                  <input
-                    type="number"
-                    value={newLevel.min_points}
-                    onChange={(e) => setNewLevel({ ...newLevel, min_points: parseInt(e.target.value) })}
-                    className="retro-input w-full"
-                    placeholder="0"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold retro-text">Max Points</label>
-                  <input
-                    type="number"
-                    value={newLevel.max_points ?? ''}
-                    onChange={(e) => setNewLevel({ ...newLevel, max_points: e.target.value ? parseInt(e.target.value) : null })}
-                    className="retro-input w-full"
-                    placeholder="Optional"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold retro-text">Color</label>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="color"
-                      value={newLevel.color}
-                      onChange={(e) => setNewLevel({ ...newLevel, color: e.target.value })}
-                      className="w-10 h-10 p-1"
-                    />
-                    <span className="text-sm retro-text">{newLevel.color}</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold retro-text">Icon</label>
-                  <input
-                    type="text"
-                    value={newLevel.icon}
-                    onChange={(e) => setNewLevel({ ...newLevel, icon: e.target.value })}
-                    className="retro-input w-full"
-                    placeholder="e.g., ⭐"
-                  />
-                </div>
-                <div className="lg:col-span-5 flex justify-end">
-                  <button
-                    onClick={handleCreateLevel}
-                    disabled={!newLevel.level_name || newLevel.min_points < 0}
-                    className="retro-btn-success py-2 px-4 flex items-center space-x-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Add Level</span>
-                  </button>
-                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">Icon</label>
+                <input
+                  type="text"
+                  value={newLevel.icon}
+                  onChange={(e) => setNewLevel({ ...newLevel, icon: e.target.value })}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="e.g., ⭐"
+                />
+              </div>
+              <div className="lg:col-span-5 flex justify-end">
+                <button
+                  onClick={handleCreateLevel}
+                  disabled={!newLevel.level_name || newLevel.min_points < 0}
+                  className="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-xl font-medium transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Level</span>
+                </button>
               </div>
             </div>
           </div>
 
-          <div className="retro-window">
-            <div className="p-4">
-              <h4 className="retro-title font-semibold mb-4 flex items-center space-x-2">
-                <Settings className="w-5 h-5" />
-                <span>Existing Levels ({userLevels.length})</span>
-              </h4>
-              {userLevels.length === 0 ? (
-                <p className="text-center text-gray-500 retro-text py-8">No levels configured. Add levels using the form above.</p>
-              ) : (
-                <div className="space-y-3">
-                  {userLevels.map((level) => (
-                    <div key={level.id} className="retro-card">
-                      {editingLevel?.id === level.id ? (
-                        <div className="p-4 space-y-3">
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-                            <div className="space-y-2">
-                              <label className="block text-sm font-semibold retro-text">Level Name</label>
-                              <input
-                                type="text"
-                                value={editingLevel?.level_name ?? ''}
-                                onChange={(e) => editingLevel && setEditingLevel({ ...editingLevel, level_name: e.target.value })}
-                                className="retro-input w-full"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="block text-sm font-semibold retro-text">Min Points</label>
-                              <input
-                                type="number"
-                                value={editingLevel?.min_points ?? 0}
-                                onChange={(e) => editingLevel && setEditingLevel({ ...editingLevel, min_points: parseInt(e.target.value) })}
-                                className="retro-input w-full"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="block text-sm font-semibold retro-text">Max Points</label>
-                              <input
-                                type="number"
-                                value={editingLevel?.max_points ?? ''}
-                                onChange={(e) => editingLevel && setEditingLevel({ ...editingLevel, max_points: e.target.value ? parseInt(e.target.value) : null })}
-                                className="retro-input w-full"
-                                placeholder="Optional"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="block text-sm font-semibold retro-text">Color</label>
-                              <div className="flex items-center space-x-2">
-                                <input
-                                  type="color"
-                                  value={editingLevel?.color ?? '#007bff'}
-                                  onChange={(e) => editingLevel && setEditingLevel({ ...editingLevel, color: e.target.value })}
-                                  className="w-10 h-10 p-1"
-                                />
-                                <span className="text-sm retro-text">{editingLevel?.color ?? '#007bff'}</span>
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <label className="block text-sm font-semibold retro-text">Icon</label>
-                              <input
-                                type="text"
-                                value={editingLevel?.icon ?? ''}
-                                onChange={(e) => editingLevel && setEditingLevel({ ...editingLevel, icon: e.target.value })}
-                                className="retro-input w-full"
-                                placeholder="Icon"
-                              />
-                            </div>
-                            <div className="lg:col-span-5 flex justify-end space-x-2">
-                              <button
-                                onClick={handleUpdateLevel}
-                                className="retro-btn-success py-2 px-4 flex items-center space-x-2"
-                              >
-                                <Save className="w-4 h-4" />
-                                <span>Save</span>
-                              </button>
-                              <button
-                                onClick={() => setEditingLevel(null)}
-                                className="retro-btn-secondary py-2 px-4"
-                              >
-                                Cancel
-                              </button>
-                            </div>
+          <div className="bg-gray-50 rounded-2xl p-5">
+            <h4 className="font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+              <Settings className="w-5 h-5 text-purple-500" />
+              <span>Existing Levels ({userLevels.length})</span>
+            </h4>
+            {userLevels.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">No levels configured. Add levels using the form above.</p>
+            ) : (
+              <div className="space-y-3">
+                {userLevels.map((level) => (
+                  <div key={level.id} className="bg-white rounded-xl p-4 border border-gray-100">
+                    {editingLevel?.id === level.id ? (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                          <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">Level Name</label>
+                            <input
+                              type="text"
+                              value={editingLevel?.level_name ?? ''}
+                              onChange={(e) => editingLevel && setEditingLevel({ ...editingLevel, level_name: e.target.value })}
+                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            />
                           </div>
-                        </div>
-                      ) : (
-                        <div className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                              <div className="w-12 h-12 flex items-center justify-center" style={{ backgroundColor: level.color, color: getContrastColor(level.color) }}>
-                                <span className="text-2xl">{level.icon}</span>
-                              </div>
-                              <div>
-                                <h4 className="font-semibold retro-title">{level.level_name}</h4>
-                                <p className="text-sm text-gray-600 retro-text">
-                                  {level.min_points} - {level.max_points ? level.max_points : '∞'} points
-                                </p>
-                              </div>
-                            </div>
+                          <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">Min Points</label>
+                            <input
+                              type="number"
+                              value={editingLevel?.min_points ?? 0}
+                              onChange={(e) => editingLevel && setEditingLevel({ ...editingLevel, min_points: parseInt(e.target.value) })}
+                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">Max Points</label>
+                            <input
+                              type="number"
+                              value={editingLevel?.max_points ?? ''}
+                              onChange={(e) => editingLevel && setEditingLevel({ ...editingLevel, max_points: e.target.value ? parseInt(e.target.value) : null })}
+                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                              placeholder="Optional"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">Color</label>
                             <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() => setEditingLevel(level)}
-                                className="retro-btn-secondary p-2"
-                                title="Edit Level"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteLevel(level.id)}
-                                className="retro-btn-danger p-2"
-                                title="Delete Level"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              <input
+                                type="color"
+                                value={editingLevel?.color ?? '#007bff'}
+                                onChange={(e) => editingLevel && setEditingLevel({ ...editingLevel, color: e.target.value })}
+                                className="w-12 h-12 p-1 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer"
+                              />
+                              <span className="text-sm text-gray-600 font-mono">{editingLevel?.color ?? '#007bff'}</span>
                             </div>
                           </div>
+                          <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700">Icon</label>
+                            <input
+                              type="text"
+                              value={editingLevel?.icon ?? ''}
+                              onChange={(e) => editingLevel && setEditingLevel({ ...editingLevel, icon: e.target.value })}
+                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                              placeholder="Icon"
+                            />
+                          </div>
+                          <div className="lg:col-span-5 flex justify-end space-x-2">
+                            <button
+                              onClick={handleUpdateLevel}
+                              className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-xl font-medium transition-colors flex items-center space-x-2"
+                            >
+                              <Save className="w-4 h-4" />
+                              <span>Save</span>
+                            </button>
+                            <button
+                              onClick={() => setEditingLevel(null)}
+                              className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-xl font-medium transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-14 h-14 flex items-center justify-center rounded-xl shadow-md" style={{ backgroundColor: level.color, color: getContrastColor(level.color) }}>
+                            <span className="text-2xl">{level.icon}</span>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{level.level_name}</h4>
+                            <p className="text-sm text-gray-500">
+                              {level.min_points} - {level.max_points ? level.max_points : '∞'} points
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => setEditingLevel(level)}
+                            className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                            title="Edit Level"
+                          >
+                            <Edit className="w-5 h-5 text-gray-600" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteLevel(level.id)}
+                            className="p-2 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                            title="Delete Level"
+                          >
+                            <Trash2 className="w-5 h-5 text-red-600" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="flex justify-end pt-4 border-t-4 border-mustard">
+          <div className="flex justify-end pt-4 border-t border-gray-100">
             <button
               onClick={() => { setShowLevelManagement(false); setEditingLevel(null); }}
-              className="retro-btn-secondary py-2 px-4"
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-xl font-medium transition-colors"
             >
               Close
             </button>
@@ -697,72 +708,132 @@ const AdminGames = () => {
         </div>
       </Modal>
 
-      {(() => {
-        if (loading) {
-          return (
-            <div className="retro-window text-center py-16">
-              <div className="retro-spinner w-16 h-16 mx-auto mb-6"></div>
-              <p className="retro-text text-lg">Loading game scores...</p>
-            </div>
-          );
-        }
+      {/* Game Scores Grid with Pagination */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-5 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-gray-800 flex items-center space-x-2">
+              <Trophy className="w-5 h-5 text-purple-500" />
+              <span>Game Scores</span>
+            </h3>
+            <span className="text-sm text-gray-500">
+              Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, filteredGameScores.length)} of {filteredGameScores.length}
+            </span>
+          </div>
+        </div>
 
-        if (filteredGameScores.length === 0) {
-          return (
-            <div className="retro-window text-center py-16">
-              <Trophy className="w-20 h-20 text-gray-300 mx-auto mb-6 retro-icon" />
-              <p className="retro-text text-xl">No game scores found</p>
-              <p className="retro-text text-base opacity-70 mt-3">
-                {gameScores.length === 0 ? 'Game scores will appear here' : 'No scores match your search criteria'}
-              </p>
-            </div>
-          );
-        }
+        {(() => {
+          if (loading) {
+            return (
+              <div className="text-center py-16">
+                <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mx-auto mb-6"></div>
+                <p className="text-gray-500">Loading game scores...</p>
+              </div>
+            );
+          }
 
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredGameScores.map((score) => (
-              <div key={score.id} className="retro-window retro-hover">
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md retro-icon">
-                      <span className="text-2xl">
-                        {score.game_type === 'checkers' ? '♟️' :
-                         score.game_type === 'marbles' ? '⚪' :
-                         score.game_type === 'pool' ? '🎱' :
-                         score.game_type === 'foosball' ? '⚽' : '🎮'}
+          if (filteredGameScores.length === 0) {
+            return (
+              <div className="text-center py-16">
+                <Trophy className="w-20 h-20 text-gray-200 mx-auto mb-6" />
+                <p className="text-xl text-gray-500 font-medium">No game scores found</p>
+                <p className="text-gray-400 mt-2">
+                  {gameScores.length === 0 ? 'Game scores will appear here' : 'No scores match your search criteria'}
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 p-5">
+                {paginatedScores.map((score) => (
+                  <div key={score.id} className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                        <span className="text-2xl">
+                          {score.game_type === 'checkers' ? '♟️' :
+                           score.game_type === 'marbles' ? '⚪' :
+                           score.game_type === 'pool' ? '🎱' :
+                           score.game_type === 'foosball' ? '⚽' : '🎮'}
+                        </span>
+                      </div>
+                      <span className={`px-3 py-1 text-xs font-medium rounded-full capitalize ${
+                        score.result === 'win' ? 'bg-green-100 text-green-700' :
+                        score.result === 'loss' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {score.result}
                       </span>
                     </div>
-                    <span className={`retro-badge px-3 py-1 text-sm font-medium ${
-                      score.result === 'win' ? 'bg-green-100 text-green-800' :
-                      score.result === 'loss' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {score.result.toUpperCase()}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-xl retro-title mb-2">
-                      {users.find(u => u.id === score.user_id)?.username || score.user_id}
-                    </h3>
-                    <p className="text-gray-600 text-base retro-text mb-3 capitalize">
-                      {score.game_type.replace('_', ' ')}
-                    </p>
-                    <div className="space-y-2">
-                      <div className="flex items-center text-sm retro-text opacity-80">
-                        <span className="font-medium">Score: <span className="font-bold text-purple-600">{score.score}</span></span>
-                      </div>
-                      <div className="flex items-center text-sm retro-text opacity-80">
-                        <span className="font-medium">Played: {new Date(score.played_at).toLocaleDateString()}</span>
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-lg mb-1">
+                        {users.find(u => u.id === score.user_id)?.username || score.user_id}
+                      </h3>
+                      <p className="text-gray-600 text-sm capitalize mb-3">
+                        {score.game_type.replace('_', ' ')}
+                      </p>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">
+                          Score: <span className="font-bold text-purple-600">{score.score}</span>
+                        </span>
+                        <span className="text-gray-400">
+                          {new Date(score.played_at).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        );
-      })()}
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 p-5 border-t border-gray-100">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-gray-600" />
+                  </button>
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                          currentPage === pageNum
+                            ? 'bg-purple-500 text-white'
+                            : 'border border-gray-200 hover:bg-gray-50 text-gray-600'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronRight className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+              )}
+            </>
+          );
+        })()}
+      </div>
     </div>
   );
 

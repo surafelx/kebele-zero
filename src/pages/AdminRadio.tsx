@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Radio, Plus, Edit3, Trash2, Search, Filter } from 'lucide-react';
+import { Radio, Plus, Edit3, Trash2, Search, Filter, Play, Star, Music, Mic } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import Modal from '../components/Modal';
 
@@ -8,7 +8,9 @@ const AdminRadio = () => {
   const [loading, setLoading] = useState(false);
   const [showRadioForm, setShowRadioForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
   const [radioFormData, setRadioFormData] = useState({
     title: '',
     description: '',
@@ -79,173 +81,265 @@ const AdminRadio = () => {
     }
   };
 
+  const filteredTracks = radioTracks.filter(track => {
+    const matchesSearch = !searchTerm || 
+      track.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      track.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = !filterCategory || track.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const totalPages = Math.ceil(filteredTracks.length / itemsPerPage);
+  const paginatedTracks = filteredTracks.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reset to page 1 when search/filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterCategory]);
+
+  const categories = ['music', 'culture', 'religious', 'documentary', 'entertainment', 'education', 'other'];
+
   return (
-    <div className="space-y-8">
-      <div className="bg-white border-b-4 border-charcoal px-4 py-3 flex justify-between items-center shadow-sm">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="retro-title text-xl">Radio Management</h2>
-          <p className="retro-text text-base opacity-80 mt-2">Manage your radio tracks and playlist</p>
+          <h2 className="text-2xl font-bold text-gray-800">Radio Management</h2>
+          <p className="text-gray-500 mt-1">Manage your radio tracks and playlist</p>
         </div>
         <button
           onClick={() => setShowRadioForm(true)}
-          className="retro-btn px-6 py-3 flex items-center space-x-2"
+          className="inline-flex items-center space-x-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
         >
-          <Plus className="w-5 h-5 retro-icon" />
+          <Plus className="w-5 h-5" />
           <span>Add Track</span>
         </button>
       </div>
 
-      {/* Radio Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        <div className="retro-card retro-hover">
-          <div className="p-3 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center shadow-md border-2 border-amber-400 retro-icon mx-auto mb-2">
-              <Radio className="w-4 h-4 text-white" />
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Total Tracks</p>
+              <p className="text-2xl font-bold text-gray-800">{radioTracks.length}</p>
             </div>
-            <p className="text-lg font-bold text-amber-900 retro-title">{radioTracks.length}</p>
-            <p className="text-xs text-amber-700 uppercase tracking-wide retro-text">Total Tracks</p>
+            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+              <Radio className="w-6 h-6 text-amber-600" />
+            </div>
           </div>
         </div>
-
-        <div className="retro-card retro-hover">
-          <div className="p-3 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-md border-2 border-green-400 retro-icon mx-auto mb-2">
-              <Radio className="w-4 h-4 text-white" />
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Featured</p>
+              <p className="text-2xl font-bold text-gray-800">{radioTracks.filter(t => t.is_featured).length}</p>
             </div>
-            <p className="text-lg font-bold text-green-900 retro-title">
-              {radioTracks.filter(t => t.is_featured).length}
-            </p>
-            <p className="text-xs text-green-700 uppercase tracking-wide retro-text">Featured</p>
+            <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+              <Star className="w-6 h-6 text-yellow-600" />
+            </div>
           </div>
         </div>
-
-        <div className="retro-card retro-hover">
-          <div className="p-3 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md border-2 border-purple-400 retro-icon mx-auto mb-2">
-              <span className="text-white font-bold text-sm">🎵</span>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Music</p>
+              <p className="text-2xl font-bold text-gray-800">{radioTracks.filter(t => t.category === 'music').length}</p>
             </div>
-            <p className="text-lg font-bold text-purple-900 retro-title">
-              {radioTracks.filter(t => t.category === 'music').length}
-            </p>
-            <p className="text-xs text-purple-700 uppercase tracking-wide retro-text">Music Tracks</p>
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+              <Music className="w-6 h-6 text-purple-600" />
+            </div>
           </div>
         </div>
-
-        <div className="retro-card retro-hover">
-          <div className="p-3 text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md border-2 border-blue-400 retro-icon mx-auto mb-2">
-              <span className="text-white font-bold text-sm">📂</span>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Categories</p>
+              <p className="text-2xl font-bold text-gray-800">{categories.length}</p>
             </div>
-            <p className="text-lg font-bold text-blue-900 retro-title">
-              {[...new Set(radioTracks.map(t => t.category))].length}
-            </p>
-            <p className="text-xs text-blue-700 uppercase tracking-wide retro-text">Categories</p>
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <Mic className="w-6 h-6 text-blue-600" />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Search and Filter */}
-      <div className="retro-window">
-        <div className="p-4">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-semibold retro-text mb-2">Search Tracks</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search by title, description, or tags..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 retro-input"
-                />
+      {/* Search & Filter */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search tracks..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            />
+          </div>
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+            <option value="">All Categories</option>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Tracks List */}
+      {loading ? (
+        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+          <div className="w-12 h-12 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading tracks...</p>
+        </div>
+      ) : filteredTracks.length === 0 ? (
+        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+          <Radio className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+          <p className="text-xl font-medium text-gray-800">No tracks found</p>
+          <p className="text-gray-500 mt-1">Add your first track to get started</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-4 border-b border-gray-100">
+            <h3 className="font-semibold text-gray-800">Playlist</h3>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {paginatedTracks.map((track) => (
+              <div key={track.id} className="p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Play className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <h4 className="font-semibold text-gray-800">{track.title}</h4>
+                        {track.is_featured && (
+                          <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
+                            Featured
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500">{track.category} • {track.youtube_id}</p>
+                      {track.description && (
+                        <p className="text-sm text-gray-400 line-clamp-1">{track.description}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                      <Edit3 className="w-4 h-4 text-gray-500" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteRadioTrack(track.id)}
+                      className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="lg:w-64">
-              <label className="block text-sm font-semibold retro-text mb-2">Filter by Category</label>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-4 py-2 bg-white retro-input"
-              >
-                <option value="">All Categories</option>
-                <option value="music">🎵 Music</option>
-                <option value="culture">🏛️ Culture</option>
-                <option value="religious">⛪ Religious</option>
-                <option value="documentary">🎥 Documentary</option>
-                <option value="entertainment">🎭 Entertainment</option>
-                <option value="education">📚 Education</option>
-                <option value="other">📌 Other</option>
-              </select>
-            </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-100">
+          <p className="text-sm text-gray-500">
+            Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredTracks.length)} of {filteredTracks.length} tracks
+          </p>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 text-sm bg-white border border-gray-200 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 text-sm bg-white border border-gray-200 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal */}
       <Modal
         isOpen={showRadioForm}
         onClose={() => setShowRadioForm(false)}
         title="Add New YouTube Video"
       >
-        <form onSubmit={(e) => { e.preventDefault(); handleCreateRadioTrack(radioFormData); setShowRadioForm(false); }} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <label className="block text-sm font-semibold retro-text">Title</label>
+        <form onSubmit={(e) => { 
+          e.preventDefault(); 
+          handleCreateRadioTrack(radioFormData); 
+          setShowRadioForm(false); 
+        }} className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Title</label>
               <input
                 type="text"
                 required
                 value={radioFormData.title}
                 onChange={(e) => setRadioFormData({ ...radioFormData, title: e.target.value })}
-                className="retro-input w-full"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
                 placeholder="Enter video title"
               />
             </div>
-            <div className="space-y-3">
-              <label className="block text-sm font-semibold retro-text">Category</label>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Category</label>
               <select
                 value={radioFormData.category}
                 onChange={(e) => setRadioFormData({ ...radioFormData, category: e.target.value })}
-                className="retro-input w-full bg-white"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
-                <option value="music">🎵 Music</option>
-                <option value="culture">🏛️ Culture</option>
-                <option value="religious">⛪ Religious</option>
-                <option value="documentary">🎥 Documentary</option>
-                <option value="entertainment">🎭 Entertainment</option>
-                <option value="education">📚 Education</option>
-                <option value="other">📌 Other</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
               </select>
             </div>
           </div>
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold retro-text">YouTube Video ID</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">YouTube Video ID</label>
             <input
               type="text"
               required
               value={radioFormData.youtube_id}
               onChange={(e) => setRadioFormData({ ...radioFormData, youtube_id: e.target.value })}
-              className="retro-input w-full"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
               placeholder="e.g., dQw4w9WgXcQ"
             />
           </div>
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold retro-text">Description</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Description</label>
             <textarea
               rows={2}
-              required
               value={radioFormData.description}
               onChange={(e) => setRadioFormData({ ...radioFormData, description: e.target.value })}
-              className="retro-input w-full resize-none"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
               placeholder="Describe the video content"
             />
           </div>
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold retro-text">Tags (optional)</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Tags (optional)</label>
             <input
               type="text"
               value={radioFormData.tags}
               onChange={(e) => setRadioFormData({ ...radioFormData, tags: e.target.value })}
-              className="retro-input w-full"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
               placeholder="Comma-separated tags"
             />
           </div>
@@ -255,98 +349,30 @@ const AdminRadio = () => {
               id="is_featured"
               checked={radioFormData.is_featured}
               onChange={(e) => setRadioFormData({ ...radioFormData, is_featured: e.target.checked })}
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+              className="w-4 h-4 text-amber-500 bg-gray-100 border-gray-300 rounded focus:ring-amber-500"
             />
-            <label htmlFor="is_featured" className="text-sm font-semibold retro-text">Mark as Featured</label>
+            <label htmlFor="is_featured" className="text-sm font-medium text-gray-700">Mark as Featured</label>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t-4 border-mustard">
+          <div className="flex space-x-3 pt-4">
             <button
               type="submit"
-              className="flex-1 retro-btn-success py-3 px-6"
+              className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 px-5 rounded-xl font-medium transition-colors"
             >
-              🎥 Add Video
+              Add Video
             </button>
             <button
               type="button"
-              onClick={() => { setShowRadioForm(false); setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false }); }}
-              className="retro-btn-secondary py-3 px-6"
+              onClick={() => { 
+                setShowRadioForm(false); 
+                setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false }); 
+              }}
+              className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
             >
               Cancel
             </button>
           </div>
         </form>
       </Modal>
-
-      <div className="retro-window">
-        <div className="retro-titlebar retro-titlebar-amber p-6">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center retro-icon">
-              <Radio className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h3 className="retro-title text-xl">Current Playlist</h3>
-              <p className="retro-text text-base opacity-80">Manage your YouTube videos</p>
-            </div>
-          </div>
-        </div>
-        <div className="p-6">
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="retro-spinner w-16 h-16 mx-auto mb-6"></div>
-              <p className="retro-text text-lg">Loading videos...</p>
-            </div>
-          ) : radioTracks.length === 0 ? (
-            <div className="text-center py-8">
-              <Radio className="w-20 h-20 text-gray-300 mx-auto mb-6 retro-icon" />
-              <p className="retro-text text-xl">No videos found</p>
-              <p className="retro-text text-base opacity-70 mt-3">Add your first YouTube video to get started</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {radioTracks.filter(track =>
-                (searchTerm === '' ||
-                  track.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  track.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  (track.tags && track.tags.toLowerCase().includes(searchTerm.toLowerCase()))) &&
-                (filterStatus === '' || track.category === filterStatus)
-              ).map((track) => (
-                <div key={track.id} className="retro-window retro-hover p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-6">
-                      <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-md retro-icon">
-                        <Radio className="w-8 h-8 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-gray-900 text-xl retro-title mb-1">{track.title}</h4>
-                        <p className="text-base text-gray-600 retro-text">
-                          {track.category} • YouTube ID: {track.youtube_id}
-                        </p>
-                        {track.description && (
-                          <p className="text-sm text-gray-500 retro-text mt-1 line-clamp-2">{track.description}</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      {track.is_featured && (
-                        <span className="retro-badge px-4 py-2 bg-green-100 text-green-800">Featured</span>
-                      )}
-                      <button className="retro-btn-secondary p-3">
-                        <Edit3 className="w-5 h-5 retro-icon" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteRadioTrack(track.id)}
-                        className="retro-btn-secondary p-3"
-                      >
-                        <Trash2 className="w-5 h-5 retro-icon" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 };
