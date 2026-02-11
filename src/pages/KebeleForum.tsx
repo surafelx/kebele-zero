@@ -1052,21 +1052,6 @@ const KebeleForum: React.FC = () => {
 
   return (
     <div className="min-h-screen retro-bg">
-      {/* Modal Header */}
-      <div className="bg-white border-b-4 border-black py-4 px-6 sticky top-0 z-10 shadow-lg">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl retro-title text-gray-800 uppercase tracking-tight font-bold">FORUM MODAL</h1>
-            <p className="retro-text text-gray-600 uppercase tracking-wide text-sm">Connect, share, and learn together</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center border-2 border-black shadow-md">
-              <MessageSquare className="w-5 h-5 text-white" />
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content - More compact */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
@@ -1121,24 +1106,34 @@ const KebeleForum: React.FC = () => {
               <div className="retro-titlebar retro-titlebar-orange p-2">
                 <h3 className="retro-title text-xs uppercase tracking-wide">Quick Actions</h3>
               </div>
-              <div className="p-2 space-y-1">
+              <div className="p-2 space-y-2">
                 <button
                   onClick={() => setSelectedCategory('')}
-                  className="w-full retro-btn-secondary py-1 px-2 font-bold text-xs uppercase"
+                  className="w-full retro-btn py-2 px-3 font-bold text-xs uppercase flex items-center justify-center space-x-2"
                 >
-                  📋 All Posts
+                  <span>📋</span>
+                  <span>All Posts</span>
                 </button>
                 <button
                   onClick={() => setSelectedCategory('games')}
-                  className="w-full retro-btn py-1 px-2 font-bold text-xs uppercase"
+                  className="w-full retro-btn py-2 px-3 font-bold text-xs uppercase flex items-center justify-center space-x-2"
                 >
-                  🎮 Games
+                  <span>🎮</span>
+                  <span>Games</span>
                 </button>
                 <button
                   onClick={() => setSelectedCategory('culture')}
-                  className="w-full retro-btn-success py-1 px-2 font-bold text-xs uppercase"
+                  className="w-full retro-btn py-2 px-3 font-bold text-xs uppercase flex items-center justify-center space-x-2"
                 >
-                  🎨 Culture
+                  <span>🎨</span>
+                  <span>Culture</span>
+                </button>
+                <button
+                  onClick={() => setSelectedCategory('events')}
+                  className="w-full retro-btn py-2 px-3 font-bold text-xs uppercase flex items-center justify-center space-x-2"
+                >
+                  <span>📅</span>
+                  <span>Events</span>
                 </button>
               </div>
             </div>

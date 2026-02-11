@@ -135,6 +135,8 @@ CREATE TABLE media (
   alt_text TEXT,
   caption TEXT,
   media_url TEXT NOT NULL,
+  cloudinary_public_id TEXT,
+  folder TEXT DEFAULT 'general',
   status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
   category TEXT,
   tags TEXT[],
@@ -249,6 +251,30 @@ CREATE TABLE transactions (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Social Links table
+CREATE TABLE social_links (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  platform TEXT NOT NULL UNIQUE CHECK (platform IN ('github', 'linkedin', 'twitter', 'instagram', 'youtube', 'discord', 'website', 'mail', 'twitch', 'facebook')),
+  label TEXT NOT NULL,
+  url TEXT NOT NULL,
+  icon TEXT,
+  is_active BOOLEAN DEFAULT true,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Insert default social links
+INSERT INTO social_links (platform, label, url, icon, display_order) VALUES
+('github', 'GitHub', 'https://github.com', 'github', 1),
+('linkedin', 'LinkedIn', 'https://linkedin.com', 'linkedin', 2),
+('twitter', 'Twitter', 'https://twitter.com', 'twitter', 3),
+('instagram', 'Instagram', 'https://instagram.com', 'instagram', 4),
+('youtube', 'YouTube', 'https://youtube.com', 'youtube', 5),
+('discord', 'Discord', 'https://discord.gg', 'discord', 6),
+('website', 'Website', 'https://kebelezero.com', 'globe', 7),
+('mail', 'Email', 'mailto:hello@kebelezero.com', 'mail', 8);
+
 -- Enable Row Level Security
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_levels ENABLE ROW LEVEL SECURITY;
@@ -265,6 +291,7 @@ ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE radio ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE social_links ENABLE ROW LEVEL SECURITY;
 
 -- Create policies (adjust as needed for your auth setup)
 -- For now, allow all operations for authenticated users
@@ -283,3 +310,4 @@ CREATE POLICY "Allow all operations for authenticated users on events" ON events
 CREATE POLICY "Allow all operations for authenticated users on videos" ON videos FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Allow all operations for authenticated users on radio" ON radio FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Allow all operations for authenticated users on transactions" ON transactions FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow all operations for authenticated users on social_links" ON social_links FOR ALL USING (auth.role() = 'authenticated');

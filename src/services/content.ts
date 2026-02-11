@@ -627,3 +627,79 @@ export const transactionsAPI = {
     return data;
   }
 };
+
+// ===================== SOCIAL LINKS =====================
+
+export const socialLinksAPI = {
+  // Get all active social links
+  getSocialLinks: async () => {
+    const { data, error } = await supabase
+      .from('social_links')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Get single social link
+  getSocialLink: async (id: string) => {
+    const { data, error } = await supabase
+      .from('social_links')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Create social link
+  createSocialLink: async (linkData: any) => {
+    const { data, error } = await supabase
+      .from('social_links')
+      .insert([{ ...linkData, created_at: new Date().toISOString() }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Update social link
+  updateSocialLink: async (id: string, updates: any) => {
+    const { data, error } = await supabase
+      .from('social_links')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Delete social link
+  deleteSocialLink: async (id: string) => {
+    const { error } = await supabase
+      .from('social_links')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  },
+
+  // Toggle active status
+  toggleSocialLink: async (id: string, isActive: boolean) => {
+    const { data, error } = await supabase
+      .from('social_links')
+      .update({ is_active: isActive, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+};

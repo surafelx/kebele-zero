@@ -124,65 +124,64 @@ const AdminSouq = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Marketplace Management</h2>
-          <p className="text-gray-500 mt-1">Manage your marketplace products</p>
+      {/* Page Header */}
+      <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div className="flex items-center justify-between px-6 py-4 border-b-4 border-black bg-gradient-to-r from-pink-600 to-rose-600">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-2 border-black shadow-lg">
+              <ShoppingBag className="w-7 h-7 text-black" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Marketplace Management</h1>
+              <p className="text-sm text-pink-100 font-bold uppercase">Manage your marketplace products</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowProductForm(true)}
+            className="retro-btn px-4 py-2 bg-white text-black"
+          >
+            <Plus className="w-4 h-4 inline mr-2" />
+            Add Product
+          </button>
         </div>
-        <button
-          onClick={() => setShowProductForm(true)}
-          className="inline-flex items-center space-x-2 bg-pink-500 hover:bg-pink-600 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Add Product</span>
-        </button>
       </div>
 
-      {/* Stats */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Total Products</p>
-              <p className="text-2xl font-bold text-gray-800">{totalProducts}</p>
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-5 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <ShoppingBag className="w-6 h-6 text-black" />
             </div>
-            <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center">
-              <ShoppingBag className="w-6 h-6 text-pink-600" />
-            </div>
+            <p className="text-3xl font-black text-gray-900 retro-title">{totalProducts}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Total Products</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Total Value</p>
-              <p className="text-2xl font-bold text-gray-800">${totalValue.toFixed(0)}</p>
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-5 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <DollarSign className="w-6 h-6 text-black" />
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-green-600" />
-            </div>
+            <p className="text-3xl font-black text-gray-900 retro-title">${totalValue.toFixed(0)}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Total Value</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Categories</p>
-              <p className="text-2xl font-bold text-gray-800">{categories.length}</p>
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-5 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <Package className="w-6 h-6 text-black" />
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <Package className="w-6 h-6 text-blue-600" />
-            </div>
+            <p className="text-3xl font-black text-gray-900 retro-title">{categories.length}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Categories</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Low Stock</p>
-              <p className="text-2xl font-bold text-gray-800">{lowStock}</p>
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-5 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <AlertTriangle className="w-6 h-6 text-black" />
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-              <AlertTriangle className="w-6 h-6 text-orange-600" />
-            </div>
+            <p className="text-3xl font-black text-gray-900 retro-title">{lowStock}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Low Stock</p>
           </div>
         </div>
       </div>

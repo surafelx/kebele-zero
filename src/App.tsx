@@ -19,8 +19,19 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminForum from './pages/AdminForum';
 import AdminOverview from './pages/AdminOverview';
 import AdminLogin from './pages/AdminLogin';
+import AdminAbout from './pages/AdminAbout';
+import AdminRadio from './pages/AdminRadio';
+import AdminSouq from './pages/AdminSouq';
+import AdminGames from './pages/AdminGames';
+import AdminMedia from './pages/AdminMedia';
+import AdminEvents from './pages/AdminEvents';
+import AdminSettings from './pages/AdminSettings';
+import AdminTransactions from './pages/AdminTransactions';
+import AdminUsers from './components/AdminUsers';
+import AdminGallery from './pages/AdminGallery';
+import AdminSocialLinks from './pages/AdminSocialLinks';
 
-// Import components
+import AdminRoute from './components/AdminRoute';
 import AuthModal from './components/AuthModal';
 import UserProfileModal from './components/UserProfileModal';
 import UserDashboardModal from './components/UserDashboardModal';
@@ -389,16 +400,41 @@ function MainApp() {
 
         {/* Modals */}
         {activeModal && (
-          <div className="fixed inset-0 z-50 retro-modal flex items-center justify-center p-4" onClick={closeModal}>
-            <div className="relative retro-modal-content retro-window w-full max-w-6xl max-h-[90vh] overflow-hidden retro-floating" onClick={(e) => e.stopPropagation()}>
-              <button
-                onClick={closeModal}
-                className="absolute top-4 right-4 retro-btn text-2xl w-10 h-10 p-0 flex items-center justify-center z-10"
-                title="Close"
-              >
-                ×
-              </button>
-              <div className="max-h-[70vh] overflow-y-auto">
+          <div className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={closeModal}>
+            <div 
+              className="w-full max-w-6xl max-h-[90vh] overflow-hidden bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none" 
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Title Bar */}
+              <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-500 to-teal-500">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg border-2 border-black">
+                    {activeModal === 'forum' && <MessageSquare className="w-5 h-5 text-emerald-500" />}
+                    {activeModal === 'games' && <Trophy className="w-5 h-5 text-emerald-500" />}
+                    {activeModal === 'about' && <Info className="w-5 h-5 text-emerald-500" />}
+                    {activeModal === 'events' && <Calendar className="w-5 h-5 text-emerald-500" />}
+                    {activeModal === 'souq' && <ShoppingBag className="w-5 h-5 text-emerald-500" />}
+                    {activeModal === 'radio' && <Radio className="w-5 h-5 text-emerald-500" />}
+                    {activeModal === 'media' && <Image className="w-5 h-5 text-emerald-500" />}
+                  </div>
+                  <h3 className="text-lg font-black text-white uppercase tracking-wide drop-shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                    {activeModal === 'forum' && 'Forum & Discussion'}
+                    {activeModal === 'games' && 'Games & Scores'}
+                    {activeModal === 'about' && 'About Kebele Zero'}
+                    {activeModal === 'events' && 'Events'}
+                    {activeModal === 'souq' && 'Souq Marketplace'}
+                    {activeModal === 'radio' && 'Kebele Radio'}
+                    {activeModal === 'media' && 'Media Gallery'}
+                  </h3>
+                </div>
+                <button
+                  onClick={closeModal}
+                  className="p-1 bg-white border-2 border-black rounded-none shadow hover:bg-red-500 hover:text-white transition-all"
+                >
+                  <X className="w-4 h-4 text-black" />
+                </button>
+              </div>
+              <div className="max-h-[calc(90vh-80px)] overflow-y-auto">
                 {activeModal === 'forum' && <KebeleForum />}
                 {activeModal === 'games' && <KebeleGames />}
                 {activeModal === 'about' && <AboutKebele />}
@@ -505,10 +541,24 @@ function App() {
           <Router>
             <Routes>
                <Route path="/" element={<MainApp />} />
-               <Route path="/admin" element={<AdminDashboard />} />
-               <Route path="/admin/forum" element={<AdminForum />} />
-               <Route path="/admin/overview" element={<AdminOverview />} />
                <Route path="/admin/login" element={<AdminLogin />} />
+               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>}>
+                 <Route index element={<AdminOverview />} />
+                 <Route path="overview" element={<AdminOverview />} />
+                 <Route path="forum" element={<AdminForum />} />
+                 <Route path="analytics" element={<div className="p-6"><h2 className="text-2xl font-bold">Analytics Coming Soon</h2></div>} />
+                 <Route path="users" element={<AdminUsers />} />
+                 <Route path="games" element={<AdminGames />} />
+                 <Route path="souq" element={<AdminSouq />} />
+                 <Route path="events" element={<AdminEvents />} />
+                 <Route path="media" element={<AdminMedia />} />
+                 <Route path="gallery" element={<AdminGallery />} />
+                 <Route path="radio" element={<AdminRadio />} />
+                 <Route path="transactions" element={<AdminTransactions />} />
+                 <Route path="about" element={<AdminAbout />} />
+                 <Route path="social-links" element={<AdminSocialLinks />} />
+                 <Route path="settings" element={<AdminSettings />} />
+               </Route>
                <Route path="*" element={<MainApp />} />
             </Routes>
           </Router>

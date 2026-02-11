@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,12 +15,49 @@ const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const { login, register, loading, user } = useAuth();
 
+  // Hide canvas and add admin-route class
+  useEffect(() => {
+    document.body.classList.add('admin-route');
+    document.documentElement.classList.add('admin-route');
+    
+    const allCanvases = document.querySelectorAll('canvas');
+    allCanvases.forEach(c => (c as HTMLElement).style.display = 'none');
+    
+    document.body.style.overflow = 'auto';
+    document.documentElement.style.overflow = 'auto';
+    
+    return () => {
+      document.body.classList.remove('admin-route');
+      document.documentElement.classList.remove('admin-route');
+      allCanvases.forEach(c => (c as HTMLElement).style.display = '');
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, []);
+
   // Redirect if already authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     if (user && !loading) {
       navigate('/admin');
     }
   }, [user, loading, navigate]);
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-[9999] retro-bg flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-bold uppercase tracking-wide">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is already authenticated (but loading is complete), redirect
+  if (user) {
+    return null;
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

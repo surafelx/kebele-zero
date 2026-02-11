@@ -234,25 +234,10 @@ const KebeleRadio: React.FC = () => {
 
   return (
     <div className="min-h-screen retro-bg retro-bg-enhanced">
-      {/* Modal Header */}
-      <div className="bg-white border-b-4 border-black py-4 px-6 sticky top-0 z-10 shadow-lg">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl retro-title text-gray-800 uppercase tracking-tight font-bold">RADIO MODAL</h1>
-            <p className="retro-text text-gray-600 uppercase tracking-wide text-sm">Ethiopian music, culture & stories</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center border-2 border-black shadow-md">
-              <Radio className="w-5 h-5 text-white" />
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Hero Section - Smaller */}
         <div className="retro-window mb-8">
-          <div className="retro-titlebar retro-titlebar-teal">
+          <div className="retro-titlebar retro-titlebar-emerald">
             <div className="flex items-center space-x-3">
               <Radio className="w-4 h-4 retro-icon" />
               <span className="retro-title text-xs font-bold uppercase">KEBELE RADIO</span>

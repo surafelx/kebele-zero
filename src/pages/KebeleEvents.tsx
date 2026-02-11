@@ -377,13 +377,13 @@ const KebeleEvents: React.FC = () => {
 
             {/* Status and Category */}
             <div className="flex flex-wrap gap-3 mb-6">
-              <span className="px-3 py-1 bg-blue-600 text-white rounded retro-title text-sm font-bold uppercase border-2 border-white shadow-lg">
-                {event.status}
+              <span className="px-3 py-1 bg-blue-600 text-white rounded text-sm font-bold uppercase border-2 border-white shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                {getEventStatus(event)}
               </span>
               <span className="px-3 py-1 bg-purple-600 text-white rounded retro-title text-sm font-bold uppercase border-2 border-white shadow-lg">
                 {event.category}
               </span>
-              {event.isFeatured && (
+              {event.is_featured && (
                 <span className="px-3 py-1 bg-green-600 text-white rounded retro-title text-sm font-bold uppercase border-2 border-white shadow-lg">
                   FEATURED
                 </span>
@@ -485,38 +485,21 @@ const KebeleEvents: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen retro-bg retro-bg-enhanced">
-      {/* Modal Header */}
-      <div className="bg-white border-b-4 border-black py-4 px-6 sticky top-0 z-10 shadow-lg">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl retro-title text-gray-800 uppercase tracking-tight font-bold">EVENTS MODAL</h1>
-            <p className="retro-text text-gray-600 uppercase tracking-wide text-sm">Discover Ethiopian cultural events</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center border-2 border-black shadow-md">
-              <Calendar className="w-5 h-5 text-white" />
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="retro-bg retro-bg-enhanced">
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Hero Section - Smaller */}
-        <div className="retro-window mb-8">
-          <div className="retro-titlebar retro-titlebar-coral">
+        <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-8">
+          <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-600 to-teal-600">
             <div className="flex items-center space-x-3">
-              <Calendar className="w-4 h-4 retro-icon" />
-              <span className="retro-title text-xs font-bold uppercase">KEBELE EVENTS</span>
+              <Calendar className="w-5 h-5 text-white" />
+              <span className="text-xs font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>KEBELE EVENTS</span>
             </div>
-            <div className="retro-window-controls">
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
-            </div>
+            <button className="p-1 bg-white border-2 border-black rounded shadow hover:bg-red-500 hover:text-white transition-all">
+              <span className="text-sm font-bold">×</span>
+            </button>
           </div>
           <div className="p-4 text-center">
-            <h1 className="text-xl md:text-2xl retro-title mb-3 leading-tight uppercase tracking-tight">
+            <h1 className="text-xl md:text-2xl font-bold mb-3 leading-tight uppercase tracking-tight" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
               DISCOVER ETHIOPIAN CULTURE THROUGH EVENTS
             </h1>
             <p className="text-xs md:text-sm retro-text max-w-2xl mx-auto leading-relaxed">
@@ -527,7 +510,7 @@ const KebeleEvents: React.FC = () => {
 
         {/* Search and Filters - Only show in grid view */}
         {viewMode === 'grid' && (
-          <div className="retro-window mb-8">
+          <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-8">
             <div className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="md:col-span-2">
@@ -575,23 +558,21 @@ const KebeleEvents: React.FC = () => {
         {viewMode === 'grid' ? (
           <div className="mb-12">
             {events.length === 0 ? (
-              <div className="retro-window retro-floating text-center p-12">
-                <div className="retro-titlebar retro-titlebar-mustard mb-6">
+              <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-12">
+                <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-orange-500 to-red-500 mb-6">
                   <div className="flex items-center space-x-3">
-                    <Calendar className="w-5 h-5 retro-icon" />
-                    <span className="retro-title text-sm font-bold uppercase">NO EVENTS FOUND</span>
+                    <Calendar className="w-5 h-5 text-white" />
+                    <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>NO EVENTS FOUND</span>
                   </div>
-                  <div className="retro-window-controls">
-                    <div className="retro-window-dot"></div>
-                    <div className="retro-window-dot"></div>
-                    <div className="retro-window-dot"></div>
-                  </div>
+                  <button className="p-1 bg-white border-2 border-black rounded shadow hover:bg-red-500 hover:text-white transition-all">
+                    <span className="text-sm font-bold">×</span>
+                  </button>
                 </div>
                 <div className="w-16 h-16 bg-mustard rounded-lg flex items-center justify-center mx-auto mb-6 border-2 border-charcoal">
                   <Calendar className="w-8 h-8 text-charcoal retro-icon" />
                 </div>
-                <h3 className="retro-title text-xl font-bold mb-4 uppercase tracking-wide">No Events Found</h3>
-                <p className="retro-text text-base">Try adjusting your search criteria or check back later for new events.</p>
+                <h3 className="font-black text-xl font-bold mb-4 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>No Events Found</h3>
+                <p className="font-medium text-base" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Try adjusting your search criteria or check back later for new events.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -667,20 +648,18 @@ const KebeleEvents: React.FC = () => {
         )}
 
         {/* Call to Action */}
-        <div className="retro-window retro-floating text-center">
-          <div className="retro-titlebar retro-titlebar-teal">
+        <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
+          <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-teal-500 to-emerald-500">
             <div className="flex items-center space-x-3">
-              <Sparkles className="w-5 h-5 retro-icon" />
-              <span className="retro-title text-sm font-bold uppercase">JOIN THE CULTURE</span>
+              <Sparkles className="w-5 h-5 text-white" />
+              <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>JOIN THE CULTURE</span>
             </div>
-            <div className="retro-window-controls">
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
-            </div>
+            <button className="p-1 bg-white border-2 border-black rounded shadow hover:bg-red-500 hover:text-white transition-all">
+              <span className="text-sm font-bold">×</span>
+            </button>
           </div>
           <div className="p-8">
-            <h2 className="retro-title text-2xl font-bold mb-4 uppercase tracking-wide">READY TO EXPERIENCE CULTURE?</h2>
+            <h2 className="font-black text-2xl font-bold mb-4 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>READY TO EXPERIENCE CULTURE?</h2>
             <p className="retro-text text-base mb-6 max-w-2xl mx-auto leading-relaxed">
               Join our community events and be part of the vibrant Ethiopian cultural scene that brings people together.
             </p>

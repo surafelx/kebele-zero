@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import ImageUpload from './ImageUpload';
 import { cloudinaryService } from '../services/cloudinary';
+import { Image, Upload } from 'lucide-react';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -86,26 +87,33 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onClose, on
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={editingItem ? "Edit Image" : "Upload New Image"} size="lg">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold retro-text">Title *</label>
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={editingItem ? "Edit Image" : "Upload New Image"} 
+      size="lg"
+      icon={<Image className="w-5 h-5 text-emerald-500" />}
+      titleColor="from-emerald-500 to-teal-500"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Title *</label>
             <input
               type="text"
               required
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="retro-input w-full"
+              className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 focus:border-emerald-500 focus:outline-none transition-all font-medium placeholder-gray-400"
               placeholder="Image title"
             />
           </div>
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold retro-text">Status</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Status</label>
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="retro-input w-full bg-white"
+              className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 focus:border-emerald-500 focus:outline-none transition-all font-medium"
             >
               <option value="draft">Draft</option>
               <option value="published">Published</option>
@@ -113,80 +121,85 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onClose, on
           </div>
         </div>
 
-        <div className="space-y-3">
-          <label className="block text-sm font-semibold retro-text">Description</label>
+        <div className="space-y-2">
+          <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Description</label>
           <textarea
             rows={2}
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="retro-input w-full resize-none"
+            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 focus:border-emerald-500 focus:outline-none transition-all font-medium placeholder-gray-400 resize-none"
             placeholder="Image description"
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold retro-text">Alt Text</label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Alt Text</label>
             <input
               type="text"
               value={formData.alt_text}
               onChange={(e) => setFormData({ ...formData, alt_text: e.target.value })}
-              className="retro-input w-full"
+              className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 focus:border-emerald-500 focus:outline-none transition-all font-medium placeholder-gray-400"
               placeholder="Alt text for accessibility"
             />
           </div>
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold retro-text">Caption</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Caption</label>
             <input
               type="text"
               value={formData.caption}
               onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
-              className="retro-input w-full"
+              className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 focus:border-emerald-500 focus:outline-none transition-all font-medium placeholder-gray-400"
               placeholder="Image caption"
             />
           </div>
         </div>
 
-        <div className="space-y-3">
-          <label className="block text-sm font-semibold retro-text">Category</label>
+        <div className="space-y-2">
+          <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Category</label>
           <input
             type="text"
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="retro-input w-full"
+            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 focus:border-emerald-500 focus:outline-none transition-all font-medium placeholder-gray-400"
             placeholder="e.g., about, events, team, general"
           />
         </div>
 
-        <div className="space-y-3">
-          <label className="block text-sm font-semibold retro-text">Tags</label>
+        <div className="space-y-2">
+          <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Tags</label>
           <input
             type="text"
             value={formData.tags.join(', ')}
             onChange={(e) => setFormData({ ...formData, tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag) })}
-            className="retro-input w-full"
+            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 focus:border-emerald-500 focus:outline-none transition-all font-medium placeholder-gray-400"
             placeholder="Comma-separated tags"
           />
         </div>
 
-        <ImageUpload
-          label="Image File"
-          value={formData.media_url}
-          onChange={(url) => setFormData({ ...formData, media_url: url })}
-          placeholder="Upload or drag & drop image"
-        />
+        <div className="space-y-2">
+          <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Image File</label>
+          <ImageUpload
+            value={formData.media_url}
+            onChange={(url) => setFormData({ ...formData, media_url: url })}
+            placeholder="Upload or drag & drop image"
+          />
+        </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t-4 border-mustard">
+        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t-2 border-gray-200 mt-6">
           <button
             type="submit"
-            className="flex-1 retro-btn-success py-3 px-6"
+            className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white py-3 px-6 font-bold uppercase tracking-wide transition-all duration-200 shadow-lg active:translate-y-0.5"
           >
-            📸 {editingItem ? 'Update' : 'Upload'} Image
+            <span className="flex items-center justify-center gap-2">
+              <Upload className="w-4 h-4" />
+              {editingItem ? 'Update Image' : 'Upload Image'}
+            </span>
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="retro-btn-secondary py-3 px-6"
+            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold uppercase tracking-wide transition-colors border-2 border-gray-300"
           >
             Cancel
           </button>

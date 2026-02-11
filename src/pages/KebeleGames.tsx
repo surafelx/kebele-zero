@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Users, Gamepad2, ArrowLeft, Play, Star } from 'lucide-react';
+import { Trophy, Users, Gamepad2, ArrowLeft, Play, Star, X } from 'lucide-react';
 import { pointsAPI } from '../services/points';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -693,21 +693,6 @@ const KebeleGames: React.FC = () => {
 
   return (
     <div className="min-h-screen retro-bg">
-      {/* Modal Header */}
-      <div className="bg-white border-b-4 border-black py-4 px-6 sticky top-0 z-10 shadow-lg">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl retro-title text-gray-800 uppercase tracking-tight font-bold">GAMES MODAL</h1>
-            <p className="retro-text text-gray-600 uppercase tracking-wide text-sm">Play, compete, and earn points</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center border-2 border-black shadow-md">
-              <Gamepad2 className="w-5 h-5 text-white" />
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Hero Section - Styled like other modal cards */}
@@ -884,39 +869,56 @@ const KebeleGames: React.FC = () => {
 
       {/* Game Mode Selection Modal */}
       {showGameModeModal && currentGame && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black bg-opacity-70">
-          <div className="bg-white rounded-2xl shadow-lg max-w-md w-full">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div 
+            className="max-w-md w-full bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Retro Title Bar */}
+            <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-500 to-teal-500">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg">
+                  <Gamepad2 className="w-5 h-5 text-emerald-500" />
+                </div>
+                <h3 className="text-lg font-black text-white uppercase tracking-wide drop-shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                  {currentGame === 'checkers' ? '♟️ Checkers' : currentGame === 'marbles' ? '⚪ Marbles' : 'Game'}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowGameModeModal(false)}
+                className="p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all active:translate-y-0.5"
+              >
+                <X className="w-4 h-4 text-black" />
+              </button>
+            </div>
+            
             <div className="p-6">
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold retro-title mb-2">
-                  {currentGame === 'checkers' ? '♟️ Checkers' :
-                   currentGame === 'marbles' ? '⚪ Marbles' : 'Game'}
-                </h3>
-                <p className="retro-text text-gray-600">Choose your opponent</p>
+                <p className="retro-text text-gray-600 font-medium" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Choose your opponent</p>
               </div>
 
               <div className="space-y-4">
                 {currentGame !== 'pool' && currentGame !== 'marbles' && (
                   <button
                     onClick={() => selectGameMode('human')}
-                    className="w-full retro-btn py-4 px-6 flex items-center justify-center space-x-3"
+                    className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white py-4 px-6 font-bold uppercase tracking-wide transition-all duration-200 shadow-lg active:translate-y-0.5 flex items-center justify-center space-x-3 border-2 border-black"
                   >
                     <span className="text-2xl">👥</span>
                     <div className="text-left">
-                      <div className="font-bold">vs Human</div>
-                      <div className="text-sm opacity-80">Play against another player</div>
+                      <div className="font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>vs Human</div>
+                      <div className="text-sm opacity-80" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Play against another player</div>
                     </div>
                   </button>
                 )}
 
                 <button
                   onClick={() => selectGameMode('computer')}
-                  className="w-full retro-btn py-4 px-6 flex items-center justify-center space-x-3"
+                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white py-4 px-6 font-bold uppercase tracking-wide transition-all duration-200 shadow-lg active:translate-y-0.5 flex items-center justify-center space-x-3 border-2 border-black"
                 >
                   <span className="text-2xl">🤖</span>
                   <div className="text-left">
-                    <div className="font-bold">{currentGame === 'pool' ? 'Play Pool' : 'vs Computer'}</div>
-                    <div className="text-sm opacity-80">
+                    <div className="font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{currentGame === 'pool' ? 'Play Pool' : 'vs Computer'}</div>
+                    <div className="text-sm opacity-80" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                       {currentGame === 'pool' ? 'Challenge the AI in 9-Ball Pool' : 'Challenge the AI opponent'}
                     </div>
                   </div>
@@ -926,7 +928,7 @@ const KebeleGames: React.FC = () => {
               <div className="mt-6 text-center">
                 <button
                   onClick={() => setShowGameModeModal(false)}
-                  className="retro-btn-secondary px-6 py-2"
+                  className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold uppercase tracking-wide transition-colors border-2 border-gray-300"
                 >
                   Cancel
                 </button>
@@ -938,9 +940,30 @@ const KebeleGames: React.FC = () => {
 
       {/* Game Modal */}
       {currentGame && selectedGameMode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-2xl shadow-lg max-w-5xl w-full max-h-[95vh] overflow-hidden">
-            <div className="p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div 
+            className="max-w-5xl w-full bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden max-h-[95vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Retro Title Bar */}
+            <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-500 to-teal-500">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg">
+                  <Gamepad2 className="w-5 h-5 text-emerald-500" />
+                </div>
+                <h3 className="text-lg font-black text-white uppercase tracking-wide drop-shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                  {currentGame === 'checkers' ? '♟️ Checkers' : currentGame === 'marbles' ? '⚪ Marbles' : 'Game'}
+                </h3>
+              </div>
+              <button
+                onClick={closeGame}
+                className="p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all active:translate-y-0.5"
+              >
+                <X className="w-4 h-4 text-black" />
+              </button>
+            </div>
+            
+            <div className="p-6 flex-1 overflow-y-auto max-h-[calc(95vh-80px)]">
               {currentGame === 'checkers' && <CheckersGameComponent onClose={closeGame} gameMode={selectedGameMode} user={user} />}
               {currentGame === 'marbles' && <MarblesGameComponent onClose={closeGame} user={user} />}
             </div>

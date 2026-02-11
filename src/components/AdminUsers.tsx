@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, CheckCircle, Settings, Trophy, MessageSquare, Gamepad2, Plus, Search, Filter, X, Mail, User as UserIcon, Shield, Eye, Edit, Trash2 } from 'lucide-react';
+import { Users, CheckCircle, Shield, Trophy, MessageSquare, Gamepad2, Plus, Search, Filter, X, Mail, User as UserIcon, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 
 const AdminUsers: React.FC = () => {
@@ -68,76 +68,83 @@ const AdminUsers: React.FC = () => {
   const totalGames = gameScores.length;
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800">User Management</h2>
-          <p className="text-gray-500 mt-1">Manage platform users and their roles</p>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div className="flex items-center justify-between px-6 py-4 border-b-4 border-black bg-gradient-to-r from-emerald-600 to-teal-600">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-2 border-black shadow-lg">
+              <Users className="w-7 h-7 text-black" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>User Management</h1>
+              <p className="text-sm text-emerald-100 font-bold uppercase">Manage platform users and roles</p>
+            </div>
+          </div>
+          <button
+            onClick={() => { setShowUserForm(true); setEditingUser(null); setUserFormData({ email: '', username: '', role: 'user', is_active: true }); }}
+            className="retro-btn px-4 py-2 bg-white text-black"
+          >
+            <Plus className="w-4 h-4 inline mr-2" />
+            Add User
+          </button>
         </div>
-        <button
-          onClick={() => { setShowUserForm(true); setEditingUser(null); setUserFormData({ email: '', username: '', role: 'user', is_active: true }); }}
-          className="flex items-center space-x-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Add User</span>
-        </button>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - Retro Style with Black Icons */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 mb-3">
-              <Users className="w-6 h-6 text-white" />
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-4 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <Users className="w-6 h-6 text-black" />
             </div>
-            <p className="text-2xl font-bold text-gray-800">{totalUsers}</p>
-            <p className="text-xs text-gray-500 font-medium">Total Users</p>
+            <p className="text-3xl font-black text-gray-900 retro-title">{totalUsers}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Users</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-200 mb-3">
-              <CheckCircle className="w-6 h-6 text-white" />
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-4 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <CheckCircle className="w-6 h-6 text-black" />
             </div>
-            <p className="text-2xl font-bold text-gray-800">{activeUsers}</p>
-            <p className="text-xs text-gray-500 font-medium">Active</p>
+            <p className="text-3xl font-black text-gray-900 retro-title">{activeUsers}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Active</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200 mb-3">
-              <Shield className="w-6 h-6 text-white" />
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-4 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <Shield className="w-6 h-6 text-black" />
             </div>
-            <p className="text-2xl font-bold text-gray-800">{adminUsers}</p>
-            <p className="text-xs text-gray-500 font-medium">Admins</p>
+            <p className="text-3xl font-black text-gray-900 retro-title">{adminUsers}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Admins</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-200 mb-3">
-              <Trophy className="w-6 h-6 text-white" />
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-4 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <Trophy className="w-6 h-6 text-black" />
             </div>
-            <p className="text-2xl font-bold text-gray-800">{totalPoints.toLocaleString()}</p>
-            <p className="text-xs text-gray-500 font-medium">Total Points</p>
+            <p className="text-3xl font-black text-gray-900 retro-title">{totalPoints.toLocaleString()}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Points</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-200 mb-3">
-              <MessageSquare className="w-6 h-6 text-white" />
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-4 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <MessageSquare className="w-6 h-6 text-black" />
             </div>
-            <p className="text-2xl font-bold text-gray-800">{totalPosts}</p>
-            <p className="text-xs text-gray-500 font-medium">Forum Posts</p>
+            <p className="text-3xl font-black text-gray-900 retro-title">{totalPosts}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Posts</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-pink-200 mb-3">
-              <Gamepad2 className="w-6 h-6 text-white" />
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-4 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <Gamepad2 className="w-6 h-6 text-black" />
             </div>
-            <p className="text-2xl font-bold text-gray-800">{totalGames}</p>
-            <p className="text-xs text-gray-500 font-medium">Games Played</p>
+            <p className="text-3xl font-black text-gray-900 retro-title">{totalGames}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Games</p>
           </div>
         </div>
       </div>
@@ -145,22 +152,31 @@ const AdminUsers: React.FC = () => {
       {/* User Form Modal */}
       {showUserForm && (
         <div 
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[100000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => { setShowUserForm(false); setEditingUser(null); }}
         >
           <div 
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-in zoom-in-95 duration-200"
+            className="max-w-md w-full bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800">{editingUser ? 'Edit User' : 'Add New User'}</h3>
+            {/* Retro Title Bar */}
+            <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-500 to-teal-500">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg border-2 border-black">
+                  <Users className="w-5 h-5 text-black" />
+                </div>
+                <h3 className="text-lg font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                  {editingUser ? 'Edit User' : 'Add New User'}
+                </h3>
+              </div>
               <button 
                 onClick={() => { setShowUserForm(false); setEditingUser(null); }}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors group"
+                className="p-2 bg-white border-2 border-black rounded-lg shadow hover:bg-red-500 hover:text-white transition-all"
               >
-                <X className="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
+                <X className="w-4 h-4 text-black" />
               </button>
             </div>
+            
             <div className="p-6">
               <form onSubmit={async (e) => {
                 e.preventDefault();
@@ -189,46 +205,37 @@ const AdminUsers: React.FC = () => {
                 }
               }} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="email"
-                      required
-                      value={userFormData.email}
-                      onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      placeholder="user@example.com"
-                    />
-                  </div>
+                  <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={userFormData.email}
+                    onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
+                    className="retro-input w-full"
+                    placeholder="user@example.com"
+                  />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Username</label>
-                  <div className="relative">
-                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      required
-                      value={userFormData.username}
-                      onChange={(e) => setUserFormData({ ...userFormData, username: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      placeholder="username"
-                    />
-                  </div>
+                  <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Username</label>
+                  <input
+                    type="text"
+                    required
+                    value={userFormData.username}
+                    onChange={(e) => setUserFormData({ ...userFormData, username: e.target.value })}
+                    className="retro-input w-full"
+                    placeholder="username"
+                  />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Role</label>
-                  <div className="relative">
-                    <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <select
-                      value={userFormData.role}
-                      onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  </div>
+                  <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Role</label>
+                  <select
+                    value={userFormData.role}
+                    onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
+                    className="retro-input w-full"
+                  >
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
@@ -236,18 +243,18 @@ const AdminUsers: React.FC = () => {
                     id="is_active"
                     checked={userFormData.is_active}
                     onChange={(e) => setUserFormData({ ...userFormData, is_active: e.target.checked })}
-                    className="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500"
+                    className="w-5 h-5 border-2 border-black rounded-none"
                   />
-                  <label htmlFor="is_active" className="text-sm font-medium text-gray-700">Active</label>
+                  <label htmlFor="is_active" className="text-sm font-bold text-gray-700 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Active</label>
                 </div>
                 <div className="flex gap-3 pt-4">
-                  <button type="submit" className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-colors">
+                  <button type="submit" className="flex-1 retro-btn">
                     {editingUser ? 'Update User' : 'Add User'}
                   </button>
                   <button
                     type="button"
                     onClick={() => { setShowUserForm(false); setEditingUser(null); setUserFormData({ email: '', username: '', role: 'user', is_active: true }); }}
-                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                    className="flex-1 retro-btn bg-gray-400 border-gray-500"
                   >
                     Cancel
                   </button>
@@ -258,30 +265,32 @@ const AdminUsers: React.FC = () => {
         </div>
       )}
 
-      {/* Search and Filter */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Search Users</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by email or username..."
-                value={userSearchTerm}
-                onChange={(e) => setUserSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              />
+      {/* Search and Filter - Retro Card */}
+      <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div className="px-6 py-4 border-b-4 border-black bg-gradient-to-r from-gray-100 to-gray-200">
+          <h3 className="text-lg font-black text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Search & Filter</h3>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Search Users</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="Search by email or username..."
+                  value={userSearchTerm}
+                  onChange={(e) => setUserSearchTerm(e.target.value)}
+                  className="retro-input w-full pl-12"
+                />
+              </div>
             </div>
-          </div>
-          <div className="lg:w-64">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Filter</label>
-            <div className="relative">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Filter</label>
               <select
                 value={userFilterStatus}
                 onChange={(e) => setUserFilterStatus(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
+                className="retro-input w-full"
               >
                 <option value="">All Users</option>
                 <option value="active">Active Users</option>
@@ -294,33 +303,36 @@ const AdminUsers: React.FC = () => {
         </div>
       </div>
 
-      {/* Users Table */}
-      {loading ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center py-16">
-          <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500">Loading users...</p>
+      {/* Users Table - Retro Card */}
+      <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div className="px-6 py-4 border-b-4 border-black bg-gradient-to-r from-emerald-500 to-teal-500">
+          <h3 className="text-lg font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Users ({filteredUsers.length})</h3>
         </div>
-      ) : filteredUsers.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center py-16">
-          <Users className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-          <p className="text-xl font-semibold text-gray-800">No users found</p>
-          <p className="text-gray-500 mt-2">
-            {users.length === 0 ? 'Users will appear here' : 'No users match your search criteria'}
-          </p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {loading ? (
+          <div className="p-12 text-center">
+            <div className="retro-spinner w-16 h-16 mx-auto mb-4"></div>
+            <p className="retro-text text-lg">Loading users...</p>
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="p-12 text-center">
+            <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="retro-text text-xl">No users found</p>
+            <p className="retro-text text-sm opacity-70 mt-2">
+              {users.length === 0 ? 'Users will appear here' : 'No users match your search criteria'}
+            </p>
+          </div>
+        ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left p-4 text-sm font-semibold text-gray-600">User</th>
-                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Role</th>
-                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Points</th>
-                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Posts</th>
-                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Games</th>
-                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Joined</th>
-                  <th className="text-left p-4 text-sm font-semibold text-gray-600">Actions</th>
+                <tr className="bg-gray-100 border-b-4 border-black">
+                  <th className="text-left p-4 text-sm font-black text-gray-800 uppercase tracking-wide">User</th>
+                  <th className="text-left p-4 text-sm font-black text-gray-800 uppercase tracking-wide">Role</th>
+                  <th className="text-left p-4 text-sm font-black text-gray-800 uppercase tracking-wide">Points</th>
+                  <th className="text-left p-4 text-sm font-black text-gray-800 uppercase tracking-wide">Posts</th>
+                  <th className="text-left p-4 text-sm font-black text-gray-800 uppercase tracking-wide">Games</th>
+                  <th className="text-left p-4 text-sm font-black text-gray-800 uppercase tracking-wide">Joined</th>
+                  <th className="text-left p-4 text-sm font-black text-gray-800 uppercase tracking-wide">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -329,17 +341,17 @@ const AdminUsers: React.FC = () => {
                   const userPostsCount = forumPosts.filter(p => p.created_by === user.id).length;
                   const userGamesCount = gameScores.filter(g => g.user_id === user.id).length;
                   return (
-                    <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                    <tr key={user.id} className="border-b-2 border-black hover:bg-gray-50">
                       <td className="p-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-md">
-                            <span className="text-white font-bold text-sm">
+                          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border-2 border-black">
+                            <span className="text-black font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                               {user.email?.charAt(0).toUpperCase()}
                             </span>
                           </div>
                           <div>
-                            <p className="font-medium text-gray-800">{user.username || user.email?.split('@')[0]}</p>
-                            <p className="text-sm text-gray-500">{user.email}</p>
+                            <p className="font-bold text-gray-800 retro-text">{user.username || user.email?.split('@')[0]}</p>
+                            <p className="text-sm text-gray-500 retro-text">{user.email}</p>
                           </div>
                         </div>
                       </td>
@@ -354,29 +366,29 @@ const AdminUsers: React.FC = () => {
                                 .eq('id', user.id);
                               if (error) throw error;
                               setUsers(users.map(u => u.id === user.id ? { ...u, role: e.target.value } : u));
-                              alert('User role updated successfully!');
+                              alert('User role updated!');
                             } catch (error) {
                               console.error('Error updating user role:', error);
                               alert('Error updating user role');
                             }
                           }}
-                          className="px-3 py-1 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                          className="retro-input w-32 py-2"
                         >
                           <option value="user">User</option>
                           <option value="admin">Admin</option>
                         </select>
                       </td>
                       <td className="p-4">
-                        <span className="font-bold text-amber-600">{userStats?.total_points || 0}</span>
+                        <span className="font-black text-gray-900 retro-title text-lg">{userStats?.total_points || 0}</span>
                       </td>
                       <td className="p-4">
-                        <span className="font-bold text-blue-600">{userPostsCount}</span>
+                        <span className="font-black text-gray-900 retro-title text-lg">{userPostsCount}</span>
                       </td>
                       <td className="p-4">
-                        <span className="font-bold text-green-600">{userGamesCount}</span>
+                        <span className="font-black text-gray-900 retro-title text-lg">{userGamesCount}</span>
                       </td>
                       <td className="p-4">
-                        <span className="text-sm text-gray-500">{new Date(user.created_at).toLocaleDateString()}</span>
+                        <span className="retro-text text-sm">{new Date(user.created_at).toLocaleDateString()}</span>
                       </td>
                       <td className="p-4">
                         <div className="flex space-x-2">
@@ -391,14 +403,14 @@ const AdminUsers: React.FC = () => {
                               });
                               setShowUserForm(true);
                             }}
-                            className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                            className="p-2 bg-white border-2 border-black rounded-lg hover:bg-yellow-100 transition-colors"
                             title="Edit"
                           >
-                            <Edit className="w-4 h-4" />
+                            <Edit className="w-4 h-4 text-black" />
                           </button>
                           <button
                             onClick={async () => {
-                              if (!confirm('Are you sure you want to deactivate this user?')) return;
+                              if (!confirm('Deactivate this user?')) return;
                               try {
                                 const { error } = await supabase
                                   .from('users')
@@ -406,17 +418,17 @@ const AdminUsers: React.FC = () => {
                                   .eq('id', user.id);
                                 if (error) throw error;
                                 setUsers(users.map(u => u.id === user.id ? { ...u, is_active: false } : u));
-                                alert('User deactivated successfully!');
+                                alert('User deactivated!');
                               } catch (error) {
                                 console.error('Error deactivating user:', error);
                                 alert('Error deactivating user');
                               }
                             }}
-                            className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                            className="p-2 bg-white border-2 border-black rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
                             disabled={!user.is_active}
                             title="Deactivate"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 text-black" />
                           </button>
                         </div>
                       </td>
@@ -426,8 +438,8 @@ const AdminUsers: React.FC = () => {
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

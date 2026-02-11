@@ -13,3 +13,21 @@
 .vercel-preview-card, #vercel-preview-card {
   display: none !important;
 }
+
+/* Admin Route Styles - Override Folio Canvas Styles */
+body.admin-route,
+html.admin-route {
+  position: static !important;
+  overflow: auto !important;
+}
+
+body.admin-route .canvas,
+html.admin-route .canvas {
+  display: none !important;
+}
+
+body.admin-route #root,
+html.admin-route #root {
+  position: relative;
+  z-index: 1;
+}

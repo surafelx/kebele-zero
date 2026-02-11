@@ -7,11 +7,9 @@ import {
   Shield, 
   Palette, 
   Mail, 
-  Database, 
-  Upload, 
-  RefreshCw,
   Check,
-  AlertTriangle
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 
@@ -36,19 +34,21 @@ interface SiteSettings {
   updated_at?: string;
 }
 
+const defaultSettings: SiteSettings = {
+  site_name: 'Kebele Zero',
+  site_description: 'Empowering Ethiopian communities through culture, commerce, and connection',
+  contact_email: 'contact@kebelezero.com',
+  maintenance_mode: false,
+  allow_registration: true,
+  enable_notifications: true,
+  primary_color: '#7c3aed',
+  logo_url: null,
+  favicon_url: null,
+  social_links: {}
+};
+
 const AdminSettings = () => {
-  const [settings, setSettings] = useState<SiteSettings>({
-    site_name: 'Kebele Zero',
-    site_description: 'Empowering Ethiopian communities through culture, commerce, and connection',
-    contact_email: 'contact@kebelezero.com',
-    maintenance_mode: false,
-    allow_registration: true,
-    enable_notifications: true,
-    primary_color: '#7c3aed',
-    logo_url: null,
-    favicon_url: null,
-    social_links: {}
-  });
+  const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -70,7 +70,7 @@ const AdminSettings = () => {
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching settings:', error);
       } else if (data) {
-        setSettings({ ...settings, ...data });
+        setSettings({ ...defaultSettings, ...data });
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -114,73 +114,82 @@ const AdminSettings = () => {
     }));
   };
 
+  // Simple loading spinner
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center p-8">
+        <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Settings</h2>
-          <p className="text-gray-500 mt-1">Configure your platform settings</p>
-        </div>
-        <button
-          onClick={handleSaveSettings}
-          disabled={saving}
-          className="inline-flex items-center space-x-2 bg-purple-500 hover:bg-purple-600 text-white px-5 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50"
-        >
-          {saving ? (
-            <RefreshCw className="w-5 h-5 animate-spin" />
-          ) : (
-            <Save className="w-5 h-5" />
-          )}
-          <span>{saving ? 'Saving...' : 'Save Settings'}</span>
-        </button>
-      </div>
-
-      {/* Status Message */}
+      {/* Status Message - Retro Style */}
       {message && (
-        <div className={`flex items-center space-x-3 p-4 rounded-xl ${
-          message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-        }`}>
+        <div className={`flex items-center space-x-3 p-4 border-4 border-black ${message.type === 'success' ? 'bg-emerald-100' : 'bg-red-100'}`}>
           {message.type === 'success' ? (
-            <Check className="w-5 h-5" />
+            <Check className="w-5 h-5 text-emerald-600" />
           ) : (
-            <AlertTriangle className="w-5 h-5" />
+            <AlertTriangle className="w-5 h-5 text-red-600" />
           )}
-          <span>{message.text}</span>
+          <span className="retro-text font-bold">{message.text}</span>
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="flex overflow-x-auto">
+      {/* Tabs Container - Retro Style */}
+      <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        {/* Retro Title Bar */}
+        <div className="flex items-center justify-between px-6 py-4 border-b-4 border-black bg-gradient-to-r from-emerald-600 to-teal-600">
+          <div className="flex items-center space-x-4">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border-2 border-black shadow-lg">
+              <Settings className="w-6 h-6 text-black" />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Settings</h2>
+              <p className="text-sm text-emerald-100 font-bold uppercase">Configure your platform settings</p>
+            </div>
+          </div>
+          <button
+            onClick={handleSaveSettings}
+            disabled={saving}
+            className="retro-btn px-4 py-2 bg-white"
+          >
+            {saving ? (
+              <RefreshCw className="w-4 h-4 inline animate-spin mr-2" />
+            ) : (
+              <Save className="w-4 h-4 inline mr-2" />
+            )}
+            {saving ? 'Saving...' : 'Save Settings'}
+          </button>
+        </div>
+        
+        {/* Tabs Navigation */}
+        <div className="flex overflow-x-auto border-b-4 border-black bg-gray-100">
           {[
             { id: 'general', label: 'General', icon: Globe },
             { id: 'appearance', label: 'Appearance', icon: Palette },
             { id: 'notifications', label: 'Notifications', icon: Bell },
             { id: 'security', label: 'Security', icon: Shield },
             { id: 'contact', label: 'Contact', icon: Mail },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors ${
-                activeTab === tab.id
-                  ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-            </button>
-          ))}
+          ].map(tab => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-6 py-4 text-sm font-bold uppercase tracking-wide transition-all border-b-4 ${
+                  activeTab === tab.id
+                    ? 'bg-white border-black text-emerald-700'
+                    : 'border-transparent text-gray-600 hover:bg-gray-50'
+                }`}
+                style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="p-6">
@@ -189,78 +198,78 @@ const AdminSettings = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <label className="block text-sm font-semibold text-gray-700">Site Name</label>
+                  <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Site Name</label>
                   <input
                     type="text"
                     value={settings.site_name}
                     onChange={(e) => handleInputChange('site_name', e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="retro-input"
                     placeholder="Enter site name"
                   />
                 </div>
                 <div className="space-y-3">
-                  <label className="block text-sm font-semibold text-gray-700">Contact Email</label>
+                  <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Contact Email</label>
                   <input
                     type="email"
                     value={settings.contact_email}
                     onChange={(e) => handleInputChange('contact_email', e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="retro-input"
                     placeholder="contact@example.com"
                   />
                 </div>
               </div>
 
               <div className="space-y-3">
-                <label className="block text-sm font-semibold text-gray-700">Site Description</label>
+                <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Site Description</label>
                 <textarea
                   value={settings.site_description}
                   onChange={(e) => handleInputChange('site_description', e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
+                  className="retro-input resize-none"
                   placeholder="Enter site description"
                 />
               </div>
 
               <div className="space-y-4">
-                <label className="block text-sm font-semibold text-gray-700">Social Links</label>
+                <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Social Links</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center space-x-3">
-                    <span className="text-blue-600 font-medium w-20">Facebook</span>
+                    <span className="text-blue-600 font-bold w-20 uppercase text-sm">Facebook</span>
                     <input
                       type="url"
                       value={settings.social_links.facebook || ''}
                       onChange={(e) => handleSocialChange('facebook', e.target.value)}
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="retro-input flex-1"
                       placeholder="https://facebook.com/..."
                     />
                   </div>
                   <div className="flex items-center space-x-3">
-                    <span className="text-blue-400 font-medium w-20">Twitter</span>
+                    <span className="text-sky-400 font-bold w-20 uppercase text-sm">Twitter</span>
                     <input
                       type="url"
                       value={settings.social_links.twitter || ''}
                       onChange={(e) => handleSocialChange('twitter', e.target.value)}
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="retro-input flex-1"
                       placeholder="https://twitter.com/..."
                     />
                   </div>
                   <div className="flex items-center space-x-3">
-                    <span className="text-pink-600 font-medium w-20">Instagram</span>
+                    <span className="text-pink-600 font-bold w-20 uppercase text-sm">Instagram</span>
                     <input
                       type="url"
                       value={settings.social_links.instagram || ''}
                       onChange={(e) => handleSocialChange('instagram', e.target.value)}
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="retro-input flex-1"
                       placeholder="https://instagram.com/..."
                     />
                   </div>
                   <div className="flex items-center space-x-3">
-                    <span className="text-blue-500 font-medium w-20">Telegram</span>
+                    <span className="text-blue-500 font-bold w-20 uppercase text-sm">Telegram</span>
                     <input
                       type="url"
                       value={settings.social_links.telegram || ''}
                       onChange={(e) => handleSocialChange('telegram', e.target.value)}
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="retro-input flex-1"
                       placeholder="https://t.me/..."
                     />
                   </div>
@@ -273,63 +282,37 @@ const AdminSettings = () => {
           {activeTab === 'appearance' && (
             <div className="space-y-6">
               <div className="space-y-3">
-                <label className="block text-sm font-semibold text-gray-700">Primary Color</label>
+                <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Primary Color</label>
                 <div className="flex items-center space-x-4">
                   <input
                     type="color"
                     value={settings.primary_color}
                     onChange={(e) => handleInputChange('primary_color', e.target.value)}
-                    className="w-16 h-12 rounded-xl border-2 border-gray-200 cursor-pointer"
+                    className="w-16 h-12 border-4 border-black cursor-pointer"
                   />
                   <input
                     type="text"
                     value={settings.primary_color}
                     onChange={(e) => handleInputChange('primary_color', e.target.value)}
-                    className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="retro-input flex-1"
                     placeholder="#7c3aed"
                   />
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="block text-sm font-semibold text-gray-700">Site Logo</label>
+              <div className="p-4 bg-gray-100 border-4 border-black">
+                <p className="retro-text text-sm font-bold uppercase mb-3">Preview</p>
                 <div className="flex items-center space-x-4">
-                  {settings.logo_url && (
-                    <img src={settings.logo_url} alt="Logo" className="w-16 h-16 object-contain rounded-xl border border-gray-200" />
-                  )}
-                  <button className="flex items-center space-x-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-colors">
-                    <Upload className="w-5 h-5" />
-                    <span>Upload Logo</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="block text-sm font-semibold text-gray-700">Favicon</label>
-                <div className="flex items-center space-x-4">
-                  {settings.favicon_url && (
-                    <img src={settings.favicon_url} alt="Favicon" className="w-12 h-12 object-contain rounded-xl border border-gray-200" />
-                  )}
-                  <button className="flex items-center space-x-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-colors">
-                    <Upload className="w-5 h-5" />
-                    <span>Upload Favicon</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <p className="text-sm text-gray-500">Preview of your primary color:</p>
-                <div className="flex items-center space-x-4 mt-3">
                   <div 
-                    className="w-12 h-12 rounded-xl shadow-md"
+                    className="w-12 h-12 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                     style={{ backgroundColor: settings.primary_color }}
                   ></div>
-                  <div 
-                    className="px-6 py-3 rounded-xl font-medium text-white"
+                  <button 
+                    className="px-6 py-3 font-bold uppercase tracking-wide text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                     style={{ backgroundColor: settings.primary_color }}
                   >
                     Button Preview
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -339,14 +322,14 @@ const AdminSettings = () => {
           {activeTab === 'notifications' && (
             <div className="space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-gray-100 border-4 border-black">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <div className="w-10 h-10 bg-white border-2 border-black flex items-center justify-center">
                       <Bell className="w-5 h-5 text-purple-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-800">Enable Notifications</h4>
-                      <p className="text-sm text-gray-500">Allow the system to send notifications to users</p>
+                      <h4 className="font-bold text-gray-800 uppercase tracking-wide">Enable Notifications</h4>
+                      <p className="retro-text text-sm">Allow the system to send notifications to users</p>
                     </div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -356,49 +339,23 @@ const AdminSettings = () => {
                       onChange={(e) => handleInputChange('enable_notifications', e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
+                    <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none border-2 border-black peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
                   </label>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-gray-100 border-4 border-black">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <div className="w-10 h-10 bg-white border-2 border-black flex items-center justify-center">
                       <Mail className="w-5 h-5 text-green-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-800">Email Notifications</h4>
-                      <p className="text-sm text-gray-500">Send email notifications for important events</p>
+                      <h4 className="font-bold text-gray-800 uppercase tracking-wide">Email Notifications</h4>
+                      <p className="retro-text text-sm">Send email notifications for important events</p>
                     </div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={true}
-                      onChange={() => {}}
-                      className="sr-only peer"
-                    />
-                    <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
-                  </label>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800">Push Notifications</h4>
-                      <p className="text-sm text-gray-500">Enable browser push notifications</p>
-                    </div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={false}
-                      onChange={() => {}}
-                      className="sr-only peer"
-                    />
-                    <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
+                    <input type="checkbox" checked={true} onChange={() => {}} className="sr-only peer" />
+                    <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none border-2 border-black peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-600"></div>
                   </label>
                 </div>
               </div>
@@ -408,14 +365,14 @@ const AdminSettings = () => {
           {/* Security Settings */}
           {activeTab === 'security' && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-gray-100 border-4 border-black">
                 <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-white border-2 border-black flex items-center justify-center">
                     <AlertTriangle className="w-5 h-5 text-orange-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800">Maintenance Mode</h4>
-                    <p className="text-sm text-gray-500">Temporarily disable public access to the site</p>
+                    <h4 className="font-bold text-gray-800 uppercase tracking-wide">Maintenance Mode</h4>
+                    <p className="retro-text text-sm">Temporarily disable public access to the site</p>
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -425,18 +382,18 @@ const AdminSettings = () => {
                     onChange={(e) => handleInputChange('maintenance_mode', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none border-2 border-black peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-orange-600"></div>
                 </label>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-gray-100 border-4 border-black">
                 <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-white border-2 border-black flex items-center justify-center">
                     <Shield className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800">Allow User Registration</h4>
-                    <p className="text-sm text-gray-500">Allow new users to register on the platform</p>
+                    <h4 className="font-bold text-gray-800 uppercase tracking-wide">Allow User Registration</h4>
+                    <p className="retro-text text-sm">Allow new users to register on the platform</p>
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -446,23 +403,23 @@ const AdminSettings = () => {
                     onChange={(e) => handleInputChange('allow_registration', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none border-2 border-black peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-600"></div>
                 </label>
               </div>
 
-              <div className="p-6 bg-red-50 border border-red-100 rounded-xl">
-                <h4 className="font-semibold text-red-800 mb-2">Danger Zone</h4>
-                <p className="text-sm text-red-600 mb-4">
+              <div className="p-4 bg-red-100 border-4 border-black">
+                <h4 className="font-bold text-red-800 uppercase tracking-wide mb-2">Danger Zone</h4>
+                <p className="retro-text text-sm text-red-600 mb-4">
                   These actions are irreversible. Please proceed with caution.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors">
+                  <button className="retro-btn px-4 py-2 bg-red-500 border-red-600">
                     Clear All Cache
                   </button>
-                  <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors">
+                  <button className="retro-btn px-4 py-2 bg-red-500 border-red-600">
                     Reset All Settings
                   </button>
-                  <button className="px-4 py-2 border border-red-500 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors">
+                  <button className="retro-btn px-4 py-2">
                     Export Data
                   </button>
                 </div>
@@ -473,84 +430,48 @@ const AdminSettings = () => {
           {/* Contact Settings */}
           {activeTab === 'contact' && (
             <div className="space-y-6">
-              <div className="bg-purple-50 border border-purple-100 rounded-xl p-6">
-                <h4 className="font-semibold text-purple-800 mb-4 flex items-center space-x-2">
+              <div className="p-4 bg-purple-100 border-4 border-black">
+                <h4 className="font-bold text-purple-800 uppercase tracking-wide mb-4 flex items-center space-x-2">
                   <Mail className="w-5 h-5" />
                   <span>Contact Information</span>
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-gray-700">Contact Email</label>
+                    <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Contact Email</label>
                     <input
                       type="email"
                       value={settings.contact_email}
                       onChange={(e) => handleInputChange('contact_email', e.target.value)}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="retro-input"
                       placeholder="contact@example.com"
                     />
                   </div>
                   <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-gray-700">Support Email</label>
+                    <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Support Email</label>
                     <input
                       type="email"
                       defaultValue="support@kebelezero.com"
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="retro-input"
                       placeholder="support@example.com"
                     />
                   </div>
                   <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-gray-700">Phone Number</label>
+                    <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Phone Number</label>
                     <input
                       type="tel"
                       defaultValue="+251 123 456 789"
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="retro-input"
                       placeholder="+251 123 456 789"
                     />
                   </div>
                   <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-gray-700">Address</label>
+                    <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Address</label>
                     <input
                       type="text"
                       defaultValue="Addis Ababa, Ethiopia"
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="retro-input"
                       placeholder="Enter address"
                     />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 border border-gray-100 rounded-xl p-6">
-                <h4 className="font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                  <Database className="w-5 h-5" />
-                  <span>Email Templates</span>
-                </h4>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
-                    <div>
-                      <h5 className="font-medium text-gray-800">Welcome Email</h5>
-                      <p className="text-sm text-gray-500">Sent to new users after registration</p>
-                    </div>
-                    <button className="text-purple-600 hover:text-purple-700 font-medium text-sm">
-                      Edit Template
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
-                    <div>
-                      <h5 className="font-medium text-gray-800">Password Reset</h5>
-                      <p className="text-sm text-gray-500">Sent when users request password reset</p>
-                    </div>
-                    <button className="text-purple-600 hover:text-purple-700 font-medium text-sm">
-                      Edit Template
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
-                    <div>
-                      <h5 className="font-medium text-gray-800">Order Confirmation</h5>
-                      <p className="text-sm text-gray-500">Sent after marketplace purchases</p>
-                    </div>
-                    <button className="text-purple-600 hover:text-purple-700 font-medium text-sm">
-                      Edit Template
-                    </button>
                   </div>
                 </div>
               </div>

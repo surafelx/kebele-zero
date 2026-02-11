@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Image, Plus, Edit3, Trash2, Search, Filter, Play, Eye, Folder } from 'lucide-react';
+import { Image, Plus, Trash2, Search, Play, Eye, Folder, Edit3 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import Modal from '../components/Modal';
 
@@ -93,7 +93,6 @@ const AdminMedia = () => {
     currentPage * itemsPerPage
   );
 
-  // Reset to page 1 when search/filter changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filterCategory]);
@@ -102,77 +101,85 @@ const AdminMedia = () => {
 
   const getYouTubeThumbnail = (id: string) => `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
 
+  // Simple loading spinner
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Video Management</h2>
-          <p className="text-gray-500 mt-1">Upload and manage videos</p>
+      {/* Page Header */}
+      <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div className="flex items-center justify-between px-6 py-4 border-b-4 border-black bg-gradient-to-r from-blue-600 to-indigo-600">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-2 border-black shadow-lg">
+              <Image className="w-7 h-7 text-black" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Video Management</h1>
+              <p className="text-sm text-blue-100 font-bold uppercase">Upload and manage videos</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowVideoForm(true)}
+            className="retro-btn px-4 py-2 bg-white text-black"
+          >
+            <Plus className="w-4 h-4 inline mr-2" />
+            Upload Video
+          </button>
         </div>
-        <button
-          onClick={() => setShowVideoForm(true)}
-          className="inline-flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Upload Video</span>
-        </button>
       </div>
 
-      {/* Stats */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Total Videos</p>
-              <p className="text-2xl font-bold text-gray-800">{videos.length}</p>
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-5 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <Play className="w-6 h-6 text-black" />
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <Play className="w-6 h-6 text-blue-600" />
-            </div>
+            <p className="text-3xl font-black text-gray-900 retro-title">{videos.length}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Total Videos</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">This Week</p>
-              <p className="text-2xl font-bold text-gray-800">
-                {videos.filter(v => v.published_at && new Date(v.published_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
-              </p>
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-5 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <Play className="w-6 h-6 text-black" />
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <Play className="w-6 h-6 text-green-600" />
-            </div>
+            <p className="text-3xl font-black text-gray-900 retro-title">
+              {videos.filter(v => v.published_at && new Date(v.published_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
+            </p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">This Week</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Total Views</p>
-              <p className="text-2xl font-bold text-gray-800">
-                {videos.reduce((sum, v) => sum + (v.statistics?.viewCount || 0), 0)}
-              </p>
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-5 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <Eye className="w-6 h-6 text-black" />
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <Eye className="w-6 h-6 text-purple-600" />
-            </div>
+            <p className="text-3xl font-black text-gray-900 retro-title">
+              {videos.reduce((sum, v) => sum + (v.statistics?.viewCount || 0), 0)}
+            </p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Total Views</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Categories</p>
-              <p className="text-2xl font-bold text-gray-800">{categories.length}</p>
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="p-5 text-center">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
+              <Folder className="w-6 h-6 text-black" />
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-              <Folder className="w-6 h-6 text-orange-600" />
-            </div>
+            <p className="text-3xl font-black text-gray-900 retro-title">{categories.length}</p>
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Categories</p>
           </div>
         </div>
       </div>
 
-      {/* Search & Filter */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+      {/* Search & Filter - Retro Card */}
+      <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -181,13 +188,13 @@ const AdminMedia = () => {
               placeholder="Search videos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="retro-input pl-10"
             />
           </div>
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="retro-input"
           >
             <option value="">All Categories</option>
             {categories.map(cat => (
@@ -198,21 +205,16 @@ const AdminMedia = () => {
       </div>
 
       {/* Videos Grid */}
-      {loading ? (
-        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500">Loading videos...</p>
-        </div>
-      ) : filteredVideos.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-          <Image className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-          <p className="text-xl font-medium text-gray-800">No videos found</p>
-          <p className="text-gray-500 mt-1">Upload your first video to get started</p>
+      {filteredVideos.length === 0 ? (
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-12 text-center">
+          <Image className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <p className="retro-title text-xl">No videos found</p>
+          <p className="retro-text text-sm mt-1">Upload your first video to get started</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {paginatedVideos.map((video) => (
-            <div key={video.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+            <div key={video.id} className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-shadow">
               {/* Video Thumbnail */}
               <div className="relative h-48 bg-gray-900">
                 <img
@@ -221,17 +223,17 @@ const AdminMedia = () => {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                  <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 bg-white border-4 border-black flex items-center justify-center">
                     <Play className="w-8 h-8 text-gray-800 ml-1" />
                   </div>
                 </div>
                 <div className="absolute top-3 right-3 flex space-x-2">
-                  <button className="p-2 bg-white/90 hover:bg-white rounded-lg transition-colors">
-                    <Edit3 className="w-4 h-4 text-gray-600" />
+                  <button className="p-2 bg-white border-2 border-black hover:bg-gray-100 transition-colors">
+                    <Edit3 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDeleteVideo(video.id)}
-                    className="p-2 bg-white/90 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2 bg-white border-2 border-black hover:bg-red-100 transition-colors"
                   >
                     <Trash2 className="w-4 h-4 text-red-500" />
                   </button>
@@ -240,15 +242,15 @@ const AdminMedia = () => {
               
               <div className="p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-bold text-gray-800 text-lg flex-1 pr-4">{video.title}</h3>
-                  <span className="inline-flex items-center px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full shrink-0">
+                  <h3 className="font-bold text-gray-800 text-lg flex-1 pr-4 uppercase tracking-wide">{video.title}</h3>
+                  <span className="inline-flex items-center px-2.5 py-1 bg-blue-100 border-2 border-black text-xs font-bold uppercase shrink-0">
                     {video.category || 'Other'}
                   </span>
                 </div>
                 
-                <p className="text-gray-600 text-sm line-clamp-2 mb-4">{video.description}</p>
+                <p className="retro-text text-sm mb-4">{video.description}</p>
                 
-                <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="flex items-center justify-between text-sm retro-text">
                   <span>{video.published_at ? new Date(video.published_at).toLocaleDateString() : ''}</span>
                   <span className="flex items-center space-x-1">
                     <Eye className="w-4 h-4" />
@@ -261,56 +263,34 @@ const AdminMedia = () => {
         </div>
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-100">
-          <p className="text-sm text-gray-500">
-            Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredVideos.length)} of {filteredVideos.length} videos
-          </p>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 text-sm bg-white border border-gray-200 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1.5 text-sm bg-white border border-gray-200 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Modal */}
+      {/* Modal - Retro Style */}
       <Modal
         isOpen={showVideoForm}
         onClose={() => setShowVideoForm(false)}
         title="Add New Video"
+        size="md"
+        icon={<Image className="w-5 h-5 text-blue-500" />}
+        titleColor="from-blue-500 to-indigo-500"
       >
         <form onSubmit={(e) => { e.preventDefault(); handleCreateVideo(videoFormData); setShowVideoForm(false); }} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Title</label>
+              <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Title</label>
               <input
                 type="text"
                 required
                 value={videoFormData.title}
                 onChange={(e) => setVideoFormData({ ...videoFormData, title: e.target.value })}
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="retro-input"
                 placeholder="Enter video title"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Category</label>
+              <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Category</label>
               <select
                 value={videoFormData.category}
                 onChange={(e) => setVideoFormData({ ...videoFormData, category: e.target.value })}
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="retro-input"
               >
                 {categories.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -319,38 +299,38 @@ const AdminMedia = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">YouTube Video ID</label>
+            <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">YouTube Video ID</label>
             <input
               type="text"
               required
               value={videoFormData.youtube_id}
-              onChange={(e) => setVideoFormData({ ...videoFormData, youtube_id: e.target.value })}
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setVideoFormData({ ...videoFormData, youtube_id: e.target.value })}
+              className="retro-input"
               placeholder="e.g., dQw4w9WgXcQ"
             />
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Description</label>
+            <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Description</label>
             <textarea
               rows={3}
               required
               value={videoFormData.description}
-              onChange={(e) => setVideoFormData({ ...videoFormData, description: e.target.value })}
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setVideoFormData({ ...videoFormData, description: e.target.value })}
+              className="retro-input resize-none"
               placeholder="Describe your video"
             />
           </div>
           <div className="flex space-x-3 pt-4">
             <button
               type="submit"
-              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 px-5 rounded-xl font-medium transition-colors"
+              className="flex-1 retro-btn bg-blue-500 border-blue-600"
             >
               Add Video
             </button>
             <button
               type="button"
               onClick={() => { setShowVideoForm(false); setVideoFormData({ title: '', description: '', youtube_id: '', category: 'cultural' }); }}
-              className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
+              className="px-5 py-3 retro-btn"
             >
               Cancel
             </button>

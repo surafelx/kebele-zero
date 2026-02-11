@@ -7,9 +7,11 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  icon?: React.ReactNode;
+  titleColor?: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md', icon, titleColor = 'from-emerald-500 to-teal-500' }) => {
   // Close on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -39,23 +41,33 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
       className="fixed inset-0 z-[100000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
       onClick={onClose}
     >
+      {/* Retro Window Card */}
       <div 
-        className={`${sizeClasses[size]} w-full bg-white rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200`}
+        className={`${sizeClasses[size]} w-full bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden max-h-[90vh] flex flex-col`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+        {/* Retro Title Bar */}
+        <div className={`flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r ${titleColor}`}>
+          <div className="flex items-center space-x-3">
+            {icon && (
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg">
+                {icon}
+              </div>
+            )}
+            <h3 className="text-lg font-black text-white uppercase tracking-wide drop-shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+              {title}
+            </h3>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 group"
+            className="p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all active:translate-y-0.5"
           >
-            <X className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
+            <X className="w-4 h-4 text-black" />
           </button>
         </div>
         
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <div className="p-6 flex-1 overflow-y-auto max-h-[calc(90vh-80px)]">
           {children}
         </div>
       </div>
