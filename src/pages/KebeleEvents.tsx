@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from '../components/AuthModal';
-import { Calendar, MapPin, Clock, Users, Ticket, Star, Heart, Share2, Music, Film, BookOpen, Coffee, Zap, Sparkles, Search, X } from 'lucide-react';
+import { Calendar, MapPin, Clock, Users, Ticket, Star, Heart, Share2, Music, Film, BookOpen, Coffee, Zap, Sparkles, Search, X, Play, ChevronRight } from 'lucide-react';
 import { eventsAPI } from '../services/content';
 
 interface Event {
@@ -136,6 +136,54 @@ const mockEvents: Event[] = [
     is_active: true,
     is_featured: true,
     capacity: 1000
+  },
+  {
+    id: "5",
+    title: "Traditional Art Exhibition",
+    description: "Explore contemporary Ethiopian art inspired by traditional heritage and modern influences.",
+    short_description: "Contemporary Ethiopian art showcase",
+    category: "Art",
+    start_date: "2024-12-25T10:00:00Z",
+    end_date: "2024-12-30T18:00:00Z",
+    location: {
+      venue: "National Museum Gallery",
+      address: { city: "Addis Ababa", country: "Ethiopia" }
+    },
+    images: [
+      { url: "https://images.unsplash.com/photo-1551818255-e9353de8d1b0?w=800&h=600&fit=crop", alt: "Art exhibition" }
+    ],
+    tickets: [
+      { type: "general", name: "General Entry", price: 15, quantity: 200, sold: 67, max_per_order: 4 }
+    ],
+    organizer: { name: "Ethiopian Artists Association" },
+    tags: ["art", "exhibition", "culture", "modern"],
+    is_active: true,
+    is_featured: false,
+    capacity: 200
+  },
+  {
+    id: "6",
+    title: "Ethiopian Food Festival",
+    description: "Taste the diverse cuisines of Ethiopia from traditional injera to modern fusion dishes.",
+    short_description: "Culinary journey through Ethiopia",
+    category: "Food",
+    start_date: "2025-01-05T11:00:00Z",
+    end_date: "2025-01-05T20:00:00Z",
+    location: {
+      venue: "Addis Ababa Exhibition Center",
+      address: { city: "Addis Ababa", country: "Ethiopia" }
+    },
+    images: [
+      { url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&h=600&fit=crop", alt: "Food festival" }
+    ],
+    tickets: [
+      { type: "general", name: "Food Taster Pass", price: 30, quantity: 400, sold: 156, max_per_order: 4 }
+    ],
+    organizer: { name: "Ethiopian Culinary Association" },
+    tags: ["food", "culture", "tasting", "culinary"],
+    is_active: true,
+    is_featured: false,
+    capacity: 400
   }
 ];
 
@@ -260,6 +308,16 @@ const KebeleEvents: React.FC = () => {
     return 'ongoing';
   };
 
+  // Get upcoming featured event for the big card
+  const getFeaturedEvent = () => {
+    return events.find(event => event.is_featured && getEventStatus(event) === 'upcoming') || events[0];
+  };
+
+  // Get remaining events for the grid
+  const getRemainingEvents = () => {
+    const featured = getFeaturedEvent();
+    return events.filter(event => event.id !== featured?.id);
+  };
 
   const handleTicketPurchase = async (event: Event, ticketType: any) => {
     if (!user) {
@@ -275,7 +333,13 @@ const KebeleEvents: React.FC = () => {
     return (
       <div className="space-y-6">
         {/* Back Button */}
-        <div className="retro-window">
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-sky-500 to-blue-500">
+            <div className="flex items-center space-x-3">
+              <Calendar className="w-5 h-5 text-white" />
+              <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Event Details</span>
+            </div>
+          </div>
           <div className="p-4">
             <button
               onClick={() => {
@@ -284,22 +348,18 @@ const KebeleEvents: React.FC = () => {
               }}
               className="retro-btn flex items-center space-x-2 text-sm font-bold uppercase"
             >
-              <span>← BACK TO EVENTS</span>
+              <ChevronRight className="w-4 h-4 rotate-180" />
+              <span>BACK TO EVENTS</span>
             </button>
           </div>
         </div>
 
         {/* Event Details Header */}
-        <div className="retro-window">
-          <div className="retro-titlebar retro-titlebar-sky">
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-600 to-teal-600">
             <div className="flex items-center space-x-3">
-              <Calendar className="w-4 h-4 retro-icon" />
-              <span className="retro-title text-sm font-bold uppercase">Event Details</span>
-            </div>
-            <div className="retro-window-controls">
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
+              <Calendar className="w-5 h-5 text-white" />
+              <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Event Details</span>
             </div>
           </div>
           <div className="p-6">
@@ -309,17 +369,17 @@ const KebeleEvents: React.FC = () => {
                 <img
                   src={event.images[0].url}
                   alt={event.images[0].alt}
-                  className="w-full h-64 object-cover rounded-lg border-2 border-charcoal"
+                  className="w-full h-64 object-cover rounded-lg border-4 border-white shadow-2xl"
                 />
               </div>
             )}
 
             {/* Title and Description */}
             <div className="mb-6">
-              <h1 className="retro-title text-2xl font-bold mb-3 uppercase tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-bold mb-3 leading-tight uppercase tracking-tight" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                 {event.title}
               </h1>
-              <p className="retro-text text-base leading-relaxed mb-4">
+              <p className="text-base leading-relaxed mb-4" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                 {event.description}
               </p>
             </div>
@@ -328,10 +388,10 @@ const KebeleEvents: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
-                  <Calendar className="w-5 h-5 text-sky-blue retro-icon mt-0.5" />
+                  <Calendar className="w-5 h-5 text-sky-blue mt-0.5" />
                   <div>
-                    <div className="retro-title text-sm font-bold uppercase mb-1">Date & Time</div>
-                    <div className="retro-text text-sm">
+                    <div className="text-sm font-bold uppercase mb-1" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Date & Time</div>
+                    <div className="text-sm">
                       {formatDate(event.start_date)} at {formatTime(event.start_date)}
                       {event.end_date && event.end_date !== event.start_date && (
                         <> - {formatDate(event.end_date)} at {formatTime(event.end_date)}</>
@@ -341,10 +401,10 @@ const KebeleEvents: React.FC = () => {
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <MapPin className="w-5 h-5 text-coral-red retro-icon mt-0.5" />
+                  <MapPin className="w-5 h-5 text-red-500 mt-0.5" />
                   <div>
-                    <div className="retro-title text-sm font-bold uppercase mb-1">Location</div>
-                    <div className="retro-text text-sm">
+                    <div className="text-sm font-bold uppercase mb-1" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Location</div>
+                    <div className="text-sm">
                       {event.location.venue}<br />
                       {event.location.address.city}, {event.location.address.country}
                     </div>
@@ -354,20 +414,20 @@ const KebeleEvents: React.FC = () => {
 
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
-                  <Users className="w-5 h-5 text-mustard retro-icon mt-0.5" />
+                  <Users className="w-5 h-5 text-mustard mt-0.5" />
                   <div>
-                    <div className="retro-title text-sm font-bold uppercase mb-1">Capacity</div>
-                    <div className="retro-text text-sm">
+                    <div className="text-sm font-bold uppercase mb-1" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Capacity</div>
+                    <div className="text-sm">
                       {event.capacity} attendees
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <Star className="w-5 h-5 text-gold retro-icon mt-0.5" />
+                  <Star className="w-5 h-5 text-yellow-500 mt-0.5" />
                   <div>
-                    <div className="retro-title text-sm font-bold uppercase mb-1">Organizer</div>
-                    <div className="retro-text text-sm">
+                    <div className="text-sm font-bold uppercase mb-1" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Organizer</div>
+                    <div className="text-sm">
                       {event.organizer.name}
                     </div>
                   </div>
@@ -377,14 +437,14 @@ const KebeleEvents: React.FC = () => {
 
             {/* Status and Category */}
             <div className="flex flex-wrap gap-3 mb-6">
-              <span className="px-3 py-1 bg-blue-600 text-white rounded text-sm font-bold uppercase border-2 border-white shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+              <span className="px-3 py-1 bg-blue-600 text-white rounded text-sm font-bold uppercase border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                 {getEventStatus(event)}
               </span>
-              <span className="px-3 py-1 bg-purple-600 text-white rounded retro-title text-sm font-bold uppercase border-2 border-white shadow-lg">
+              <span className="px-3 py-1 bg-purple-600 text-white rounded text-sm font-bold uppercase border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                 {event.category}
               </span>
               {event.is_featured && (
-                <span className="px-3 py-1 bg-green-600 text-white rounded retro-title text-sm font-bold uppercase border-2 border-white shadow-lg">
+                <span className="px-3 py-1 bg-green-600 text-white rounded text-sm font-bold uppercase border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                   FEATURED
                 </span>
               )}
@@ -393,30 +453,25 @@ const KebeleEvents: React.FC = () => {
         </div>
 
         {/* Tickets Section */}
-        <div className="retro-window">
-          <div className="retro-titlebar retro-titlebar-teal">
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-amber-600 to-yellow-600">
             <div className="flex items-center space-x-3">
-              <Ticket className="w-4 h-4 retro-icon" />
-              <span className="retro-title text-sm font-bold uppercase">Tickets</span>
-            </div>
-            <div className="retro-window-controls">
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
+              <Ticket className="w-5 h-5 text-white" />
+              <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Tickets</span>
             </div>
           </div>
           <div className="p-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {event.tickets.map((ticket, index) => (
-                <div key={index} className="retro-card p-3 border-2 border-charcoal">
+                <div key={index} className="bg-gray-50 border-2 border-black p-3">
                   <div className="mb-2">
-                    <div className="retro-title text-sm font-bold mb-1">{ticket.name}</div>
-                    <div className="retro-text text-xs opacity-80 mb-1">
+                    <div className="text-sm font-bold mb-1 uppercase" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{ticket.name}</div>
+                    <div className="text-xs opacity-80 mb-1">
                       {ticket.quantity - ticket.sold}/{ticket.quantity} left
                     </div>
                     <div className="flex justify-between items-center mb-2">
-                      <div className="retro-title text-lg font-bold">${ticket.price}</div>
-                      <div className="retro-text text-xs">Max {ticket.max_per_order}</div>
+                      <div className="text-lg font-bold">${ticket.price}</div>
+                      <div className="text-xs">Max {ticket.max_per_order}</div>
                     </div>
                   </div>
                   <button
@@ -434,22 +489,17 @@ const KebeleEvents: React.FC = () => {
 
         {/* Tags Section */}
         {event.tags.length > 0 && (
-          <div className="retro-window">
-            <div className="retro-titlebar retro-titlebar-mustard">
+          <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-pink-600 to-rose-600">
               <div className="flex items-center space-x-3">
-                <Sparkles className="w-4 h-4 retro-icon" />
-                <span className="retro-title text-sm font-bold uppercase">Tags</span>
-              </div>
-              <div className="retro-window-controls">
-                <div className="retro-window-dot"></div>
-                <div className="retro-window-dot"></div>
-                <div className="retro-window-dot"></div>
+                <Sparkles className="w-5 h-5 text-white" />
+                <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Tags</span>
               </div>
             </div>
             <div className="p-6">
               <div className="flex flex-wrap gap-2">
                 {event.tags.map((tag, index) => (
-                  <span key={index} className="px-3 py-1 bg-gray-200 text-charcoal rounded retro-title text-sm font-bold uppercase">
+                  <span key={index} className="px-3 py-1 bg-gray-200 text-charcoal rounded text-sm font-bold uppercase border-2 border-black" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                     {tag}
                   </span>
                 ))}
@@ -461,24 +511,171 @@ const KebeleEvents: React.FC = () => {
     );
   };
 
+  // Featured Event Card Component
+  const FeaturedEventCard: React.FC<{ event: Event }> = ({ event }) => {
+    return (
+      <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-8">
+        <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-600 to-teal-600">
+          <div className="flex items-center space-x-3">
+            <Star className="w-5 h-5 text-white" />
+            <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Featured Event</span>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+          {/* Event Image */}
+          <div className="relative h-64 lg:h-auto overflow-hidden">
+            <img
+              src={event.images[0]?.url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop'}
+              alt={event.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
+            <div className="absolute bottom-4 left-4">
+              <span className="px-3 py-1 bg-green-600 text-white rounded text-sm font-bold uppercase border-2 border-white shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                FEATURED
+              </span>
+            </div>
+          </div>
+
+          {/* Event Content */}
+          <div className="p-6 flex flex-col justify-center">
+            <div className="flex items-center space-x-2 mb-3">
+              <span className="px-2 py-1 bg-purple-600 text-white rounded text-xs font-bold uppercase border border-white" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                {event.category}
+              </span>
+              <span className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-bold uppercase border border-white" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                {getEventStatus(event)}
+              </span>
+            </div>
+
+            <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight uppercase tracking-tight" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+              {event.title}
+            </h2>
+
+            <p className="text-base leading-relaxed mb-4" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+              {event.short_description || event.description}
+            </p>
+
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-sky-blue" />
+                <span className="text-sm">{formatDate(event.start_date)}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Clock className="w-4 h-4 text-mustard" />
+                <span className="text-sm">{formatTime(event.start_date)}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <MapPin className="w-4 h-4 text-red-500" />
+                <span className="text-sm truncate">{event.location.venue}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Users className="w-4 h-4 text-emerald-600" />
+                <span className="text-sm">{event.capacity} capacity</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="text-xl font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                From ${Math.min(...event.tickets.map(t => t.price))}
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedEvent(event);
+                  setViewMode('detail');
+                }}
+                className="retro-btn px-6 py-2 text-sm font-bold uppercase"
+              >
+                DETAILS
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Standard Event Card Component
+  const EventCard: React.FC<{ event: Event }> = ({ event }) => {
+    return (
+      <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-shadow">
+        {/* Event Image */}
+        <div className="aspect-[3/2] overflow-hidden relative">
+          <img
+            src={event.images[0]?.url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=300&fit=crop'}
+            alt={event.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+
+          <div className="absolute top-2 right-2">
+            <span className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-bold uppercase border-2 border-white shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+              {getEventStatus(event)}
+            </span>
+          </div>
+          {event.is_featured && (
+            <div className="absolute top-2 left-2">
+              <span className="px-2 py-1 bg-green-600 text-white rounded text-xs font-bold uppercase border-2 border-white shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                FEATURED
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Event Content */}
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="px-2 py-1 bg-purple-600 text-white rounded text-xs font-bold uppercase border-2 border-white" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+              {event.category}
+            </span>
+            <span className="font-bold text-emerald-600" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+              ${Math.min(...event.tickets.map(t => t.price))}
+            </span>
+          </div>
+
+          <h3 className="font-bold text-lg mb-2 leading-tight uppercase" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+            {event.title}
+          </h3>
+
+          <div className="space-y-1 mb-3">
+            <div className="flex items-center space-x-2">
+              <Calendar className="w-3 h-3 text-sky-blue" />
+              <span className="text-xs">{formatDate(event.start_date)}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <MapPin className="w-3 h-3 text-red-500" />
+              <span className="text-xs truncate">{event.location.venue}</span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              setSelectedEvent(event);
+              setViewMode('detail');
+            }}
+            className="w-full retro-btn py-2 text-xs font-bold uppercase"
+          >
+            DETAILS
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center">
         <div className="text-center w-80">
-          <div className="retro-titlebar retro-titlebar-sky mb-4">
-            <div className="flex items-center justify-center">
-              <Calendar className="w-5 h-5 retro-icon" />
+          <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-4">
+            <div className="flex items-center justify-center px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-600 to-teal-600">
+              <Calendar className="w-5 h-5 text-white" />
             </div>
-            <div className="retro-window-controls">
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
+            <div className="p-4">
+              <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
+              <div className="text-sm font-bold uppercase tracking-wide mb-2" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Loading Events...</div>
+              <p className="text-xs opacity-80">Discovering amazing Ethiopian cultural events</p>
             </div>
           </div>
-          <div className="retro-spinner w-16 h-16 mx-auto mb-6"></div>
-          <div className="retro-title text-lg font-bold uppercase tracking-wider">Loading Events...</div>
-          <p className="retro-text text-sm mt-4 opacity-80">Discovering amazing Ethiopian cultural events</p>
         </div>
       </div>
     );
@@ -487,160 +684,144 @@ const KebeleEvents: React.FC = () => {
   return (
     <div className="retro-bg retro-bg-enhanced">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Hero Section - Smaller */}
-        <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-8">
-          <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-600 to-teal-600">
+        {/* Hero Section */}
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-8">
+          <div className="flex items-center justify-center px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-600 to-teal-600">
             <div className="flex items-center space-x-3">
               <Calendar className="w-5 h-5 text-white" />
-              <span className="text-xs font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>KEBELE EVENTS</span>
+              <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>KEBELE EVENTS</span>
             </div>
-            <button className="p-1 bg-white border-2 border-black rounded shadow hover:bg-red-500 hover:text-white transition-all">
-              <span className="text-sm font-bold">×</span>
-            </button>
           </div>
-          <div className="p-4 text-center">
-            <h1 className="text-xl md:text-2xl font-bold mb-3 leading-tight uppercase tracking-tight" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+          <div className="p-6 text-center">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 leading-tight uppercase tracking-tight" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
               DISCOVER ETHIOPIAN CULTURE THROUGH EVENTS
             </h1>
-            <p className="text-xs md:text-sm retro-text max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm md:text-base leading-relaxed max-w-2xl mx-auto" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
               Experience the richness of Ethiopian culture through our curated events, celebrations, and community gatherings.
             </p>
           </div>
         </div>
 
-        {/* Search and Filters - Only show in grid view */}
-        {viewMode === 'grid' && (
-          <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-8">
-            <div className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="md:col-span-2">
-                  <div className="relative">
-                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-charcoal w-4 h-4 retro-icon" />
-                    <input
-                      type="text"
-                      placeholder="Search events..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-8 pr-3 py-2 retro-input text-xs"
-                    />
-                  </div>
+        {/* Search and Filters - Retro Card Style */}
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-8">
+          <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-sky-500 to-blue-500">
+            <div className="flex items-center space-x-3">
+              <Search className="w-5 h-5 text-white" />
+              <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Search & Filter</span>
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Search Input */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-gray-800 uppercase tracking-wide mb-1" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                  Search Events
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-charcoal w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search events..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-8 pr-3 py-2 bg-gray-50 border-2 border-gray-300 focus:border-emerald-500 focus:outline-none text-xs transition-all placeholder-gray-400"
+                    style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
+                  />
                 </div>
-                <div>
+              </div>
+
+              {/* Category Filter */}
+              <div>
+                <label className="block text-xs font-bold text-gray-800 uppercase tracking-wide mb-1" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                  Category
+                </label>
+                <div className="relative">
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-3 py-2 retro-input bg-paper text-xs"
+                    className="w-full px-3 py-2 bg-gray-50 border-2 border-gray-300 focus:border-emerald-500 focus:outline-none text-xs transition-all appearance-none"
+                    style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
                   >
                     <option value="">All Categories</option>
                     {categories.map(category => (
                       <option key={category} value={category}>{category}</option>
                     ))}
                   </select>
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <ChevronRight className="w-4 h-4 rotate-90 text-charcoal" />
+                  </div>
                 </div>
-                <div>
+              </div>
+
+              {/* Status Filter */}
+              <div>
+                <label className="block text-xs font-bold text-gray-800 uppercase tracking-wide mb-1" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                  Status
+                </label>
+                <div className="relative">
                   <select
                     value={selectedStatus}
                     onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="w-full px-3 py-2 retro-input bg-paper text-xs"
+                    className="w-full px-3 py-2 bg-gray-50 border-2 border-gray-300 focus:border-emerald-500 focus:outline-none text-xs transition-all appearance-none"
+                    style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
                   >
                     <option value="">All Status</option>
                     <option value="upcoming">Upcoming</option>
                     <option value="ongoing">Ongoing</option>
                     <option value="past">Past</option>
                   </select>
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <ChevronRight className="w-4 h-4 rotate-90 text-charcoal" />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Events Content */}
         {viewMode === 'grid' ? (
           <div className="mb-12">
             {events.length === 0 ? (
-              <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-12">
+              <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center p-12">
                 <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-orange-500 to-red-500 mb-6">
                   <div className="flex items-center space-x-3">
                     <Calendar className="w-5 h-5 text-white" />
                     <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>NO EVENTS FOUND</span>
                   </div>
-                  <button className="p-1 bg-white border-2 border-black rounded shadow hover:bg-red-500 hover:text-white transition-all">
-                    <span className="text-sm font-bold">×</span>
-                  </button>
                 </div>
-                <div className="w-16 h-16 bg-mustard rounded-lg flex items-center justify-center mx-auto mb-6 border-2 border-charcoal">
-                  <Calendar className="w-8 h-8 text-charcoal retro-icon" />
+                <div className="w-16 h-16 bg-mustard rounded-lg flex items-center justify-center mx-auto mb-6 border-2 border-black">
+                  <Calendar className="w-8 h-8 text-charcoal" />
                 </div>
-                <h3 className="font-black text-xl font-bold mb-4 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>No Events Found</h3>
-                <p className="font-medium text-base" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Try adjusting your search criteria or check back later for new events.</p>
+                <h3 className="font-bold text-xl mb-4 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>No Events Found</h3>
+                <p className="text-sm" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Try adjusting your search criteria or check back later for new events.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {events.map((event) => (
-                  <div key={event.id} className="retro-window retro-floating">
-                    {/* Event Image */}
-                    <div className="aspect-[3/2] overflow-hidden relative">
-                      <img
-                        src={event.images[0]?.url}
-                        alt={event.title}
-                        className="w-full h-full object-cover"
-                      />
-                      {/* Semi-transparent background overlay for better tag visibility */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10"></div>
+              <>
+                {/* Featured Event Card - Bigger */}
+                {events.length > 0 && (
+                  <FeaturedEventCard event={getFeaturedEvent()!} />
+                )}
 
-                      <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 rounded-md retro-title text-xs font-bold uppercase border-2 border-white shadow-lg transform rotate-3 bg-blue-600 text-white">
-                          {getEventStatus(event)}
-                        </span>
+                {/* Section Title for Remaining Events */}
+                {getRemainingEvents().length > 0 && (
+                  <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-6">
+                    <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-purple-600 to-pink-600">
+                      <div className="flex items-center space-x-3">
+                        <Sparkles className="w-5 h-5 text-white" />
+                        <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>More Events</span>
                       </div>
-                      {event.is_featured && (
-                        <div className="absolute top-3 left-3">
-                          <span className="px-2 py-1 bg-green-600 text-white rounded-md retro-title text-xs font-bold uppercase border-2 border-white shadow-lg transform -rotate-3">
-                            FEATURED
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Event Content */}
-                    <div className="p-2">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="px-1.5 py-0.5 bg-purple-600 text-white rounded retro-title text-xs font-bold uppercase border border-white shadow-sm">
-                          {event.category}
-                        </span>
-                        <span className="retro-title text-xs font-bold text-charcoal">
-                          ${Math.min(...event.tickets.map(t => t.price))}
-                        </span>
-                      </div>
-
-                      <h3 className="retro-title text-xs font-bold mb-1 leading-tight uppercase line-clamp-2">
-                        {event.title}
-                      </h3>
-
-                      <div className="space-y-0.5 mb-2">
-                        <div className="flex items-center space-x-1">
-                          <Calendar className="w-2.5 h-2.5 text-sky-blue retro-icon" />
-                          <span className="retro-text text-xs">{formatDate(event.start_date)}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <MapPin className="w-2.5 h-2.5 text-coral-red retro-icon" />
-                          <span className="retro-text text-xs truncate">{event.location.venue}</span>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => {
-                          setSelectedEvent(event);
-                          setViewMode('detail');
-                        }}
-                        className="w-full retro-btn text-xs py-1 font-bold uppercase"
-                      >
-                        DETAILS
-                      </button>
                     </div>
                   </div>
-                ))}
-              </div>
+                )}
+
+                {/* Remaining Events Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {getRemainingEvents().map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         ) : (
@@ -648,19 +829,16 @@ const KebeleEvents: React.FC = () => {
         )}
 
         {/* Call to Action */}
-        <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
+        <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
           <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-teal-500 to-emerald-500">
             <div className="flex items-center space-x-3">
               <Sparkles className="w-5 h-5 text-white" />
               <span className="text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>JOIN THE CULTURE</span>
             </div>
-            <button className="p-1 bg-white border-2 border-black rounded shadow hover:bg-red-500 hover:text-white transition-all">
-              <span className="text-sm font-bold">×</span>
-            </button>
           </div>
           <div className="p-8">
-            <h2 className="font-black text-2xl font-bold mb-4 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>READY TO EXPERIENCE CULTURE?</h2>
-            <p className="retro-text text-base mb-6 max-w-2xl mx-auto leading-relaxed">
+            <h2 className="font-bold text-2xl mb-4 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>READY TO EXPERIENCE CULTURE?</h2>
+            <p className="text-sm mb-6 max-w-2xl mx-auto leading-relaxed" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
               Join our community events and be part of the vibrant Ethiopian cultural scene that brings people together.
             </p>
             <button className="retro-btn text-lg py-4 px-8 font-bold uppercase">
