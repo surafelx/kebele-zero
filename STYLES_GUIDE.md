@@ -68,13 +68,60 @@ The design system uses a **retro/brutalist aesthetic** with:
 
 ## Typography
 
-### Primary Font (Comic Sans MS)
-All headings and body text should use Comic Sans MS for consistency:
+### Comic Sans MS Font
+All headings and body text should use the local Comic Sans MS font for consistency:
+
+**Font Files Location:** `/public/fonts/`
+
+| File | Variant |
+|------|---------|
+| `COMIC.TTF` | Regular |
+| `COMICBD.TTF` | Bold |
+| `COMICI.TTF` | Italic |
+| `COMICZ.TTF` | Bold Italic |
+
+**Font-Face Declaration:**
+```html
+<style>
+    @font-face {
+        font-family: 'Comic Sans MS';
+        src: url('/fonts/COMIC.TTF') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'Comic Sans MS';
+        src: url('/fonts/COMICBD.TTF') format('truetype');
+        font-weight: bold;
+        font-style: normal;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'Comic Sans MS';
+        src: url('/fonts/COMICI.TTF') format('truetype');
+        font-weight: normal;
+        font-style: italic;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'Comic Sans MS';
+        src: url('/fonts/COMICZ.TTF') format('truetype');
+        font-weight: bold;
+        font-style: italic;
+        font-display: swap;
+    }
+</style>
+```
+
+### Font Usage in CSS
 ```css
 font-family: 'Comic Sans MS', cursive, sans-serif;
 text-transform: uppercase;
 letter-spacing: 0.05em;
 ```
+
+> **Important:** Always include the fallback `cursive, sans-serif` after 'Comic Sans MS' for graceful degradation.
 
 ### Heading Styles
 ```jsx

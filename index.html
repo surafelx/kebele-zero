@@ -32,14 +32,45 @@
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <!-- Local Comic Sans Fonts -->
+    <style>
+        @font-face {
+            font-family: 'Comic Sans MS';
+            src: url('/fonts/COMIC.TTF') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Comic Sans MS';
+            src: url('/fonts/COMICBD.TTF') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Comic Sans MS';
+            src: url('/fonts/COMICI.TTF') format('truetype');
+            font-weight: normal;
+            font-style: italic;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Comic Sans MS';
+            src: url('/fonts/COMICZ.TTF') format('truetype');
+            font-weight: bold;
+            font-style: italic;
+            font-display: swap;
+        }
+    </style>
 </head>
 <body>
 
   <div id="root"></div>
-  <canvas class="canvas js-canvas"></canvas>
+  <canvas class="canvas js-cancanvas"></canvas>
   <script type="module" src="/src/main.tsx"></script>
 
 
