@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Trophy, Calendar, MessageSquare, ShoppingBag, Radio, Image, Settings, LogOut, Edit3, Star, Award, TrendingUp } from 'lucide-react';
+import { User, Trophy, Calendar, MessageSquare, ShoppingBag, Radio, Image, Settings, LogOut, Edit3, Star, Award, TrendingUp, Music } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { pointsAPI } from '../services/points';
+import { trackPlaysAPI } from '../services/content';
 
 const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout, loading: authLoading } = useAuth();
   const [userPoints, setUserPoints] = useState<any>(null);
+  const [mostPlayedTracks, setMostPlayedTracks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,8 +25,12 @@ const UserDashboard: React.FC = () => {
   const fetchUserData = async () => {
     if (!user) return;
     try {
-      const pointsData = await pointsAPI.getUserPoints(user.id);
+      const [pointsData, tracksData] = await Promise.all([
+        pointsAPI.getUserPoints(user.id),
+        trackPlaysAPI.getMostPlayedTracks(5),
+      ]);
       setUserPoints(pointsData);
+      setMostPlayedTracks(tracksData);
     } catch (error) {
       console.error('Error fetching user data:', error);
     } finally {
@@ -312,6 +318,40 @@ const UserDashboard: React.FC = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Most Played Music */}
+            <div className="retro-window retro-floating">
+              <div className="retro-titlebar" style={{ background: 'linear-gradient(to right, #7c3aed, #4f46e5)' }}>
+                <div className="flex items-center space-x-3">
+                  <Music className="w-5 h-5 retro-icon text-white" />
+                  <span className="retro-title text-sm text-white">Most Played Music</span>
+                </div>
+              </div>
+              <div className="p-4">
+                {mostPlayedTracks.length === 0 ? (
+                  <div className="text-center py-4">
+                    <Music className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <p className="retro-text text-xs text-gray-500">No plays recorded yet.</p>
+                    <p className="retro-text text-xs text-gray-400">Hit +Play on any Radio track!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {mostPlayedTracks.map((track, index) => (
+                      <div key={track.id} className="flex items-center space-x-3 p-2 bg-white/20 rounded-lg border border-black/10">
+                        <div className="w-6 h-6 bg-purple-500 rounded flex items-center justify-center flex-shrink-0 border-2 border-purple-700">
+                          <span className="text-white text-xs font-bold">{index + 1}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="retro-text text-xs font-bold truncate">{track.track_title}</p>
+                          <p className="retro-text text-xs opacity-70">{track.play_count} play{track.play_count !== 1 ? 's' : ''}</p>
+                        </div>
+                        <Music className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

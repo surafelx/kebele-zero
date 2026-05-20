@@ -11,6 +11,7 @@ interface AuthModalProps {
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, feature }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [registered, setRegistered] = useState(false); // "check your email" state
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -24,6 +25,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, feature }) => {
 
   const { login, register } = useAuth();
 
+  // Reset to login mode whenever the modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      setIsSignUp(false);
+      setRegistered(false);
+      resetForm();
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -34,7 +44,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, feature }) => {
     }
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, [isOpen, onClose]);
 
@@ -55,10 +65,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, feature }) => {
           email: formData.email,
           password: formData.password
         });
+        // Show "check your email" instead of silently closing —
+        // Supabase may require email confirmation before the user is logged in.
+        setRegistered(true);
       } else {
         await login(formData.email, formData.password);
+        onClose();
       }
-      onClose();
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'An error occurred');
     } finally {
@@ -76,6 +89,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, feature }) => {
       receiveNotifications: true
     });
     setError('');
+    setShowPassword(false);
   };
 
   const toggleMode = () => {
@@ -100,23 +114,52 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, feature }) => {
               <User className="w-5 h-5 text-emerald-500" />
             </div>
             <div>
-              <h3 className="text-lg font-black text-white uppercase tracking-wide drop-shadow-lg">
-                {isSignUp ? 'Create Account' : 'Welcome Back'}
+              <h3 className="text-lg font-black text-white uppercase tracking-wide drop-shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                {registered ? 'Almost there!' : isSignUp ? 'Create Account' : 'Welcome Back'}
               </h3>
-              <p className="text-xs text-emerald-100 font-medium uppercase tracking-wide">Sign in to access {feature}</p>
+              <p className="text-xs text-emerald-100 font-medium uppercase tracking-wide">
+                {registered
+                  ? 'Check your inbox to confirm'
+                  : isSignUp
+                  ? 'Join the Kebele Zero community'
+                  : feature ? `Sign in to access ${feature}` : 'Sign in to continue'}
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all active:translate-y-0.5 active:shadow-md"
+            className="group p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:border-red-500 transition-all active:translate-y-0.5 active:shadow-md"
           >
-            <X className="w-4 h-4 text-black" />
+            <X className="w-4 h-4 text-black group-hover:text-white transition-colors" />
           </button>
         </div>
 
         {/* Form */}
         <div className="p-6 bg-white">
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* Post-registration confirmation */}
+          {registered && (
+            <div className="text-center space-y-4 py-4">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto border-2 border-black">
+                <Mail className="w-8 h-8 text-emerald-600" />
+              </div>
+              <div>
+                <p className="font-bold text-gray-800 text-lg">Account created!</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  We sent a confirmation link to <span className="font-bold">{formData.email}</span>.
+                  Click it to activate your account, then sign in.
+                </p>
+              </div>
+              <button
+                onClick={() => { setRegistered(false); setIsSignUp(false); resetForm(); }}
+                className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white py-3 px-4 font-bold uppercase tracking-wide transition-all shadow-lg"
+              >
+                Go to Sign In
+              </button>
+            </div>
+          )}
+
+          {!registered && <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
               <div className="space-y-2">
                 <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Username</label>
@@ -245,6 +288,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, feature }) => {
               {isSignUp ? 'Sign In' : 'Create Account'}
             </button>
           </div>
+          </form>}
+
         </div>
       </div>
     </div>

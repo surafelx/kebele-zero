@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Eye, Trophy, ArrowLeft, Plus, Search, Filter, Heart, Reply, Flag } from 'lucide-react';
 import { forumAPI } from '../services/forum';
 import { pointsAPI } from '../services/points';
@@ -42,8 +41,14 @@ interface UserPoints {
   updated_at: string;
 }
 
+// Helper: open the site-wide auth modal instead of navigating away
+const requireAuth = (feature = 'forum') => {
+  if (typeof window !== 'undefined' && (window as any).checkAuthForFeature) {
+    (window as any).checkAuthForFeature(feature);
+  }
+};
+
 const KebeleForum: React.FC = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('posts');
   const [posts, setPosts] = useState<ForumPost[]>([]);
@@ -483,8 +488,7 @@ const KebeleForum: React.FC = () => {
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      alert('Please sign in to create posts');
-      navigate('/admin/login');
+      requireAuth();
       return;
     }
 
@@ -521,8 +525,7 @@ const KebeleForum: React.FC = () => {
   const handleCreateComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      alert('Please sign in to comment');
-      navigate('/admin/login');
+      requireAuth();
       return;
     }
     if (!selectedPost || !newComment.trim()) return;
@@ -548,8 +551,7 @@ const KebeleForum: React.FC = () => {
   const handleLikePost = (postId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
-      alert('Please sign in to like posts');
-      navigate('/admin/login');
+      requireAuth();
       return;
     }
 
@@ -567,8 +569,7 @@ const KebeleForum: React.FC = () => {
   const handleUpvotePost = (postId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
-      alert('Please sign in to upvote posts');
-      navigate('/admin/login');
+      requireAuth();
       return;
     }
 
@@ -634,11 +635,7 @@ const KebeleForum: React.FC = () => {
           </div>
           <button
             onClick={() => {
-              if (!user) {
-                alert('Please sign in to create posts');
-                navigate('/admin/login');
-                return;
-              }
+              if (!user) { requireAuth(); return; }
               setShowCreateForm(true);
             }}
             className="retro-btn-success px-4 py-3 font-bold flex items-center justify-center space-x-2 uppercase text-sm tracking-wide"
@@ -676,11 +673,7 @@ const KebeleForum: React.FC = () => {
             </button>
             <button
               onClick={() => {
-                if (!user) {
-                  alert('Please sign in to create posts');
-                  navigate('/admin/login');
-                  return;
-                }
+                if (!user) { requireAuth(); return; }
                 setShowCreateForm(true);
               }}
               className="retro-btn px-6 py-3 font-bold uppercase text-base tracking-wide"
@@ -958,7 +951,7 @@ const KebeleForum: React.FC = () => {
                 <div className="text-center py-3">
                   <p className="retro-text text-xs opacity-80 mb-2">Sign in to comment</p>
                   <button
-                    onClick={() => navigate('/admin/login')}
+                    onClick={() => requireAuth()}
                     className="retro-btn text-xs py-1 px-3 font-bold uppercase"
                   >
                     Sign In

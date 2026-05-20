@@ -1,6 +1,6 @@
  import React, { useState, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, Heart, Share2, ThumbsUp, Music, Film, Coffee, Mic, Radio, Headphones, Star, Search } from 'lucide-react';
-import { videosAPI, radioAPI } from '../services/content';
+import { videosAPI, radioAPI, trackPlaysAPI } from '../services/content';
 
 interface Video {
   id: string;
@@ -360,9 +360,19 @@ const KebeleRadio: React.FC = () => {
                           <span className="retro-text text-sm font-bold">{video.statistics.comment_count}</span>
                         </div>
                       </div>
-                      <button className="retro-btn text-sm py-2 px-4 font-bold uppercase">
-                        FULLSCREEN
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => trackPlaysAPI.recordPlay(video.id, video.title)}
+                          className="retro-btn text-sm py-2 px-3 font-bold uppercase flex items-center space-x-1"
+                          title="Record this play to your history"
+                        >
+                          <Play className="w-3 h-3" />
+                          <span>+Play</span>
+                        </button>
+                        <button className="retro-btn text-sm py-2 px-4 font-bold uppercase">
+                          FULLSCREEN
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

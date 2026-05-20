@@ -698,8 +698,56 @@ export const socialLinksAPI = {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   }
+};
+
+// ===================== TRACK PLAYS (Most Played Music) =====================
+
+export const trackPlaysAPI = {
+  // Record or increment a play for the current user
+  recordPlay: async (trackId: string, trackTitle: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return; // not logged in — skip silently
+
+    // Manual upsert: increment if exists, insert if not
+    const { data: existing } = await supabase
+      .from('track_plays')
+      .select('id, play_count')
+      .eq('user_id', session.user.id)
+      .eq('track_id', trackId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from('track_plays')
+        .update({ play_count: existing.play_count + 1, last_played_at: new Date().toISOString() })
+        .eq('id', existing.id);
+    } else {
+      await supabase
+        .from('track_plays')
+        .insert([{ user_id: session.user.id, track_id: trackId, track_title: trackTitle, play_count: 1 }]);
+    }
+  },
+
+  // Get most played tracks for the current user
+  getMostPlayedTracks: async (limit = 5) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return [];
+
+    const { data, error } = await supabase
+      .from('track_plays')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('play_count', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.warn('[trackPlaysAPI] getMostPlayedTracks error:', error.message);
+      return [];
+    }
+    return data || [];
+  },
 };

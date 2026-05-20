@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Shield, Loader2 } from 'lucide-react';
@@ -10,10 +10,9 @@ interface AdminRouteProps {
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
-  const [redirecting, setRedirecting] = useState(false);
 
   // Show loading state while checking auth
-  if (loading || redirecting) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -71,12 +70,8 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
               </a>
               <button
                 onClick={() => {
-                  // Sign out and redirect to login
-                  import('../contexts/AuthContext').then(({ useAuth }) => {
-                    const { logout } = useAuth();
-                    logout();
-                    window.location.href = '/admin/login';
-                  });
+                  logout();
+                  window.location.href = '/admin/login';
                 }}
                 className="block w-full bg-gray-200 text-gray-700 py-3 px-4 font-bold uppercase tracking-wide transition-all duration-200 hover:bg-gray-300"
                 style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}

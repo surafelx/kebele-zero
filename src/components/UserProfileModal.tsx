@@ -34,7 +34,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     }
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, [isOpen, onClose]);
 
@@ -48,11 +48,12 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     if (!user) return;
 
     try {
-      // Load user points and stats
+      // Load all user data in parallel. Use getUserPosts instead of
+      // fetching all posts and filtering client-side.
       const [pointsData, gameHistory, forumPosts] = await Promise.all([
         pointsAPI.getUserPoints(user.id),
         pointsAPI.getUserGameScores(user.id, undefined, 5),
-        forumAPI.getPosts().then(posts => posts.filter(p => p.created_by === user.id))
+        forumAPI.getUserPosts(user.id, 20)
       ]);
 
       setUserStats({
@@ -60,7 +61,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         gamesPlayed: pointsData?.games_played || 0,
         checkersWins: pointsData?.checkers_wins || 0,
         marblesWins: pointsData?.marbles_wins || 0,
-        forumPosts: forumPosts.length,
+        forumPosts: (forumPosts || []).length,
         joinDate: user.created_at || new Date().toISOString()
       });
 
@@ -103,10 +104,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         onClick={(e) => e.stopPropagation()}
       >
         {/* Retro Title Bar */}
-        <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-500 to-teal-500">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
-              <User className="w-6 h-6 text-blue-600" />
+              <User className="w-6 h-6 text-emerald-500" />
             </div>
             <div>
               <h3 className="text-lg font-black text-white uppercase tracking-wide drop-shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
@@ -116,14 +117,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all active:translate-y-0.5"
+            className="group p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:border-red-500 transition-all active:translate-y-0.5"
           >
-            <X className="w-4 h-4 text-black" />
+            <X className="w-4 h-4 text-black group-hover:text-white transition-colors" />
           </button>
         </div>
 
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-6">
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
               <span className="text-white font-bold text-xl" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
@@ -157,7 +158,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center space-x-2 px-4 py-3 border-b-4 font-bold text-sm transition-all ${
                     activeTab === tab.id
-                      ? 'border-black bg-white text-blue-600'
+                      ? 'border-black bg-white text-emerald-600'
                       : 'border-transparent text-gray-600 hover:bg-white/50'
                   }`}
                   style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
@@ -271,14 +272,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
             <div className="space-y-4 animate-in fade-in duration-200">
               <h3 className="font-bold text-gray-900 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Account Settings</h3>
               <div className="space-y-2">
-                <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border-2 border-black hover:bg-gray-100 transition-colors">
-                  <Edit3 className="w-5 h-5 text-gray-600" />
-                  <span className="text-gray-900 font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Edit Profile</span>
-                </button>
-                <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border-2 border-black hover:bg-gray-100 transition-colors">
-                  <Settings className="w-5 h-5 text-gray-600" />
-                  <span className="text-gray-900 font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Preferences</span>
-                </button>
+                <div className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-xl border-2 border-gray-200 opacity-60 cursor-not-allowed">
+                  <div className="flex items-center space-x-3">
+                    <Edit3 className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-500 font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Edit Profile</span>
+                  </div>
+                  <span className="text-xs font-bold text-gray-400 uppercase border border-gray-300 px-2 py-0.5 rounded" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Soon</span>
+                </div>
+                <div className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-xl border-2 border-gray-200 opacity-60 cursor-not-allowed">
+                  <div className="flex items-center space-x-3">
+                    <Settings className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-500 font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Preferences</span>
+                  </div>
+                  <span className="text-xs font-bold text-gray-400 uppercase border border-gray-300 px-2 py-0.5 rounded" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Soon</span>
+                </div>
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center space-x-3 p-3 bg-red-50 rounded-xl border-2 border-black hover:bg-red-100 transition-colors text-red-700"

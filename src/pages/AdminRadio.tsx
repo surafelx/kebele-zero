@@ -7,6 +7,7 @@ const AdminRadio = () => {
   const [radioTracks, setRadioTracks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showRadioForm, setShowRadioForm] = useState(false);
+  const [editingTrack, setEditingTrack] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,6 +60,28 @@ const AdminRadio = () => {
     } catch (error) {
       console.error('Error creating track:', error);
       alert('Error adding track');
+    }
+  };
+
+  const handleUpdateRadioTrack = async (trackData: any) => {
+    if (!editingTrack) return;
+    try {
+      const { data, error } = await supabase
+        .from('radio')
+        .update(trackData)
+        .eq('id', editingTrack.id)
+        .select();
+
+      if (error) throw error;
+
+      setRadioTracks(radioTracks.map(t => t.id === editingTrack.id ? data[0] : t));
+      setShowRadioForm(false);
+      setEditingTrack(null);
+      setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false });
+      fetchRadioTracks();
+    } catch (error) {
+      console.error('Error updating track:', error);
+      alert('Error updating track');
     }
   };
 
@@ -126,7 +149,7 @@ const AdminRadio = () => {
             </div>
           </div>
           <button
-            onClick={() => setShowRadioForm(true)}
+            onClick={() => { setEditingTrack(null); setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false }); setShowRadioForm(true); }}
             className="retro-btn px-4 py-2 bg-white text-black"
           >
             <Plus className="w-4 h-4 inline mr-2" />
@@ -201,8 +224,6 @@ const AdminRadio = () => {
         </div>
       </div>
 
-      {/* Tracks List ->
-
       {/* Tracks Retro Card */}
       {filteredTracks.length === 0 ? (
         <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-12 text-center">
@@ -239,7 +260,21 @@ const AdminRadio = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button className="p-2 bg-white border-2 border-black hover:bg-gray-100 transition-colors">
+                    <button
+                      onClick={() => {
+                        setEditingTrack(track);
+                        setRadioFormData({
+                          title: track.title || '',
+                          description: track.description || '',
+                          youtube_id: track.youtube_id || '',
+                          category: track.category || 'music',
+                          tags: Array.isArray(track.tags) ? track.tags.join(', ') : (track.tags || ''),
+                          is_featured: track.is_featured || false,
+                        });
+                        setShowRadioForm(true);
+                      }}
+                      className="p-2 bg-white border-2 border-black hover:bg-yellow-100 transition-colors"
+                    >
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
@@ -259,16 +294,15 @@ const AdminRadio = () => {
       {/* Modal - Retro Style */}
       <Modal
         isOpen={showRadioForm}
-        onClose={() => setShowRadioForm(false)}
-        title="Add New YouTube Video"
+        onClose={() => { setShowRadioForm(false); setEditingTrack(null); setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false }); }}
+        title={editingTrack ? 'Edit Track' : 'Add New Track'}
         size="md"
         icon={<Radio className="w-5 h-5 text-amber-500" />}
         titleColor="from-amber-500 to-orange-500"
       >
-        <form onSubmit={(e) => { 
-          e.preventDefault(); 
-          handleCreateRadioTrack(radioFormData); 
-          setShowRadioForm(false); 
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          editingTrack ? handleUpdateRadioTrack(radioFormData) : handleCreateRadioTrack(radioFormData);
         }} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -341,14 +375,11 @@ const AdminRadio = () => {
               type="submit"
               className="flex-1 retro-btn bg-amber-500 border-amber-600"
             >
-              Add Video
+              {editingTrack ? 'Save Changes' : 'Add Track'}
             </button>
             <button
               type="button"
-              onClick={() => { 
-                setShowRadioForm(false); 
-                setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false }); 
-              }}
+              onClick={() => { setShowRadioForm(false); setEditingTrack(null); setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false }); }}
               className="px-5 py-3 retro-btn"
             >
               Cancel

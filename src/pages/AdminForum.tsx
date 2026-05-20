@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Users, Calendar, ShoppingBag, Radio, Image, Settings, BarChart3, Edit3, Trash2, Plus, ArrowLeft, Save, X, LogOut, LogIn, CreditCard, Trophy, Gamepad2, Filter, Search, MoreVertical, Eye, Ban, CheckCircle, Info, Upload, Camera, Menu, PanelLeftClose, ChevronDown, User } from 'lucide-react';
+import { MessageSquare, Users, Calendar, ShoppingBag, Radio, Image, Settings, BarChart3, Edit3, Trash2, Plus, ArrowLeft, Save, X, LogOut, LogIn, CreditCard, Trophy, Gamepad2, Filter, Search, MoreVertical, Eye, Ban, CheckCircle, Info, Upload, Camera, Menu, PanelLeftClose, ChevronDown, User, ChevronUp } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { forumAPI } from '../services/forum';
@@ -37,6 +37,11 @@ const AdminForum = () => {
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(6);
+
+  // Comments moderation states
+  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
+  const [postComments, setPostComments] = useState<Record<string, any[]>>({});
+  const [loadingComments, setLoadingComments] = useState<string | null>(null);
 
   // Fetch data when user is authenticated and has admin role
   useEffect(() => {
@@ -157,6 +162,38 @@ const AdminForum = () => {
       console.error('Error updating post:', error);
       const message = error instanceof Error ? error.message : 'Unknown error';
       alert('Error updating post: ' + message);
+    }
+  };
+
+  const handleToggleComments = async (postId: string) => {
+    if (expandedPostId === postId) {
+      setExpandedPostId(null);
+      return;
+    }
+    setExpandedPostId(postId);
+    if (postComments[postId]) return; // already loaded
+    setLoadingComments(postId);
+    try {
+      const comments = await forumAPI.getComments(postId);
+      setPostComments(prev => ({ ...prev, [postId]: comments || [] }));
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    } finally {
+      setLoadingComments(null);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string, postId: string) => {
+    if (!confirm('Delete this comment?')) return;
+    try {
+      await forumAPI.deleteComment(commentId);
+      setPostComments(prev => ({
+        ...prev,
+        [postId]: (prev[postId] || []).filter(c => c.id !== commentId),
+      }));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      alert('Error deleting comment: ' + message);
     }
   };
 
@@ -376,6 +413,46 @@ const AdminForum = () => {
                             <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
+                      </div>
+
+                      {/* Comments toggle */}
+                      <div className="mt-2 border-t-2 border-dashed border-gray-200 pt-2">
+                        <button
+                          onClick={() => handleToggleComments(post.id)}
+                          className="flex items-center space-x-1 text-xs retro-text font-bold text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                          {expandedPostId === post.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                          <span>
+                            {expandedPostId === post.id ? 'Hide' : 'Moderate'} Comments
+                            {postComments[post.id] ? ` (${postComments[post.id].length})` : ''}
+                          </span>
+                        </button>
+
+                        {expandedPostId === post.id && (
+                          <div className="mt-3 space-y-2">
+                            {loadingComments === post.id ? (
+                              <p className="retro-text text-xs text-gray-500">Loading comments...</p>
+                            ) : (postComments[post.id] || []).length === 0 ? (
+                              <p className="retro-text text-xs text-gray-400 italic">No comments on this post yet.</p>
+                            ) : (
+                              (postComments[post.id] || []).map((comment: any) => (
+                                <div key={comment.id} className="flex items-start justify-between bg-gray-50 border-2 border-gray-200 rounded p-2">
+                                  <div className="flex-1 pr-2">
+                                    <p className="retro-text text-xs text-gray-700 line-clamp-2">{comment.content}</p>
+                                    <p className="retro-text text-xs text-gray-400 mt-0.5">{new Date(comment.created_at).toLocaleDateString()}</p>
+                                  </div>
+                                  <button
+                                    onClick={() => handleDeleteComment(comment.id, post.id)}
+                                    className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
+                                    title="Delete comment"
+                                  >
+                                    <Trash2 className="w-3 h-3 text-red-500" />
+                                  </button>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

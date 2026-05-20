@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { 
-  LayoutDashboard, BarChart3, Users, MessageSquare, Gamepad2, 
-  Calendar, Image, Radio, ShoppingBag, CreditCard, Info, Settings,
+import {
+  LayoutDashboard, BarChart3, Users, MessageSquare, Gamepad2,
+  Calendar, Image, GalleryHorizontal, Radio, ShoppingBag, CreditCard, Info, Settings, Link2,
   ChevronRight, ChevronLeft, Bell, Search, LogOut, User, Menu
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,6 +12,8 @@ const AdminDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [headerSearch, setHeaderSearch] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -80,11 +82,11 @@ const AdminDashboard = () => {
     { id: 'souq', label: 'Marketplace', icon: ShoppingBag, category: 'main' },
     { id: 'events', label: 'Events', icon: Calendar, category: 'content' },
     { id: 'media', label: 'Videos', icon: Image, category: 'content' },
-    { id: 'gallery', label: 'Media Gallery', icon: Image, category: 'content' },
+    { id: 'gallery', label: 'Media Gallery', icon: GalleryHorizontal, category: 'content' },
     { id: 'radio', label: 'Radio', icon: Radio, category: 'content' },
     { id: 'transactions', label: 'Transactions', icon: CreditCard, category: 'system' },
     { id: 'about', label: 'About Page', icon: Info, category: 'system' },
-    { id: 'social-links', label: 'Social Links', icon: Settings, category: 'system' },
+    { id: 'social-links', label: 'Social Links', icon: Link2, category: 'system' },
     { id: 'settings', label: 'Settings', icon: Settings, category: 'system' },
   ];
 
@@ -294,12 +296,39 @@ const AdminDashboard = () => {
               {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
+                <input
+                  type="text"
+                  placeholder="Search sections..."
+                  value={headerSearch}
+                  onChange={(e) => { setHeaderSearch(e.target.value); setShowSearchResults(e.target.value.length > 0); }}
+                  onBlur={() => setTimeout(() => setShowSearchResults(false), 150)}
+                  onFocus={() => headerSearch.length > 0 && setShowSearchResults(true)}
                   className="pl-10 pr-4 py-2 bg-white border-2 border-black rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-64"
                   style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
                 />
+                {showSearchResults && (
+                  <div className="absolute top-full left-0 mt-1 w-full bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 overflow-hidden">
+                    {navItems
+                      .filter(item => item.label.toLowerCase().includes(headerSearch.toLowerCase()))
+                      .map(item => {
+                        const Icon = item.icon;
+                        return (
+                          <button
+                            key={item.id}
+                            onMouseDown={() => { navigate(`/admin/${item.id}`); setHeaderSearch(''); setShowSearchResults(false); }}
+                            className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-emerald-50 border-b border-gray-100 text-left"
+                            style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
+                          >
+                            <Icon className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm font-bold uppercase">{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    {navItems.filter(item => item.label.toLowerCase().includes(headerSearch.toLowerCase())).length === 0 && (
+                      <div className="px-4 py-3 text-sm text-gray-500" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>No sections found</div>
+                    )}
+                  </div>
+                )}
               </div>
               
               {/* Notifications */}

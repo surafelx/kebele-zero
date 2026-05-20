@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Leva } from "leva";
 import { Info, Calendar, ShoppingBag, Radio, Image, Menu, X, MessageSquare, Trophy, User, LayoutDashboard, Settings, Music, Play, Pause } from 'lucide-react';
@@ -33,7 +33,6 @@ import AdminSocialLinks from './pages/AdminSocialLinks';
 
 import AdminRoute from './components/AdminRoute';
 import AuthModal from './components/AuthModal';
-import UserProfileModal from './components/UserProfileModal';
 import UserDashboardModal from './components/UserDashboardModal';
 
 // Import services and context
@@ -80,7 +79,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }> {
                 Go Home
               </button>
             </div>
-            {process.env.NODE_ENV === 'development' && (
+            {import.meta.env.DEV && (
               <details className="mt-6 text-left">
                 <summary className="cursor-pointer text-sm text-gray-400 hover:text-gray-300">
                   Error Details (Dev Mode)
@@ -107,11 +106,21 @@ function MainApp() {
   const { cart, cartTotal } = useCart();
   const [authModalFeature, setAuthModalFeature] = useState<string>('');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showUserProfileModal, setShowUserProfileModal] = useState(false);
   const [showUserDashboardModal, setShowUserDashboardModal] = useState(false);
   const [modalLoading, setModalLoading] = useState<string | null>(null);
   const [isMusicPlayerOpen, setIsMusicPlayerOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Imperatively control the video when isPlaying changes
+  useEffect(() => {
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      videoRef.current.play().catch(() => {});
+    } else {
+      videoRef.current.pause();
+    }
+  }, [isPlaying]);
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [userPoints, setUserPoints] = useState<any>(null);
@@ -133,12 +142,6 @@ function MainApp() {
     } catch (error) {
       console.error('Error fetching user points:', error);
     }
-  };
-
-  // Set up global functions immediately
-  (window as any).openKebeleModal = (modalType: string) => {
-    console.log('openKebeleModal called with:', modalType);
-    openModal(modalType);
   };
 
   // Initialize checkAuthForFeature function
@@ -167,7 +170,12 @@ function MainApp() {
   }, [user, loading]);
 
   useEffect(() => {
-    console.log('MainApp component mounted, openKebeleModal function available:', !!(window as any).openKebeleModal);
+    // Set up the global function once on mount using the stable setActiveModal setter
+    (window as any).openKebeleModal = (modalType: string) => {
+      console.log('openKebeleModal called with:', modalType);
+      setActiveModal(modalType);
+    };
+    console.log('MainApp component mounted, openKebeleModal function available:', true);
 
     // Also listen for the fallback custom event
     const handleOpenKebeleModal = (event: CustomEvent) => {
@@ -361,14 +369,13 @@ function MainApp() {
               {/* Spectrum Visualizer */}
               {isPlaying && (
                 <div className="flex items-end space-x-1 h-8">
-                  {[...Array(8)].map((_, i) => (
+                  {[30, 70, 50, 90, 40, 80, 60, 45].map((pct, i) => (
                     <div
                       key={i}
-                      className="w-1 bg-purple-400 rounded-full animate-pulse"
+                      className="w-1 bg-purple-400 rounded-full"
                       style={{
-                        height: `${Math.random() * 100}%`,
-                        animationDelay: `${i * 0.1}s`,
-                        animationDuration: '0.5s'
+                        height: `${pct}%`,
+                        animation: `pulse ${0.4 + i * 0.07}s ease-in-out infinite alternate`
                       }}
                     />
                   ))}
@@ -402,7 +409,7 @@ function MainApp() {
         {activeModal && (
           <div className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={closeModal}>
             <div 
-              className="w-full max-w-6xl max-h-[90vh] overflow-hidden bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none" 
+              className="w-full max-w-6xl max-h-[90vh] overflow-hidden bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-none"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Title Bar */}
@@ -429,9 +436,9 @@ function MainApp() {
                 </div>
                 <button
                   onClick={closeModal}
-                  className="p-1 bg-white border-2 border-black rounded-none shadow hover:bg-red-500 hover:text-white transition-all"
+                  className="group p-1 bg-white border-2 border-black rounded-none shadow hover:bg-red-500 transition-all"
                 >
-                  <X className="w-4 h-4 text-black" />
+                  <X className="w-4 h-4 text-black group-hover:text-white transition-colors" />
                 </button>
               </div>
               <div className="max-h-[calc(90vh-80px)] overflow-y-auto">
@@ -452,12 +459,6 @@ function MainApp() {
           isOpen={showAuthModal}
           onClose={closeAuthModal}
           feature={authModalFeature}
-        />
-
-        {/* User Profile Modal */}
-        <UserProfileModal
-          isOpen={showUserProfileModal}
-          onClose={() => setShowUserProfileModal(false)}
         />
 
         {/* User Dashboard Modal */}
@@ -486,9 +487,8 @@ function MainApp() {
               <div className="flex justify-center mb-3">
                 <div className="w-32 h-24 bg-black rounded-lg overflow-hidden border-2 border-purple-500">
                   <video
+                    ref={videoRef}
                     className="w-full h-full object-cover"
-                    autoPlay={isPlaying}
-                    muted
                     loop
                     src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
                   >

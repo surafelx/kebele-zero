@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Plus, Search, Filter, Gamepad2, Users, Target, Award, BarChart3, History, Settings, Edit, Trash2, Save, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Trophy, Plus, Search, Filter, Gamepad2, Users, Target, Award, BarChart3, History, Settings, Edit, Trash2, Save, ChevronLeft, ChevronRight, X, Edit3 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import Modal from '../components/Modal';
 
@@ -21,6 +21,13 @@ const AdminGames = () => {
   const [showGameScoreForm, setShowGameScoreForm] = useState(false);
   const [showLevelManagement, setShowLevelManagement] = useState(false);
   const [editingLevel, setEditingLevel] = useState<Level | null>(null);
+  const [editingPoints, setEditingPoints] = useState<any>(null);
+  const [pointsFormData, setPointsFormData] = useState({
+    total_points: 0,
+    games_played: 0,
+    checkers_wins: 0,
+    marbles_wins: 0,
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
   const [newLevel, setNewLevel] = useState<Level>({
@@ -72,6 +79,23 @@ const AdminGames = () => {
       console.error('Error fetching game data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateUserPoints = async () => {
+    if (!editingPoints) return;
+    try {
+      const { data, error } = await supabase
+        .from('user_points')
+        .update({ ...pointsFormData, updated_at: new Date().toISOString() })
+        .eq('id', editingPoints.id)
+        .select();
+      if (error) throw error;
+      setUserPoints(userPoints.map(p => p.id === editingPoints.id ? data[0] : p));
+      setEditingPoints(null);
+    } catch (error) {
+      console.error('Error updating user points:', error);
+      alert('Error updating user points');
     }
   };
 
@@ -337,6 +361,84 @@ const AdminGames = () => {
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* User Points Management */}
+      <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-purple-600 to-indigo-600">
+          <h3 className="font-black text-white uppercase tracking-wide flex items-center space-x-2">
+            <Trophy className="w-5 h-5" />
+            <span>User Points Management</span>
+          </h3>
+          <span className="text-xs text-white/80 uppercase">Adjust player points manually</span>
+        </div>
+        <div className="p-4">
+          {userPoints.length === 0 ? (
+            <p className="text-center retro-text py-8 text-gray-500">No user points records found</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b-2 border-black">
+                    <th className="text-left p-2 retro-text uppercase text-xs">Player</th>
+                    <th className="text-center p-2 retro-text uppercase text-xs">Total Pts</th>
+                    <th className="text-center p-2 retro-text uppercase text-xs">Games</th>
+                    <th className="text-center p-2 retro-text uppercase text-xs">Checkers W</th>
+                    <th className="text-center p-2 retro-text uppercase text-xs">Marbles W</th>
+                    <th className="text-center p-2 retro-text uppercase text-xs">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {userPoints.map((pts) => {
+                    const user = users.find(u => u.id === pts.user_id);
+                    const isEditing = editingPoints?.id === pts.id;
+                    return (
+                      <tr key={pts.id} className={isEditing ? 'bg-yellow-50' : 'hover:bg-gray-50'}>
+                        <td className="p-2 font-bold retro-text">{user?.username || user?.email || pts.user_id?.slice(0, 8)}</td>
+                        <td className="p-2 text-center">
+                          {isEditing ? (
+                            <input type="number" min={0} value={pointsFormData.total_points} onChange={e => setPointsFormData(f => ({ ...f, total_points: +e.target.value }))} className="retro-input w-20 text-center py-1 px-2 text-xs" />
+                          ) : <span className="font-bold text-purple-700">{pts.total_points}</span>}
+                        </td>
+                        <td className="p-2 text-center">
+                          {isEditing ? (
+                            <input type="number" min={0} value={pointsFormData.games_played} onChange={e => setPointsFormData(f => ({ ...f, games_played: +e.target.value }))} className="retro-input w-20 text-center py-1 px-2 text-xs" />
+                          ) : pts.games_played}
+                        </td>
+                        <td className="p-2 text-center">
+                          {isEditing ? (
+                            <input type="number" min={0} value={pointsFormData.checkers_wins} onChange={e => setPointsFormData(f => ({ ...f, checkers_wins: +e.target.value }))} className="retro-input w-20 text-center py-1 px-2 text-xs" />
+                          ) : pts.checkers_wins}
+                        </td>
+                        <td className="p-2 text-center">
+                          {isEditing ? (
+                            <input type="number" min={0} value={pointsFormData.marbles_wins} onChange={e => setPointsFormData(f => ({ ...f, marbles_wins: +e.target.value }))} className="retro-input w-20 text-center py-1 px-2 text-xs" />
+                          ) : pts.marbles_wins}
+                        </td>
+                        <td className="p-2 text-center">
+                          {isEditing ? (
+                            <div className="flex justify-center space-x-1">
+                              <button onClick={handleUpdateUserPoints} className="p-1.5 bg-green-100 border-2 border-black hover:bg-green-200 transition-colors" title="Save"><Save className="w-3 h-3 text-green-700" /></button>
+                              <button onClick={() => setEditingPoints(null)} className="p-1.5 bg-gray-100 border-2 border-black hover:bg-gray-200 transition-colors" title="Cancel"><X className="w-3 h-3 text-gray-700" /></button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => { setEditingPoints(pts); setPointsFormData({ total_points: pts.total_points, games_played: pts.games_played, checkers_wins: pts.checkers_wins, marbles_wins: pts.marbles_wins }); }}
+                              className="p-1.5 bg-white border-2 border-black hover:bg-yellow-100 transition-colors"
+                              title="Edit points"
+                            >
+                              <Edit className="w-3 h-3 text-gray-600" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 

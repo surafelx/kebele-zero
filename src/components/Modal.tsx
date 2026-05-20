@@ -23,7 +23,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     }
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, [isOpen, onClose]);
 
@@ -60,14 +60,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all active:translate-y-0.5"
+            className="group p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:border-red-500 transition-all active:translate-y-0.5"
           >
-            <X className="w-4 h-4 text-black" />
+            <X className="w-4 h-4 text-black group-hover:text-white transition-colors" />
           </button>
         </div>
         
         {/* Content */}
-        <div className="p-6 flex-1 overflow-y-auto max-h-[calc(90vh-80px)]">
+        <div className="p-6 flex-1 overflow-y-auto">
           {children}
         </div>
       </div>

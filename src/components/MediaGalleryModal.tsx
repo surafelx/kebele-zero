@@ -24,7 +24,7 @@ const MediaGalleryModal: React.FC<MediaGalleryModalProps> = ({ isOpen, onClose, 
     }
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, [isOpen, onClose]);
 
@@ -100,9 +100,9 @@ const MediaGalleryModal: React.FC<MediaGalleryModalProps> = ({ isOpen, onClose, 
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all active:translate-y-0.5"
+            className="group p-2 bg-white border-2 border-black rounded-lg shadow-lg hover:bg-red-500 hover:border-red-500 transition-all active:translate-y-0.5"
           >
-            <X className="w-4 h-4 text-black" />
+            <X className="w-4 h-4 text-black group-hover:text-white transition-colors" />
           </button>
         </div>
 
@@ -205,15 +205,13 @@ const MediaGalleryModal: React.FC<MediaGalleryModalProps> = ({ isOpen, onClose, 
               Click on an image to select it
             </p>
             <button
-              onClick={() => {
-                // TODO: Implement upload functionality
-                alert('Upload functionality coming soon!');
-              }}
-              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold border-2 border-black hover:from-purple-700 hover:to-pink-700 transition-colors"
+              disabled
+              title="Use the Admin Media section to upload new images"
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-300 text-gray-500 rounded-xl font-bold border-2 border-gray-400 cursor-not-allowed opacity-60"
               style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
             >
               <Upload className="w-4 h-4" />
-              <span>Upload New</span>
+              <span>Upload via Admin</span>
             </button>
           </div>
         </div>

@@ -4,16 +4,14 @@ import { Shield, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const AdminLogin: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [credentials, setCredentials] = useState({
     email: '',
     password: '',
-    confirmPassword: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login, register, loading, user } = useAuth();
+  const { login, loading, user } = useAuth();
 
   // Hide canvas and add admin-route class
   useEffect(() => {
@@ -71,33 +69,11 @@ const AdminLogin: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (isLogin) {
-      try {
-        await login(credentials.email, credentials.password);
-        navigate('/admin');
-      } catch (error: any) {
-        setError(error.message || 'Login failed. Please check your credentials.');
-      }
-    } else {
-      if (credentials.password !== credentials.confirmPassword) {
-        setError('Passwords do not match');
-        return;
-      }
-
-      try {
-        await register({
-          username: credentials.email.split('@')[0],
-          email: credentials.email,
-          password: credentials.password,
-          role: 'admin'
-        });
-        alert('Admin account created successfully! Please check your email to confirm, then sign in.');
-        setIsLogin(true);
-        setCredentials({ email: '', password: '', confirmPassword: '' });
-      } catch (error: any) {
-        setError(error.message || 'Signup failed. Please try again.');
-      }
+    try {
+      await login(credentials.email, credentials.password);
+      navigate('/admin');
+    } catch (error: any) {
+      setError(error.message || 'Login failed. Please check your credentials.');
     }
   };
 
@@ -114,13 +90,10 @@ const AdminLogin: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-lg font-black text-white uppercase tracking-wide drop-shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                  {isLogin ? 'Admin Access' : 'Create Admin'}
+                  Admin Access
                 </h3>
                 <p className="text-xs text-blue-100 font-bold uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                  {isLogin
-                    ? 'Sign in to access the admin dashboard'
-                    : 'Create an admin account to manage content'
-                  }
+                  Sign in to access the admin dashboard
                 </p>
               </div>
             </div>
@@ -180,26 +153,6 @@ const AdminLogin: React.FC = () => {
                 </div>
               </div>
 
-              {!isLogin && (
-                <div className="space-y-2">
-                  <label htmlFor="confirmPassword" className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                    Confirm Password
-                  </label>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    value={credentials.confirmPassword}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 focus:border-blue-500 focus:outline-none transition-all font-medium placeholder-gray-400"
-                    style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
-                    placeholder="Confirm your password"
-                  />
-                </div>
-              )}
-
               <button
                 type="submit"
                 disabled={loading}
@@ -209,31 +162,16 @@ const AdminLogin: React.FC = () => {
                 {loading ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                    {isLogin ? 'Signing in...' : 'Creating account...'}
+                    Signing in...
                   </div>
                 ) : (
                   <div className="flex items-center justify-center">
                     <LogIn className="w-5 h-5 mr-3" />
-                    {isLogin ? 'Sign In to Dashboard' : 'Create Admin Account'}
+                    Sign In to Dashboard
                   </div>
                 )}
               </button>
 
-              {/* Toggle Login/Signup */}
-              <div className="text-center pt-4 border-t-2 border-gray-200">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsLogin(!isLogin);
-                    setError('');
-                    setCredentials({ email: '', password: '', confirmPassword: '' });
-                  }}
-                  className="text-sm font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wide transition-colors"
-                  style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
-                >
-                  {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-                </button>
-              </div>
             </form>
 
             {/* Back Button */}

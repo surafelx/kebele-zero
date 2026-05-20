@@ -7,6 +7,7 @@ const AdminMedia = () => {
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showVideoForm, setShowVideoForm] = useState(false);
+  const [editingVideo, setEditingVideo] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,6 +58,28 @@ const AdminMedia = () => {
     } catch (error) {
       console.error('Error creating video:', error);
       alert('Error adding video');
+    }
+  };
+
+  const handleUpdateVideo = async (videoData: any) => {
+    if (!editingVideo) return;
+    try {
+      const { data, error } = await supabase
+        .from('videos')
+        .update(videoData)
+        .eq('id', editingVideo.id)
+        .select();
+
+      if (error) throw error;
+
+      setVideos(videos.map(v => v.id === editingVideo.id ? data[0] : v));
+      setShowVideoForm(false);
+      setEditingVideo(null);
+      setVideoFormData({ title: '', description: '', youtube_id: '', category: 'cultural' });
+      fetchVideos();
+    } catch (error) {
+      console.error('Error updating video:', error);
+      alert('Error updating video');
     }
   };
 
@@ -125,7 +148,7 @@ const AdminMedia = () => {
             </div>
           </div>
           <button
-            onClick={() => setShowVideoForm(true)}
+            onClick={() => { setEditingVideo(null); setVideoFormData({ title: '', description: '', youtube_id: '', category: 'cultural' }); setShowVideoForm(true); }}
             className="retro-btn px-4 py-2 bg-white text-black"
           >
             <Plus className="w-4 h-4 inline mr-2" />
@@ -228,7 +251,19 @@ const AdminMedia = () => {
                   </div>
                 </div>
                 <div className="absolute top-3 right-3 flex space-x-2">
-                  <button className="p-2 bg-white border-2 border-black hover:bg-gray-100 transition-colors">
+                  <button
+                    onClick={() => {
+                      setEditingVideo(video);
+                      setVideoFormData({
+                        title: video.title || '',
+                        description: video.description || '',
+                        youtube_id: video.youtube_id || '',
+                        category: video.category || 'cultural',
+                      });
+                      setShowVideoForm(true);
+                    }}
+                    className="p-2 bg-white border-2 border-black hover:bg-yellow-100 transition-colors"
+                  >
                     <Edit3 className="w-4 h-4" />
                   </button>
                   <button
@@ -266,13 +301,13 @@ const AdminMedia = () => {
       {/* Modal - Retro Style */}
       <Modal
         isOpen={showVideoForm}
-        onClose={() => setShowVideoForm(false)}
-        title="Add New Video"
+        onClose={() => { setShowVideoForm(false); setEditingVideo(null); setVideoFormData({ title: '', description: '', youtube_id: '', category: 'cultural' }); }}
+        title={editingVideo ? 'Edit Video' : 'Add New Video'}
         size="md"
         icon={<Image className="w-5 h-5 text-blue-500" />}
         titleColor="from-blue-500 to-indigo-500"
       >
-        <form onSubmit={(e) => { e.preventDefault(); handleCreateVideo(videoFormData); setShowVideoForm(false); }} className="space-y-5">
+        <form onSubmit={(e) => { e.preventDefault(); editingVideo ? handleUpdateVideo(videoFormData) : handleCreateVideo(videoFormData); }} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Title</label>
@@ -325,11 +360,11 @@ const AdminMedia = () => {
               type="submit"
               className="flex-1 retro-btn bg-blue-500 border-blue-600"
             >
-              Add Video
+              {editingVideo ? 'Save Changes' : 'Add Video'}
             </button>
             <button
               type="button"
-              onClick={() => { setShowVideoForm(false); setVideoFormData({ title: '', description: '', youtube_id: '', category: 'cultural' }); }}
+              onClick={() => { setShowVideoForm(false); setEditingVideo(null); setVideoFormData({ title: '', description: '', youtube_id: '', category: 'cultural' }); }}
               className="px-5 py-3 retro-btn"
             >
               Cancel

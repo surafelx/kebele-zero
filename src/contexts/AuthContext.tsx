@@ -64,36 +64,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     let mounted = true
 
-    const init = async () => {
-      console.log('[Auth] Fetching initial session...')
-      const { data } = await supabase.auth.getSession()
-      console.log('[Auth] Initial session:', data.session)
-
-      if (data.session?.user && mounted) {
-         loadUserProfile(data.session.user)
-      }
-
-      setLoading(false)
-    }
-
-    init()
-
+    // onAuthStateChange fires immediately with the current session (INITIAL_SESSION),
+    // then again on SIGNED_IN / SIGNED_OUT. We handle everything here so there is
+    // no duplicate profile load and no race between getSession() and this listener.
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('[Auth] Auth state change:', event)
-        console.log('[Auth] Session:', session)
 
         if (!mounted) return
 
-        if (event === 'SIGNED_IN' && session?.user) {
-           loadUserProfile(session.user)
-        }
-
-        if (event === 'SIGNED_OUT') {
+        if (session?.user) {
+          await loadUserProfile(session.user)
+        } else {
           setUser(null)
         }
 
-        setLoading(false)
+        if (mounted) setLoading(false)
       }
     )
 
@@ -109,6 +95,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 const loadUserProfile = async (authUser: any) => {
   console.log('[Auth] Loading profile for:', authUser.id)
 
+  // Default role from metadata (used as fallback)
+  const metadataRole = authUser.user_metadata?.role === 'admin' ? 'admin' : 'user'
+
   const profile: User = {
     id: authUser.id,
     email: authUser.email || '',
@@ -116,7 +105,7 @@ const loadUserProfile = async (authUser: any) => {
       authUser.user_metadata?.username ||
       authUser.email?.split('@')[0] ||
       'user',
-    role: authUser.user_metadata?.role === 'admin' ? 'admin' : 'user',
+    role: metadataRole,
     created_at: authUser.created_at,
     profile: {
       firstName: authUser.user_metadata?.firstName || '',
@@ -126,11 +115,11 @@ const loadUserProfile = async (authUser: any) => {
     }
   }
 
-  // Ensure user exists in users table
+  // Check the users table — it is the authoritative source for roles
   try {
     const { data: existingUser, error: userCheckError } = await supabase
       .from('users')
-      .select('id')
+      .select('id, role, username')
       .eq('id', authUser.id)
       .single()
 
@@ -152,6 +141,11 @@ const loadUserProfile = async (authUser: any) => {
       } else {
         console.log('[Auth] User record created successfully')
       }
+    } else if (existingUser) {
+      // Use role from users table (authoritative — admin can change it via AdminUsers UI)
+      profile.role = existingUser.role === 'admin' ? 'admin' : 'user'
+      if (existingUser.username) profile.username = existingUser.username
+      console.log('[Auth] Role resolved from users table:', profile.role)
     }
   } catch (err) {
     console.error('[Auth] Error checking/creating user record:', err)
