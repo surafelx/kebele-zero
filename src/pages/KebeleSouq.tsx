@@ -176,7 +176,7 @@ const KebeleSouq: React.FC = () => {
                   {/* Product Image */}
                   <div className="aspect-[3/2] overflow-hidden relative">
                     <img
-                      src={product.images[0]?.url}
+                      src={product.imageUrl || product.image_url || product.images?.[0]?.url || ''}
                       alt={product.name}
                       className="w-full h-full object-cover"
                     />

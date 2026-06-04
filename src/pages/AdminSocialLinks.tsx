@@ -106,8 +106,8 @@ const AdminSocialLinks = () => {
       label: link.label,
       url: link.url,
       icon: link.icon,
-      is_active: link.is_active,
-      display_order: link.display_order
+      is_active: link.is_active ?? true,
+      display_order: link.display_order ?? 0
     });
     setShowForm(true);
   };
@@ -254,7 +254,7 @@ const AdminSocialLinks = () => {
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleToggle(link.id, link.is_active)}
+                      onClick={() => handleToggle(link.id, link.is_active ?? true)}
                       className={`retro-btn-secondary p-2 ${
                         link.is_active ? '' : 'bg-green-100'
                       }`}

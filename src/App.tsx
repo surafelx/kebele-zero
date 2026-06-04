@@ -29,6 +29,7 @@ import AdminEvents from './pages/AdminEvents';
 import AdminSettings from './pages/AdminSettings';
 import AdminTransactions from './pages/AdminTransactions';
 import AdminUsers from './components/AdminUsers';
+import AdminAnalytics from './components/AdminAnalytics';
 import AdminGallery from './pages/AdminGallery';
 import AdminSocialLinks from './pages/AdminSocialLinks';
 import AdminPaymentRequests from './pages/AdminPaymentRequests';
@@ -107,6 +108,15 @@ const isLevaDebug = window.location.hash === "#leva";
 function MainApp() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Pause Three.js render loop while a modal covers the 3D scene
+  useEffect(() => {
+    if (activeModal) {
+      window.dispatchEvent(new Event('kebele:modal:open'));
+    } else {
+      window.dispatchEvent(new Event('kebele:modal:close'));
+    }
+  }, [activeModal]);
   const { cart, cartTotal } = useCart();
   const [authModalFeature, setAuthModalFeature] = useState<string>('');
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -590,7 +600,7 @@ function App() {
                  <Route index element={<AdminOverview />} />
                  <Route path="overview" element={<AdminOverview />} />
                  <Route path="forum" element={<AdminForum />} />
-                 <Route path="analytics" element={<div className="p-6"><h2 className="text-2xl font-bold">Analytics Coming Soon</h2></div>} />
+                 <Route path="analytics" element={<AdminAnalytics />} />
                  <Route path="users" element={<AdminUsers />} />
                  <Route path="games" element={<AdminGames />} />
                  <Route path="souq" element={<AdminSouq />} />

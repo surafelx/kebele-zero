@@ -158,6 +158,20 @@ export default class Physics
         this.car.upsideDown.turningTimeout = null
 
         /**
+         * Pre-allocated scratch vectors/quaternions to avoid GC pressure
+         * in the postStep hot path (fires every physics tick ~60 Hz)
+         */
+        this.car._scratch = {
+            positionDelta:    new CANNON.Vec3(),
+            localForward:     new CANNON.Vec3(1, 0, 0),
+            localUp:          new CANNON.Vec3(0, 0, 1),
+            worldUp:          new CANNON.Vec3(),
+            rotationQuat:     new CANNON.Quaternion(0, 0, 0, 1),
+            rotationAxis:     new CANNON.Vec3(0, 0, 1),
+            slowDownForce:    new CANNON.Vec3(),
+        }
+
+        /**
          * Jump
          */
         this.car.jump = (_toReturn = true, _strength = 60) =>
@@ -255,7 +269,7 @@ export default class Physics
 
             for(const _wheelInfos of this.car.vehicle.wheelInfos)
             {
-                const shape = new CANNON.Cylinder(_wheelInfos.radius, _wheelInfos.radius, this.car.wheels.options.height, 20)
+                const shape = new CANNON.Cylinder(_wheelInfos.radius, _wheelInfos.radius, this.car.wheels.options.height, 8)
                 const body = new CANNON.Body({ mass: this.car.options.wheelMass, material: this.materials.items.wheel })
                 const quaternion = new CANNON.Quaternion()
                 quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2)
@@ -349,28 +363,27 @@ export default class Physics
          */
         this.world.addEventListener('postStep', () =>
         {
-            // Update speed
-            let positionDelta = new CANNON.Vec3()
-            positionDelta = positionDelta.copy(this.car.chassis.body.position)
-            positionDelta = positionDelta.vsub(this.car.oldPosition)
+            const sc = this.car._scratch
+
+            // Update speed — reuse positionDelta scratch vector
+            sc.positionDelta.copy(this.car.chassis.body.position)
+            sc.positionDelta.vsub(this.car.oldPosition, sc.positionDelta)
 
             this.car.oldPosition.copy(this.car.chassis.body.position)
-            this.car.speed = positionDelta.length()
+            this.car.speed = sc.positionDelta.length()
 
-            // Update forward
-            const localForward = new CANNON.Vec3(1, 0, 0)
-            this.car.chassis.body.vectorToWorldFrame(localForward, this.car.worldForward)
+            // Update forward — reuse localForward scratch vector
+            this.car.chassis.body.vectorToWorldFrame(sc.localForward, this.car.worldForward)
             this.car.angle = Math.atan2(this.car.worldForward.y, this.car.worldForward.x)
 
-            this.car.forwardSpeed = this.car.worldForward.dot(positionDelta)
+            this.car.forwardSpeed = this.car.worldForward.dot(sc.positionDelta)
             this.car.goingForward = this.car.forwardSpeed > 0
 
-            // Updise down
-            const localUp = new CANNON.Vec3(0, 0, 1)
-            const worldUp = new CANNON.Vec3()
-            this.car.chassis.body.vectorToWorldFrame(localUp, worldUp)
+            // Upside down — reuse localUp / worldUp scratch vectors
+            this.car.chassis.body.vectorToWorldFrame(sc.localUp, sc.worldUp)
+            const worldUp = sc.worldUp
 
-            if(worldUp.dot(localUp) < 0.5)
+            if(worldUp.dot(sc.localUp) < 0.5)
             {
                 if(this.car.upsideDown.state === 'watching')
                 {
@@ -405,28 +418,30 @@ export default class Physics
                 this.car.wheels.bodies[i].position.copy(transform.position)
                 this.car.wheels.bodies[i].quaternion.copy(transform.quaternion)
 
-                // Rotate the wheels on the right
+                // Rotate the wheels on the right — reuse scratch quaternion/axis
                 if(i === 1 || i === 3)
                 {
-                    const rotationQuaternion = new CANNON.Quaternion(0, 0, 0, 1)
-                    rotationQuaternion.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), Math.PI)
-                    this.car.wheels.bodies[i].quaternion = this.car.wheels.bodies[i].quaternion.mult(rotationQuaternion)
+                    const rq = sc.rotationQuat
+                    rq.setFromAxisAngle(sc.rotationAxis, Math.PI)
+                    this.car.wheels.bodies[i].quaternion = this.car.wheels.bodies[i].quaternion.mult(rq)
                 }
             }
 
             // Slow down back
             if(!this.controls.actions.up && !this.controls.actions.down)
             {
-                let slowDownForce = this.car.worldForward.clone()
-
+                // Reuse scratch vector — copy worldForward, optionally negate, then scale
+                sc.slowDownForce.copy(this.car.worldForward)
                 if(this.car.goingForward)
                 {
-                    slowDownForce = slowDownForce.negate()
+                    sc.slowDownForce.negate(sc.slowDownForce)
                 }
+                const speed = this.car.chassis.body.velocity.length()
+                sc.slowDownForce.x *= speed * 0.1
+                sc.slowDownForce.y *= speed * 0.1
+                sc.slowDownForce.z *= speed * 0.1
 
-                slowDownForce = slowDownForce.scale(this.car.chassis.body.velocity.length() * 0.1)
-
-                this.car.chassis.body.applyImpulse(slowDownForce, this.car.chassis.body.position)
+                this.car.chassis.body.applyImpulse(sc.slowDownForce, this.car.chassis.body.position)
             }
         })
 

@@ -60,11 +60,20 @@ const KebeleMedia: React.FC = () => {
   };
 
   const filteredMedia = mediaItems.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          item.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const q = searchTerm.toLowerCase();
+    const matchesSearch = (item.title || '').toLowerCase().includes(q) ||
+                          (item.description || '').toLowerCase().includes(q);
     const matchesCategory = !selectedCategory || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // Safe year from a possibly-missing date
+  const yearOf = (date?: string) => {
+    if (!date) return '';
+    const y = new Date(date).getFullYear();
+    return isNaN(y) ? '' : y;
+  };
+  const PLACEHOLDER = 'https://placehold.co/600x450/1f2937/9ca3af?text=No+Image';
 
   const categories = [...new Set(mediaItems.map(item => item.category))];
 
@@ -288,9 +297,10 @@ const KebeleMedia: React.FC = () => {
                   </div>
                   <div className="relative">
                     <img
-                      src={filteredMedia[0].imageUrl}
+                      src={filteredMedia[0].imageUrl || PLACEHOLDER}
                       alt={filteredMedia[0].title}
                       className="w-full h-96 object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                     <div className="absolute bottom-6 left-6 right-6 text-white">
@@ -298,12 +308,16 @@ const KebeleMedia: React.FC = () => {
                         <span className="px-4 py-2 bg-paper text-charcoal rounded-lg retro-title text-sm font-bold uppercase border-2 border-charcoal">
                           {filteredMedia[0].category}
                         </span>
-                        <span className="retro-title text-sm font-bold">
-                          {new Date(filteredMedia[0].date).getFullYear()}
-                        </span>
+                        {yearOf(filteredMedia[0].date) && (
+                          <span className="retro-title text-sm font-bold">
+                            {yearOf(filteredMedia[0].date)}
+                          </span>
+                        )}
                       </div>
                       <h2 className="text-2xl md:text-3xl font-bold mb-2 retro-title">{filteredMedia[0].title}</h2>
-                      <p className="text-lg opacity-90 leading-relaxed max-w-2xl">{filteredMedia[0].description}</p>
+                      {filteredMedia[0].description && (
+                        <p className="text-lg opacity-90 leading-relaxed max-w-2xl">{filteredMedia[0].description}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -316,9 +330,11 @@ const KebeleMedia: React.FC = () => {
                     {/* Image Container */}
                     <div className="aspect-[4/3] overflow-hidden relative">
                       <img
-                        src={item.imageUrl}
+                        src={item.imageUrl || PLACEHOLDER}
                         alt={item.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        loading="lazy"
+                        onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 group-hover:from-black/60 transition-all duration-300"></div>
 
@@ -339,18 +355,22 @@ const KebeleMedia: React.FC = () => {
 
                     {/* Content */}
                     <div className="p-4">
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-3 gap-2">
                         <h3 className="retro-title text-base font-bold uppercase line-clamp-2 group-hover:text-sky-blue transition-colors">
                           {item.title}
                         </h3>
-                        <span className="retro-title text-sm font-bold text-charcoal">
-                          {new Date(item.date).getFullYear()}
-                        </span>
+                        {yearOf(item.date) && (
+                          <span className="retro-title text-sm font-bold text-charcoal flex-shrink-0">
+                            {yearOf(item.date)}
+                          </span>
+                        )}
                       </div>
 
-                      <p className="retro-text text-sm mb-4 leading-relaxed opacity-90">
-                        {item.description.length > 80 ? `${item.description.substring(0, 80)}...` : item.description}
-                      </p>
+                      {item.description && (
+                        <p className="retro-text text-sm mb-4 leading-relaxed opacity-90 line-clamp-2">
+                          {item.description}
+                        </p>
+                      )}
 
                       <div className="flex items-center justify-between">
                         <span className="retro-text text-xs opacity-70">

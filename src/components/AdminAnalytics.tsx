@@ -35,27 +35,17 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, color, tr
 );
 
 const AdminAnalytics: React.FC = () => {
-  const [users, setUsers] = useState<any[]>([]);
-  const [forumPosts, setForumPosts] = useState<any[]>([]);
-  const [forumComments, setForumComments] = useState<any[]>([]);
-  const [gameScores, setGameScores] = useState<any[]>([]);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [videos, setVideos] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const stats = await adminAPI.getStats();
-        if (stats) {
-          setUsers(Array(stats.totalUsers || 0).fill({}));
-          setForumPosts(Array(stats.totalPosts || 0).fill({}));
-          setGameScores(Array(stats.totalGames || 0).fill({}));
-          setTransactions(Array(stats.totalTransactions || 0).fill({}));
-          setVideos(Array(stats.totalMedia || 0).fill({}));
-        }
+        const data = await adminAPI.getStats();
+        setStats(data || {});
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching analytics:', error);
+        setStats({});
       } finally {
         setLoading(false);
       }
@@ -75,13 +65,14 @@ const AdminAnalytics: React.FC = () => {
     );
   }
 
-  const totalRevenue = transactions
-    .filter(t => t.status === 'completed')
-    .reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0);
-
-  const activeUsersThisMonth = users.filter(u => 
-    new Date(u.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-  ).length;
+  const totalUsers = stats?.totalUsers || 0;
+  const newUsers = stats?.newUsers || 0;
+  const totalPosts = stats?.totalPosts || 0;
+  const totalComments = stats?.totalComments || 0;
+  const totalGames = stats?.totalGames || 0;
+  const totalMediaViews = stats?.totalMedia || 0;
+  const totalRevenue = stats?.totalRevenue || 0;
+  const pendingPayments = stats?.paymentRequests?.pending || 0;
 
   return (
     <div className="space-y-8">
@@ -99,37 +90,33 @@ const AdminAnalytics: React.FC = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Active Users" 
-          value={activeUsersThisMonth}
-          icon={Users} 
+        <StatCard
+          title="New Users"
+          value={newUsers}
+          icon={Users}
           color="bg-gradient-to-br from-blue-500 to-blue-600"
-          trend="+12%"
-          subtitle="Last 30 days"
+          subtitle={`Last 30 days · ${totalUsers} total`}
         />
-        <StatCard 
-          title="Forum Activity" 
-          value={forumPosts.length + forumComments.length}
-          icon={MessageSquare} 
+        <StatCard
+          title="Forum Activity"
+          value={totalPosts + totalComments}
+          icon={MessageSquare}
           color="bg-gradient-to-br from-green-500 to-green-600"
-          trend="+8%"
-          subtitle="Posts & Comments"
+          subtitle={`${totalPosts} posts · ${totalComments} comments`}
         />
-        <StatCard 
-          title="Game Sessions" 
-          value={gameScores.length}
-          icon={Trophy} 
+        <StatCard
+          title="Game Sessions"
+          value={totalGames}
+          icon={Trophy}
           color="bg-gradient-to-br from-purple-500 to-purple-600"
-          trend="+15%"
           subtitle="Total plays"
         />
-        <StatCard 
-          title="Revenue" 
+        <StatCard
+          title="Revenue"
           value={`$${totalRevenue.toLocaleString()}`}
-          icon={DollarSign} 
+          icon={DollarSign}
           color="bg-gradient-to-br from-amber-500 to-amber-600"
-          trend="+5%"
-          subtitle="This month"
+          subtitle={`${pendingPayments} pending requests`}
         />
       </div>
 
@@ -156,7 +143,7 @@ const AdminAnalytics: React.FC = () => {
                 </div>
                 <span className="font-bold text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Total Users</span>
               </div>
-              <span className="text-xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{users.length}</span>
+              <span className="text-xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{totalUsers}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl border-2 border-black">
               <div className="flex items-center space-x-3">
@@ -165,7 +152,7 @@ const AdminAnalytics: React.FC = () => {
                 </div>
                 <span className="font-bold text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Forum Posts</span>
               </div>
-              <span className="text-xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{forumPosts.length}</span>
+              <span className="text-xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{totalPosts}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl border-2 border-black">
               <div className="flex items-center space-x-3">
@@ -174,16 +161,16 @@ const AdminAnalytics: React.FC = () => {
                 </div>
                 <span className="font-bold text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Game Plays</span>
               </div>
-              <span className="text-xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{gameScores.length}</span>
+              <span className="text-xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{totalGames}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl border-2 border-black">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center border-2 border-black">
                   <Activity className="w-5 h-5 text-amber-600" />
                 </div>
-                <span className="font-bold text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Media Views</span>
+                <span className="font-bold text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Media Items</span>
               </div>
-              <span className="text-xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{videos.reduce((sum, v) => sum + (v.statistics?.viewCount || 0), 0).toLocaleString()}</span>
+              <span className="text-xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{totalMediaViews.toLocaleString()}</span>
             </div>
           </div>
         </div>

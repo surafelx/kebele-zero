@@ -315,11 +315,11 @@ const KebeleEvents: React.FC = () => {
           </div>
           <div className="p-6">
             {/* Main Image */}
-            {event.images.length > 0 && (
+            {(event.images?.length > 0 || event.imageUrl || event.image_url) && (
               <div className="mb-6">
                 <img
-                  src={event.images[0].url}
-                  alt={event.images[0].alt}
+                  src={event.images?.[0]?.url || event.imageUrl || event.image_url || ''}
+                  alt={event.images?.[0]?.alt || event.title}
                   className="w-full h-64 object-cover rounded-lg border-4 border-white shadow-2xl"
                 />
               </div>

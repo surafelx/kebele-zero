@@ -2,43 +2,37 @@ import EventEmitter from './EventEmitter.js'
 
 export default class Sizes extends EventEmitter
 {
-    /**
-     * Constructor
-     */
     constructor()
     {
         super()
 
-        // Viewport size
-        this.viewport = {}
-        this.$sizeViewport = document.createElement('div')
-        this.$sizeViewport.style.width = '100vw'
-        this.$sizeViewport.style.height = '100vh'
-        this.$sizeViewport.style.position = 'absolute'
-        this.$sizeViewport.style.top = 0
-        this.$sizeViewport.style.left = 0
-        this.$sizeViewport.style.pointerEvents = 'none'
+        // Debounce timer so rapid resize events don't hammer the GPU
+        this._resizeTimer = null
 
-        // Resize event
-        this.resize = this.resize.bind(this)
-        window.addEventListener('resize', this.resize)
+        this._onResize = () =>
+        {
+            clearTimeout(this._resizeTimer)
+            this._resizeTimer = setTimeout(() => this.resize(), 100)
+        }
+        window.addEventListener('resize', this._onResize)
 
         this.resize()
     }
 
-    /**
-     * Resize
-     */
     resize()
     {
-        document.body.appendChild(this.$sizeViewport)
-        this.viewport.width = this.$sizeViewport.offsetWidth
-        this.viewport.height = this.$sizeViewport.offsetHeight
-        document.body.removeChild(this.$sizeViewport)
-
-        this.width = window.innerWidth
-        this.height = window.innerHeight
+        // Use window dimensions directly — no DOM append/remove needed
+        this.width    = window.innerWidth
+        this.height   = window.innerHeight
+        // viewport alias kept for backward compatibility
+        this.viewport = { width: this.width, height: this.height }
 
         this.trigger('resize')
+    }
+
+    dispose()
+    {
+        clearTimeout(this._resizeTimer)
+        window.removeEventListener('resize', this._onResize)
     }
 }

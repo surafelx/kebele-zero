@@ -74,9 +74,11 @@ const KebeleForum: React.FC = () => {
   const [totalPosts, setTotalPosts] = useState(0);
   const postsPerPage = 10;
 
-  // User ID to short display name
-  const getUserDisplayName = (userId?: string) => {
+  // User ID → display name. Also accepts the full post/comment object for populated username.
+  const getUserDisplayName = (userId?: string, post?: any) => {
     if (!userId) return 'Anonymous';
+    // Use populated username from the normalizer when available
+    if (post?.created_by_username) return post.created_by_username;
     if (user && user.id === userId) return 'You';
     // MongoDB ObjectId: 24 hex chars
     if (/^[0-9a-f]{24}$/i.test(userId)) return `User…${userId.slice(-6)}`;
@@ -385,7 +387,7 @@ const KebeleForum: React.FC = () => {
                         </span>
                       </div>
                       <div>
-                        <div className="text-sm font-medium retro-text">{getUserDisplayName(post.created_by)}</div>
+                        <div className="text-sm font-medium retro-text">{getUserDisplayName(post.created_by, post)}</div>
                         <div className="text-xs text-gray-500">{new Date(post.created_at).toLocaleDateString()}</div>
                       </div>
                     </div>
@@ -518,7 +520,7 @@ const KebeleForum: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <div className="text-xs font-medium retro-text">{getUserDisplayName(selectedPost.created_by)}</div>
+                  <div className="text-xs font-medium retro-text">{getUserDisplayName(selectedPost.created_by, selectedPost)}</div>
                   <div className="text-xs text-gray-500">
                     {new Date(selectedPost.created_at).toLocaleDateString()}
                   </div>
@@ -569,7 +571,7 @@ const KebeleForum: React.FC = () => {
                           {(comment.created_by || '?').charAt(0).toUpperCase()}
                         </span>
                       </div>
-                      <span className="font-medium retro-text">{getUserDisplayName(comment.created_by)}</span>
+                      <span className="font-medium retro-text">{getUserDisplayName(comment.created_by, comment)}</span>
                       <span className="text-gray-500">•</span>
                       <span className="text-gray-500">
                         {new Date(comment.created_at).toLocaleDateString()}

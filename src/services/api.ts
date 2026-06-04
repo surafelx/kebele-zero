@@ -60,8 +60,18 @@ function normalizeIds(obj: any): any {
       out.id = String(out._id);
     }
     // Bridge Express camelCase userId → Supabase-style created_by
+    // userId may be a raw ObjectId string OR a populated user object {_id, username, email}
     if (out.userId !== undefined && out.created_by === undefined) {
-      out.created_by = String(out.userId);
+      const uid = out.userId;
+      if (uid && typeof uid === 'object') {
+        // Populated user document — extract the ID string and expose the username
+        out.created_by = String(uid._id || uid.id || '');
+        if (!out.created_by_username) {
+          out.created_by_username = uid.username || uid.email?.split('@')[0] || '';
+        }
+      } else {
+        out.created_by = String(uid);
+      }
     }
     return out;
   }

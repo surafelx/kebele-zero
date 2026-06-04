@@ -80,24 +80,23 @@ export default class Application
         // Scene
         this.scene = new THREE.Scene()
 
-        // Renderer
+        // Renderer — use device DPR clamped to [1, 2] to avoid 9 MP framebuffers on 3× screens
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.$canvas,
-            alpha: true
+            alpha: true,
+            powerPreference: 'high-performance',
+            antialias: false   // postprocessing stack handles AA via blur pass
         })
-        // this.renderer.setClearColor(0x414141, 1)
         this.renderer.setClearColor(0x000000, 1)
-        // this.renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio, 1.5), 2))
-        this.renderer.setPixelRatio(2)
+        this.renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio, 1), 2))
         this.renderer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
-        this.renderer.physicallyCorrectLights = true
-        // this.renderer.gammaFactor = 2.2
         this.renderer.gammaOutPut = true
         this.renderer.autoClear = false
 
         // Resize event
         this.sizes.on('resize', () =>
         {
+            this.renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio, 1), 2))
             this.renderer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
         })
     }
@@ -282,8 +281,10 @@ export default class Application
         this.time.off('tick')
         this.sizes.off('resize')
 
-        this.camera.orbitControls.dispose()
+        if (this.time.dispose)    this.time.dispose()
+        if (this.sizes.dispose)   this.sizes.dispose()
+        if (this.camera.orbitControls) this.camera.orbitControls.dispose()
         this.renderer.dispose()
-        this.debug.destroy()
+        if (this.debug)           this.debug.destroy()
     }
 }

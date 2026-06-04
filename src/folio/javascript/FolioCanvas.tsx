@@ -75,7 +75,7 @@ export default function FolioCanvas() {
       <Canvas
         frameloop="never"
         gl={{
-          pixelRatio: 2,
+          pixelRatio: Math.min(Math.max(window.devicePixelRatio, 1), 2),
           autoClear: false,
           outputEncoding: LinearEncoding,
           toneMapping: NoToneMapping,
