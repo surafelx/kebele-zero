@@ -23,6 +23,7 @@ export default class CrossroadsSection
         this.setStatic()
         this.setAreas()
         this.setLabels()
+        this.setProps()
         this.setTiles()
     }
 
@@ -252,6 +253,106 @@ export default class CrossroadsSection
         texture.anisotropy = 4
         texture.needsUpdate = true
         return texture
+    }
+
+    /**
+     * Populate the crossroads with car-knockable physics props.
+     * All use existing loaded models; repeated props pass duplicated:true.
+     */
+    setProps()
+    {
+        const R = this.resources.items
+
+        // small helper to place one prop at an absolute (x,y) within the section
+        const place = (model, dx, dy, opts = {}) =>
+        {
+            const base = R[`${model}Base`]
+            const collision = R[`${model}Collision`]
+            if (!base || !collision) return   // asset not loaded — skip gracefully
+
+            this.objects.add({
+                base: base.scene,
+                collision: collision.scene,
+                offset: new THREE.Vector3(this.x + dx, this.y + dy, opts.z ?? 0.4),
+                rotation: new THREE.Euler(0, 0, opts.rotation ?? 0),
+                duplicated: true,
+                shadow: opts.shadow ?? { sizeX: 1.2, sizeY: 1.2, offsetZ: - 0.35, alpha: 0.35 },
+                mass: opts.mass ?? 1.5,
+                soundName: opts.soundName ?? 'woodHit',
+                sleep: true
+            })
+        }
+
+        // ── Bowling set by the GAMES pad (pad at x-22, y-3) ──────────────────
+        // 10-pin triangle just north of the pad, apex toward the approach
+        {
+            const ox = - 22, oy = 2        // triangle centre relative to section
+            const gap = 0.62
+            for (let row = 0; row < 4; row++)
+            {
+                for (let i = 0; i <= row; i++)
+                {
+                    const px = ox + (i - row / 2) * gap
+                    const py = oy - row * gap
+                    place('bowlingPin', px, py, {
+                        z: 0.2, mass: 0.6, soundName: 'bowlingPin',
+                        shadow: { sizeX: 0.45, sizeY: 0.45, offsetZ: - 0.18, alpha: 0.35 }
+                    })
+                }
+            }
+            // ball ready to roll, further north of the apex
+            place('bowlingBall', ox, oy + 2.4, {
+                z: 0.3, mass: 5, soundName: 'bowlingBall',
+                shadow: { sizeX: 0.7, sizeY: 0.7, offsetZ: - 0.2, alpha: 0.4 }
+            })
+        }
+
+        // ── Brick stall by the SOUQ pad (pad at x+20, y-8) ───────────────────
+        // a small 3-wide, 2-high wall + a couple on top, north of the pad
+        {
+            const ox = 20, oy = - 3
+            const bw = 1.05
+            for (let layer = 0; layer < 2; layer++)
+            {
+                for (let i = - 1; i <= 1; i++)
+                {
+                    place('brick', ox + i * bw, oy, {
+                        z: 0.3 + layer * 0.55, mass: 1.5, soundName: 'brick',
+                        shadow: { sizeX: 1.1, sizeY: 0.7, offsetZ: - 0.3, alpha: 0.35 }
+                    })
+                }
+            }
+            place('brick', ox - 0.5, oy, { z: 1.4, mass: 1.5, soundName: 'brick' })
+            place('brick', ox + 0.5, oy, { z: 1.4, mass: 1.5, soundName: 'brick' })
+        }
+
+        // ── Traffic cones lining the northern approach lane (intro→junction) ─
+        // The road from the intro runs along x≈0 from dy +18 down to the junction
+        {
+            for (let dy = 18; dy >= 2; dy -= 3)
+            {
+                place('cone', - 2.5, dy, { z: 0.2, mass: 0.4, soundName: 'woodHit',
+                    shadow: { sizeX: 0.5, sizeY: 0.5, offsetZ: - 0.2, alpha: 0.3 } })
+                place('cone',   2.5, dy, { z: 0.2, mass: 0.4, soundName: 'woodHit',
+                    shadow: { sizeX: 0.5, sizeY: 0.5, offsetZ: - 0.2, alpha: 0.3 } })
+            }
+        }
+
+        // ── Scattered playful props around the junction ─────────────────────
+        {
+            const scatter = [
+                ['lemon', - 8,  - 4], ['lemon',  9, - 14], ['lemon', - 4, - 16],
+                ['egg',     6,  - 6], ['egg',  - 10, - 12], ['egg',    3, - 20],
+            ]
+            for (const [model, dx, dy] of scatter)
+            {
+                place(model, dx, dy, { z: 0.3, mass: 1,
+                    shadow: { sizeX: 0.6, sizeY: 0.6, offsetZ: - 0.2, alpha: 0.3 } })
+            }
+            // a honking horn near the centre
+            place('horn', - 5, - 8, { z: 0.2, mass: 1.5, rotation: 0.4, soundName: 'horn',
+                shadow: { sizeX: 1.65, sizeY: 0.75, offsetZ: - 0.1, alpha: 0.4 } })
+        }
     }
 
 

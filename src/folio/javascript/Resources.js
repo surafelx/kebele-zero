@@ -155,9 +155,9 @@ import hornCollisionSource from '/models/horn/collision.glb'
 // import distinctionCStaticBaseSource from '../models/distinctionC/static/base.glb'
 // import distinctionCStaticCollisionSource from '../models/distinctionC/static/collision.glb'
 
-// // Cone
-// import coneBaseSource from '../models/cone/base.glb'
-// import coneCollisionSource from '../models/cone/collision.glb'
+// Cone
+import coneBaseSource from '/models/cone/base.glb'
+import coneCollisionSource from '/models/cone/collision.glb'
 
 // // Awwwards trophy
 // import awwwardsTrophyBaseSource from '../models/awwwardsTrophy/base.glb'
@@ -377,9 +377,9 @@ export default class Resources extends EventEmitter
             // { name: 'distinctionCStaticCollision', source: distinctionCStaticCollisionSource },
             // { name: 'distinctionCStaticFloorShadow', source: distinctionCStaticFloorShadowSource, type: 'texture' },
 
-            // // Cone
-            // { name: 'coneBase', source: coneBaseSource },
-            // { name: 'coneCollision', source: coneCollisionSource },
+            // Cone
+            { name: 'coneBase', source: coneBaseSource },
+            { name: 'coneCollision', source: coneCollisionSource },
 
             // // Awwwards trophy
             // { name: 'awwwardsTrophyBase', source: awwwardsTrophyBaseSource },
