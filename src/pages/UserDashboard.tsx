@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { User, Trophy, Calendar, MessageSquare, ShoppingBag, Radio, Image, Settings, LogOut, Edit3, Star, Award, TrendingUp, Music } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { pointsAPI } from '../services/points';
-import { trackPlaysAPI } from '../services/content';
 
 const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -25,12 +24,9 @@ const UserDashboard: React.FC = () => {
   const fetchUserData = async () => {
     if (!user) return;
     try {
-      const [pointsData, tracksData] = await Promise.all([
-        pointsAPI.getUserPoints(user.id),
-        trackPlaysAPI.getMostPlayedTracks(5),
-      ]);
+      const pointsData = await pointsAPI.getUserPoints(user.id);
       setUserPoints(pointsData);
-      setMostPlayedTracks(tracksData);
+      setMostPlayedTracks([]);
     } catch (error) {
       console.error('Error fetching user data:', error);
     } finally {
@@ -64,7 +60,7 @@ const UserDashboard: React.FC = () => {
     email: 'demo@kebele.com',
     role: 'user' as const,
     id: 'demo',
-    created_at: new Date().toISOString()
+    createdAt: new Date().toISOString()
   };
 
   const displayUserPoints = userPoints || { total_points: 150 };
@@ -180,7 +176,7 @@ const UserDashboard: React.FC = () => {
                 <div className="retro-progress-fill" style={{width: '100%', background: 'linear-gradient(90deg, #06b6d4 0%, #0891b2 100%)'}}></div>
               </div>
               <p className="retro-text text-xs opacity-90">
-                Member since {new Date(displayUser.created_at || Date.now()).toLocaleDateString()}
+                Member since {new Date(displayUser.createdAt || Date.now()).toLocaleDateString()}
               </p>
             </div>
           </div>

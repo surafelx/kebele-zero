@@ -1,753 +1,104 @@
-import { supabase } from './supabase';
+import api from './api';
 
-// ===================== ABOUT & TEAM =====================
-
-export const aboutAPI = {
-  // Get all active about content sections
-  getAboutContent: async () => {
-    const { data, error } = await supabase
-      .from('about_content')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Get single about section
-  getAboutSection: async (section: string) => {
-    const { data, error } = await supabase
-      .from('about_content')
-      .select('*')
-      .eq('section', section)
-      .single();
-    
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
-  },
-
-  // Create about section
-  createAboutSection: async (sectionData: any) => {
-    const { data, error } = await supabase
-      .from('about_content')
-      .insert([sectionData])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Update about section
-  updateAboutSection: async (id: string, updates: any) => {
-    const { data, error } = await supabase
-      .from('about_content')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Delete about section
-  deleteAboutSection: async (id: string) => {
-    const { error } = await supabase
-      .from('about_content')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
-  },
-
-  // Team Members
-  getTeamMembers: async () => {
-    const { data, error } = await supabase
-      .from('team_members')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
-    
-    if (error) throw error;
-    return data;
-  },
-
-  createTeamMember: async (memberData: any) => {
-    const { data, error } = await supabase
-      .from('team_members')
-      .insert([memberData])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  updateTeamMember: async (id: string, updates: any) => {
-    const { data, error } = await supabase
-      .from('team_members')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  deleteTeamMember: async (id: string) => {
-    const { error } = await supabase
-      .from('team_members')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
-  }
-};
-
-// ===================== EVENTS =====================
-
+// ── Events ────────────────────────────────────────────────────────────────
 export const eventsAPI = {
-  // Get all active events
-  getEvents: async (filters?: { category?: string; status?: string }) => {
-    let query = supabase
-      .from('events')
-      .select('*')
-      .eq('is_active', true)
-      .order('start_date', { ascending: true });
-
-    if (filters?.category) {
-      query = query.eq('category', filters.category);
-    }
-    if (filters?.status === 'upcoming') {
-      query = query.gte('start_date', new Date().toISOString());
-    } else if (filters?.status === 'past') {
-      query = query.lt('start_date', new Date().toISOString());
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
+  getEvents: async (params?: { category?: string; active?: boolean }) => {
+    const r = await api.get('/events', { params });
+    return r.data;
   },
-
-  // Get featured events
-  getFeaturedEvents: async (limit = 5) => {
-    const { data, error } = await supabase
-      .from('events')
-      .select('*')
-      .eq('is_active', true)
-      .eq('is_featured', true)
-      .order('start_date', { ascending: true })
-      .limit(limit);
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Get single event
   getEvent: async (id: string) => {
-    const { data, error } = await supabase
-      .from('events')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    return data;
+    const r = await api.get(`/events/${id}`);
+    return r.data;
   },
-
-  // Create event
-  createEvent: async (eventData: any) => {
-    const { data, error } = await supabase
-      .from('events')
-      .insert([{ ...eventData, created_at: new Date().toISOString() }])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+  createEvent: async (data: any) => {
+    const r = await api.post('/events', data);
+    return r.data;
   },
-
-  // Update event
-  updateEvent: async (id: string, updates: any) => {
-    const { data, error } = await supabase
-      .from('events')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+  updateEvent: async (id: string, data: any) => {
+    const r = await api.put(`/events/${id}`, data);
+    return r.data;
   },
-
-  // Delete event
   deleteEvent: async (id: string) => {
-    const { error } = await supabase
-      .from('events')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
+    await api.delete(`/events/${id}`);
   },
-
-  // Get event categories
   getCategories: async () => {
-    const { data, error } = await supabase
-      .from('events')
-      .select('category')
-      .eq('is_active', true);
-    
-    if (error) throw error;
-    return [...new Set(data.map(item => item.category))];
-  }
+    // derive categories from events list
+    const r = await api.get('/events');
+    const cats = [...new Set((r.data as any[]).map((e: any) => e.category).filter(Boolean))];
+    return cats;
+  },
 };
 
-// ===================== PRODUCTS (SOUQ) =====================
-
+// ── Products ──────────────────────────────────────────────────────────────
 export const productsAPI = {
-  // Get all active products
-  getProducts: async (filters?: { category?: string; search?: string }) => {
-    let query = supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-
-    if (filters?.category) {
-      query = query.eq('category', filters.category);
-    }
-    if (filters?.search) {
-      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
+  getProducts: async (params?: { category?: string; inStock?: boolean }) => {
+    const r = await api.get('/products', { params });
+    return r.data;
   },
-
-  // Get featured products
-  getFeaturedProducts: async (limit = 10) => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true)
-      .eq('is_featured', true)
-      .limit(limit);
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Get single product
   getProduct: async (id: string) => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    return data;
+    const r = await api.get(`/products/${id}`);
+    return r.data;
   },
-
-  // Create product
-  createProduct: async (productData: any) => {
-    const { data, error } = await supabase
-      .from('products')
-      .insert([{ ...productData, created_at: new Date().toISOString() }])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+  createProduct: async (data: any) => {
+    const r = await api.post('/products', data);
+    return r.data;
   },
-
-  // Update product
-  updateProduct: async (id: string, updates: any) => {
-    const { data, error } = await supabase
-      .from('products')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+  updateProduct: async (id: string, data: any) => {
+    const r = await api.put(`/products/${id}`, data);
+    return r.data;
   },
-
-  // Delete product
   deleteProduct: async (id: string) => {
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
+    await api.delete(`/products/${id}`);
   },
-
-  // Get product categories
   getCategories: async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('category')
-      .eq('is_active', true);
-    
-    if (error) throw error;
-    return [...new Set(data.map(item => item.category))];
-  }
+    const r = await api.get('/products');
+    const cats = [...new Set((r.data as any[]).map((p: any) => p.category).filter(Boolean))];
+    return cats;
+  },
 };
 
-// ===================== RADIO & VIDEOS =====================
-
+// ── Media ─────────────────────────────────────────────────────────────────
 export const mediaAPI = {
-  // Get all active media items
-  getMediaItems: async (filters?: { category?: string; search?: string }) => {
-    let query = supabase
-      .from('media')
-      .select('*')
-      .eq('is_active', true)
-      .eq('status', 'published')
-      .order('created_at', { ascending: false });
-
-    if (filters?.category) {
-      query = query.eq('category', filters.category);
-    }
-    if (filters?.search) {
-      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
+  getMedia: async (params?: { type?: string; category?: string }) => {
+    const r = await api.get('/media', { params });
+    return r.data;
   },
-
-  // Get featured media
-  getFeaturedMedia: async (limit = 5) => {
-    const { data, error } = await supabase
-      .from('media')
-      .select('*')
-      .eq('is_active', true)
-      .eq('is_featured', true)
-      .limit(limit);
-    
-    if (error) throw error;
-    return data;
+  uploadMedia: async (data: any) => {
+    const r = await api.post('/media', data);
+    return r.data;
   },
-
-  // Get single media item
-  getMediaItem: async (id: string) => {
-    const { data, error } = await supabase
-      .from('media')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    return data;
+  deleteMedia: async (id: string) => {
+    await api.delete(`/media/${id}`);
   },
-
-  // Create media item
-  createMediaItem: async (mediaData: any) => {
-    const { data, error } = await supabase
-      .from('media')
-      .insert([{ ...mediaData, created_at: new Date().toISOString() }])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Update media item
-  updateMediaItem: async (id: string, updates: any) => {
-    const { data, error } = await supabase
-      .from('media')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Delete media item
-  deleteMediaItem: async (id: string) => {
-    const { error } = await supabase
-      .from('media')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
-  },
-
-  // Get media categories
-  getCategories: async () => {
-    const { data, error } = await supabase
-      .from('media')
-      .select('category')
-      .eq('is_active', true);
-    
-    if (error) throw error;
-    return [...new Set(data.map(item => item.category))];
-  }
 };
 
-export const videosAPI = {
-  // Get all active videos
-  getVideos: async (filters?: { category?: string }) => {
-    let query = supabase
-      .from('videos')
-      .select('*')
-      .eq('is_active', true)
-      .order('published_at', { ascending: false });
-
-    if (filters?.category) {
-      query = query.eq('category', filters.category);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
-  },
-
-  // Get featured videos
-  getFeaturedVideos: async (limit = 4) => {
-    const { data, error } = await supabase
-      .from('videos')
-      .select('*')
-      .eq('is_active', true)
-      .eq('is_featured', true)
-      .limit(limit);
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Get single video
-  getVideo: async (id: string) => {
-    const { data, error } = await supabase
-      .from('videos')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Create video
-  createVideo: async (videoData: any) => {
-    const { data, error } = await supabase
-      .from('videos')
-      .insert([{ ...videoData, created_at: new Date().toISOString() }])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Update video
-  updateVideo: async (id: string, updates: any) => {
-    const { data, error } = await supabase
-      .from('videos')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Delete video
-  deleteVideo: async (id: string) => {
-    const { error } = await supabase
-      .from('videos')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
-  },
-
-  // Get video categories
-  getCategories: async () => {
-    const { data, error } = await supabase
-      .from('videos')
-      .select('category')
-      .eq('is_active', true);
-    
-    if (error) throw error;
-    return [...new Set(data.map(item => item.category))];
-  }
-};
-
+// ── Radio ─────────────────────────────────────────────────────────────────
 export const radioAPI = {
-  // Get all active radio tracks
-  getRadioTracks: async (filters?: { category?: string }) => {
-    let query = supabase
-      .from('radio')
-      .select('*')
-      .eq('is_active', true)
-      .order('published_at', { ascending: false });
-
-    if (filters?.category) {
-      query = query.eq('category', filters.category);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
+  getStations: async (params?: { active?: boolean }) => {
+    const r = await api.get('/radio', { params });
+    return r.data;
   },
-
-  // Get featured tracks
-  getFeaturedTracks: async (limit = 5) => {
-    const { data, error } = await supabase
-      .from('radio')
-      .select('*')
-      .eq('is_active', true)
-      .eq('is_featured', true)
-      .limit(limit);
-    
-    if (error) throw error;
-    return data;
+  createStation: async (data: any) => {
+    const r = await api.post('/radio', data);
+    return r.data;
   },
-
-  // Get single track
-  getTrack: async (id: string) => {
-    const { data, error } = await supabase
-      .from('radio')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    return data;
+  updateStation: async (id: string, data: any) => {
+    const r = await api.put(`/radio/${id}`, data);
+    return r.data;
   },
-
-  // Create track
-  createTrack: async (trackData: any) => {
-    const { data, error } = await supabase
-      .from('radio')
-      .insert([{ ...trackData, created_at: new Date().toISOString() }])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+  deleteStation: async (id: string) => {
+    await api.delete(`/radio/${id}`);
   },
-
-  // Update track
-  updateTrack: async (id: string, updates: any) => {
-    const { data, error } = await supabase
-      .from('radio')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Delete track
-  deleteTrack: async (id: string) => {
-    const { error } = await supabase
-      .from('radio')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
-  },
-
-  // Get radio categories
-  getCategories: async () => {
-    const { data, error } = await supabase
-      .from('radio')
-      .select('category')
-      .eq('is_active', true);
-    
-    if (error) throw error;
-    return [...new Set(data.map(item => item.category))];
-  }
 };
 
-// ===================== TRANSACTIONS =====================
-
-export const transactionsAPI = {
-  // Get user transactions
-  getUserTransactions: async (userId: string) => {
-    const { data, error } = await supabase
-      .from('transactions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data;
+// ── About ─────────────────────────────────────────────────────────────────
+export const aboutAPI = {
+  getAbout: async () => {
+    const r = await api.get('/about');
+    return r.data;
   },
-
-  // Get all transactions (admin)
-  getAllTransactions: async () => {
-    const { data, error } = await supabase
-      .from('transactions')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Create transaction
-  createTransaction: async (transactionData: any) => {
-    const { data, error } = await supabase
-      .from('transactions')
-      .insert([{ ...transactionData, created_at: new Date().toISOString() }])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Update transaction status
-  updateTransactionStatus: async (id: string, status: string) => {
-    const { data, error } = await supabase
-      .from('transactions')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  }
-};
-
-// ===================== SOCIAL LINKS =====================
-
-export const socialLinksAPI = {
-  // Get all active social links
-  getSocialLinks: async () => {
-    const { data, error } = await supabase
-      .from('social_links')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Get single social link
-  getSocialLink: async (id: string) => {
-    const { data, error } = await supabase
-      .from('social_links')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Create social link
-  createSocialLink: async (linkData: any) => {
-    const { data, error } = await supabase
-      .from('social_links')
-      .insert([{ ...linkData, created_at: new Date().toISOString() }])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Update social link
-  updateSocialLink: async (id: string, updates: any) => {
-    const { data, error } = await supabase
-      .from('social_links')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  // Delete social link
-  deleteSocialLink: async (id: string) => {
-    const { error } = await supabase
-      .from('social_links')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
-  },
-
-  // Toggle active status
-  toggleSocialLink: async (id: string, isActive: boolean) => {
-    const { data, error } = await supabase
-      .from('social_links')
-      .update({ is_active: isActive, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  }
-};
-
-// ===================== TRACK PLAYS (Most Played Music) =====================
-
-export const trackPlaysAPI = {
-  // Record or increment a play for the current user
-  recordPlay: async (trackId: string, trackTitle: string) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) return; // not logged in — skip silently
-
-    // Manual upsert: increment if exists, insert if not
-    const { data: existing } = await supabase
-      .from('track_plays')
-      .select('id, play_count')
-      .eq('user_id', session.user.id)
-      .eq('track_id', trackId)
-      .maybeSingle();
-
-    if (existing) {
-      await supabase
-        .from('track_plays')
-        .update({ play_count: existing.play_count + 1, last_played_at: new Date().toISOString() })
-        .eq('id', existing.id);
-    } else {
-      await supabase
-        .from('track_plays')
-        .insert([{ user_id: session.user.id, track_id: trackId, track_title: trackTitle, play_count: 1 }]);
-    }
-  },
-
-  // Get most played tracks for the current user
-  getMostPlayedTracks: async (limit = 5) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) return [];
-
-    const { data, error } = await supabase
-      .from('track_plays')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .order('play_count', { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.warn('[trackPlaysAPI] getMostPlayedTracks error:', error.message);
-      return [];
-    }
-    return data || [];
+  upsertSection: async (section: string, data: any) => {
+    const r = await api.put(`/about/${section}`, data);
+    return r.data;
   },
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Image, Plus, Edit3, Trash2, Search, Filter, Eye, Grid, List, X, Upload, CheckCircle } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { mediaAPI } from '../services/content';
 import Modal from '../components/Modal';
 
 const AdminGallery = () => {
@@ -68,18 +68,11 @@ const AdminGallery = () => {
   const fetchMediaItems = async () => {
     setLoading(true);
     try {
-      const { data: mediaData, error: mediaError } = await supabase
-        .from('media')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (mediaError) {
-        console.error('Error fetching media:', mediaError);
-      } else {
-        setMediaItems(mediaData || []);
-      }
+      const data = await mediaAPI.getMedia();
+      setMediaItems(data || []);
     } catch (error) {
       console.error('Error fetching media:', error);
+      setMediaItems([]);
     } finally {
       setLoading(false);
     }
@@ -89,15 +82,8 @@ const AdminGallery = () => {
     if (!confirm('Delete this image?')) return;
 
     try {
-      const { error } = await supabase
-        .from('media')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setMediaItems(mediaItems.filter(item => item.id !== id));
-      alert('Image deleted successfully!');
+      await mediaAPI.deleteMedia(id);
+      setMediaItems(mediaItems.filter(item => (item._id || item.id) !== id));
     } catch (error) {
       console.error('Error deleting image:', error);
       alert('Error deleting image');
@@ -165,28 +151,23 @@ const AdminGallery = () => {
         });
       }, 100);
 
-      const { data: responseData, error } = await supabase
-        .from('media')
-        .insert([{
+      const responseData = await mediaAPI.uploadMedia({
           title: formData.title,
           description: formData.description,
           alt_text: formData.alt_text,
           caption: formData.caption,
+          url: formData.media_url,
           media_url: formData.media_url,
           status: formData.status,
           tags: formData.tags,
           category: formData.category || 'general',
+          type: 'image',
           is_active: formData.status === 'published'
-        }])
-        .select()
-        .single();
+        });
 
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      if (error) throw error;
-
-      console.log('Image saved to media table:', responseData);
       alert('Image uploaded and saved successfully!');
       
       resetForm();

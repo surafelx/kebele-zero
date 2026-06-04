@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link, Github, Linkedin, Twitter, Instagram, Youtube, Globe, Mail, Edit2, Trash2, ExternalLink, Plus } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { socialLinksAPI } from '../services/admin';
 import Modal from '../components/Modal';
 
 interface SocialLink {
   id: string;
+  _id?: string;
   platform: string;
   label: string;
   url: string;
   icon: string;
-  is_active: boolean;
-  display_order: number;
+  isActive?: boolean;
+  is_active?: boolean;
+  displayOrder?: number;
+  display_order?: number;
 }
 
 const platformIcons: Record<string, React.ReactNode> = {
@@ -47,15 +50,11 @@ const AdminSocialLinks = () => {
   const fetchSocialLinks = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('social_links')
-        .select('*')
-        .order('display_order', { ascending: true });
-
-      if (error) throw error;
+      const data = await socialLinksAPI.getLinks();
       setSocialLinks(data || []);
     } catch (error) {
       console.error('Error fetching social links:', error);
+      setSocialLinks([]);
     } finally {
       setLoading(false);
     }
@@ -63,23 +62,14 @@ const AdminSocialLinks = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (editingLink) {
-        const { error } = await supabase
-          .from('social_links')
-          .update(formData)
-          .eq('id', editingLink.id);
-        
-        if (error) throw error;
+        await socialLinksAPI.updateLink(editingLink._id || editingLink.id, formData);
       } else {
-        const { error } = await supabase
-          .from('social_links')
-          .insert([formData]);
-        
-        if (error) throw error;
+        await socialLinksAPI.createLink(formData);
       }
-      
+
       fetchSocialLinks();
       closeForm();
     } catch (error) {
@@ -92,13 +82,8 @@ const AdminSocialLinks = () => {
     if (!confirm('Are you sure you want to delete this social link?')) return;
 
     try {
-      const { error } = await supabase
-        .from('social_links')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      setSocialLinks(socialLinks.filter(link => link.id !== id));
+      await socialLinksAPI.deleteLink(id);
+      setSocialLinks(socialLinks.filter(link => (link._id || link.id) !== id));
     } catch (error) {
       console.error('Error deleting social link:', error);
       alert('Error deleting social link');
@@ -107,12 +92,7 @@ const AdminSocialLinks = () => {
 
   const handleToggle = async (id: string, isActive: boolean) => {
     try {
-      const { error } = await supabase
-        .from('social_links')
-        .update({ is_active: !isActive })
-        .eq('id', id);
-
-      if (error) throw error;
+      await socialLinksAPI.updateLink(id, { isActive: !isActive });
       fetchSocialLinks();
     } catch (error) {
       console.error('Error toggling social link:', error);

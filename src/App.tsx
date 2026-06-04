@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Leva } from "leva";
 import { Info, Calendar, ShoppingBag, Radio, Image, Menu, X, MessageSquare, Trophy, User, LayoutDashboard, Settings, Music, Play, Pause } from 'lucide-react';
@@ -8,6 +8,7 @@ import FolioCanvas from "./folio/javascript/FolioCanvas";
 import "./folio/style/main.css";
 
 // Import pages
+import MaintenancePage from './pages/MaintenancePage';
 import AboutKebele from './pages/AboutKebele';
 import KebeleEvents from './pages/KebeleEvents';
 import KebeleSouq from './pages/KebeleSouq';
@@ -30,6 +31,7 @@ import AdminTransactions from './pages/AdminTransactions';
 import AdminUsers from './components/AdminUsers';
 import AdminGallery from './pages/AdminGallery';
 import AdminSocialLinks from './pages/AdminSocialLinks';
+import AdminPaymentRequests from './pages/AdminPaymentRequests';
 
 import AdminRoute from './components/AdminRoute';
 import AuthModal from './components/AuthModal';
@@ -39,6 +41,8 @@ import UserDashboardModal from './components/UserDashboardModal';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider, useCart } from './contexts/CartContext';
 import { pointsAPI } from './services/points';
+import { settingsAPI } from './services/admin';
+import { radioAPI } from './services/content';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }> {
@@ -107,20 +111,11 @@ function MainApp() {
   const [authModalFeature, setAuthModalFeature] = useState<string>('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUserDashboardModal, setShowUserDashboardModal] = useState(false);
-  const [modalLoading, setModalLoading] = useState<string | null>(null);
   const [isMusicPlayerOpen, setIsMusicPlayerOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Imperatively control the video when isPlaying changes
-  useEffect(() => {
-    if (!videoRef.current) return;
-    if (isPlaying) {
-      videoRef.current.play().catch(() => {});
-    } else {
-      videoRef.current.pause();
-    }
-  }, [isPlaying]);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [radioTracks, setRadioTracks] = useState<any[]>([]);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [userPoints, setUserPoints] = useState<any>(null);
@@ -144,22 +139,39 @@ function MainApp() {
     }
   };
 
+
+  // Fetch radio tracks on mount
+  const fetchRadioTracks = async () => {
+    try {
+      const data = await radioAPI.getStations();
+      if (data && data.length > 0) {
+        setRadioTracks(data);
+      }
+    } catch (err) {
+      console.error('Error fetching radio tracks:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRadioTracks();
+  }, []);
+
+  // Fetch maintenance mode setting on mount
+  useEffect(() => {
+    settingsAPI.getSettings().then(data => {
+      if (data?.maintenanceMode) setMaintenanceMode(true);
+    }).catch(() => {});
+  }, []);
+
   // Initialize checkAuthForFeature function
   const updateAuthCheckFunction = () => {
     (window as any).checkAuthForFeature = (feature: string) => {
-      console.log('checkAuthForFeature called with:', feature, 'user:', user, 'loading:', loading);
-      if (loading) {
-        // If still loading, deny access and show loading state
-        console.log('Auth still loading, denying access');
-        return false;
-      }
+      if (loading) return false;
       if (!user) {
-        console.log('No user found, showing auth modal for:', feature);
         setAuthModalFeature(feature);
         setShowAuthModal(true);
         return false;
       }
-      console.log('User authenticated, allowing access to:', feature);
       return true;
     };
   };
@@ -170,16 +182,11 @@ function MainApp() {
   }, [user, loading]);
 
   useEffect(() => {
-    // Set up the global function once on mount using the stable setActiveModal setter
     (window as any).openKebeleModal = (modalType: string) => {
-      console.log('openKebeleModal called with:', modalType);
       setActiveModal(modalType);
     };
-    console.log('MainApp component mounted, openKebeleModal function available:', true);
 
-    // Also listen for the fallback custom event
     const handleOpenKebeleModal = (event: CustomEvent) => {
-      console.log('Received openKebeleModal event:', event.detail);
       setActiveModal(event.detail);
     };
 
@@ -206,6 +213,8 @@ function MainApp() {
     setShowAuthModal(false);
     setAuthModalFeature('');
   };
+
+  if (maintenanceMode && user?.role !== 'admin') return <MaintenancePage />;
 
   return (
     <div className="w-screen h-screen relative retro-bg">
@@ -407,7 +416,11 @@ function MainApp() {
 
         {/* Modals */}
         {activeModal && (
-          <div className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={closeModal}>
+          <div
+            className="fixed inset-0 z-[150] flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}
+            onClick={closeModal}
+          >
             <div 
               className="w-full max-w-6xl max-h-[90vh] overflow-hidden bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-none"
               onClick={(e) => e.stopPropagation()}
@@ -442,13 +455,13 @@ function MainApp() {
                 </button>
               </div>
               <div className="max-h-[calc(90vh-80px)] overflow-y-auto">
-                {activeModal === 'forum' && <KebeleForum />}
-                {activeModal === 'games' && <KebeleGames />}
-                {activeModal === 'about' && <AboutKebele />}
+                {activeModal === 'forum'  && <KebeleForum />}
+                {activeModal === 'games'  && <KebeleGames />}
+                {activeModal === 'about'  && <AboutKebele />}
                 {activeModal === 'events' && <KebeleEvents />}
-                {activeModal === 'souq' && <KebeleSouq />}
-                {activeModal === 'radio' && <KebeleRadio />}
-                {activeModal === 'media' && <KebeleMedia />}
+                {activeModal === 'souq'   && <KebeleSouq />}
+                {activeModal === 'radio'  && <KebeleRadio />}
+                {activeModal === 'media'  && <KebeleMedia />}
               </div>
             </div>
           </div>
@@ -469,64 +482,95 @@ function MainApp() {
 
         {/* Music Player Modal */}
         {isMusicPlayerOpen && (
-          <div className="fixed bottom-20 left-8 z-[95] retro-window retro-floating min-w-[300px]">
-            <div className="retro-titlebar retro-titlebar-purple mb-3">
-              <div className="flex items-center justify-center space-x-2">
-                <Music className="w-4 h-4 retro-icon" />
-                <span className="retro-title text-sm font-bold uppercase">Music Player</span>
+          <div className="fixed bottom-20 left-8 z-[95] bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-80">
+            {/* Title bar */}
+            <div className="flex items-center justify-between px-3 py-2 border-b-4 border-black bg-gradient-to-r from-purple-600 to-violet-600">
+              <div className="flex items-center space-x-2">
+                <Music className="w-4 h-4 text-white" />
+                <span className="font-black text-white uppercase text-xs tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Music Player</span>
               </div>
-              <div className="retro-window-controls">
-                <button
-                  onClick={() => setIsMusicPlayerOpen(false)}
-                  className="retro-window-dot bg-red-500 hover:bg-red-600"
-                ></button>
-              </div>
+              <button onClick={() => setIsMusicPlayerOpen(false)} className="w-6 h-6 bg-red-500 border-2 border-black flex items-center justify-center hover:bg-red-600">
+                <X className="w-3 h-3 text-white" />
+              </button>
             </div>
-            <div className="space-y-2">
-              {/* Tiny Video Display */}
-              <div className="flex justify-center mb-3">
-                <div className="w-32 h-24 bg-black rounded-lg overflow-hidden border-2 border-purple-500">
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover"
-                    loop
-                    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                  >
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
+
+            {/* Video embed */}
+            {radioTracks.length > 0 && radioTracks[currentTrackIndex]?.youtube_id ? (
+              <div className="w-full aspect-video bg-black border-b-4 border-black">
+                <iframe
+                  key={radioTracks[currentTrackIndex].youtube_id}
+                  src={`https://www.youtube.com/embed/${radioTracks[currentTrackIndex].youtube_id}?autoplay=${isPlaying ? 1 : 0}&controls=1`}
+                  className="w-full h-full"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen={false}
+                  title={radioTracks[currentTrackIndex].title}
+                />
               </div>
-              <div className="text-center">
-                <div className="retro-title text-sm font-bold mb-2">Traditional Ethiopian Music</div>
-                <div className="retro-text text-xs opacity-80 mb-3">Various Artists</div>
-                <div className="flex items-center justify-center space-x-4">
-                  <button className="retro-btn p-2">
-                    <span className="text-lg">⏮️</span>
-                  </button>
+            ) : (
+              <div className="w-full aspect-video bg-gray-100 border-b-4 border-black flex items-center justify-center">
+                <Music className="w-12 h-12 text-gray-300" />
+              </div>
+            )}
+
+            {/* Current track info */}
+            <div className="p-3 border-b-4 border-black bg-purple-50">
+              {radioTracks.length > 0 ? (
+                <>
+                  <p className="font-black text-sm uppercase truncate" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                    {radioTracks[currentTrackIndex]?.title || 'Unknown Track'}
+                  </p>
+                  <p className="text-xs text-gray-500 capitalize" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                    {radioTracks[currentTrackIndex]?.category || 'music'} • {currentTrackIndex + 1}/{radioTracks.length}
+                  </p>
+                </>
+              ) : (
+                <p className="text-xs text-gray-500" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>No tracks added yet. Add tracks from the admin dashboard.</p>
+              )}
+            </div>
+
+            {/* Controls */}
+            <div className="p-3 flex items-center justify-center space-x-3 border-b-4 border-black">
+              <button
+                onClick={() => setCurrentTrackIndex(i => Math.max(0, i - 1))}
+                disabled={currentTrackIndex === 0 || radioTracks.length === 0}
+                className="w-8 h-8 bg-white border-2 border-black flex items-center justify-center hover:bg-gray-100 disabled:opacity-40"
+              >
+                <span className="text-sm">⏮</span>
+              </button>
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="w-10 h-10 bg-purple-600 border-2 border-black flex items-center justify-center hover:bg-purple-700"
+              >
+                {isPlaying ? <Pause className="w-5 h-5 text-white" /> : <Play className="w-5 h-5 text-white" />}
+              </button>
+              <button
+                onClick={() => setCurrentTrackIndex(i => Math.min(radioTracks.length - 1, i + 1))}
+                disabled={currentTrackIndex >= radioTracks.length - 1 || radioTracks.length === 0}
+                className="w-8 h-8 bg-white border-2 border-black flex items-center justify-center hover:bg-gray-100 disabled:opacity-40"
+              >
+                <span className="text-sm">⏭</span>
+              </button>
+            </div>
+
+            {/* Playlist */}
+            {radioTracks.length > 0 && (
+              <div className="max-h-40 overflow-y-auto">
+                {radioTracks.map((track, idx) => (
                   <button
-                    onClick={() => setIsPlaying(!isPlaying)}
-                    className="retro-btn p-3 bg-purple-600 hover:bg-purple-700"
+                    key={track.id}
+                    onClick={() => { setCurrentTrackIndex(idx); setIsPlaying(true); }}
+                    className={`w-full text-left px-3 py-2 border-b-2 border-black text-xs transition-colors ${
+                      idx === currentTrackIndex ? 'bg-purple-100' : 'bg-white hover:bg-gray-50'
+                    }`}
                   >
-                    {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+                    <p className="font-bold truncate uppercase" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+                      {idx === currentTrackIndex ? '▶ ' : ''}{track.title}
+                    </p>
+                    <p className="text-gray-400 capitalize">{track.category}</p>
                   </button>
-                  <button className="retro-btn p-2">
-                    <span className="text-lg">⏭️</span>
-                  </button>
-                </div>
+                ))}
               </div>
-              <div className="space-y-1 p-2">
-                <div className="text-xs retro-text">Now Playing:</div>
-                <div className="bg-purple-100 p-2 rounded text-xs">
-                  🎵 Azmari Performance - Live Session
-                </div>
-                <div className="bg-gray-100 p-2 rounded text-xs opacity-60">
-                  🎵 Coffee Ceremony Chant - Traditional
-                </div>
-                <div className="bg-gray-100 p-2 rounded text-xs opacity-60">
-                  🎵 Modern Fusion - Addis Groove
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         )}
       </div>
@@ -555,6 +599,7 @@ function App() {
                  <Route path="gallery" element={<AdminGallery />} />
                  <Route path="radio" element={<AdminRadio />} />
                  <Route path="transactions" element={<AdminTransactions />} />
+                 <Route path="payment-requests" element={<AdminPaymentRequests />} />
                  <Route path="about" element={<AdminAbout />} />
                  <Route path="social-links" element={<AdminSocialLinks />} />
                  <Route path="settings" element={<AdminSettings />} />

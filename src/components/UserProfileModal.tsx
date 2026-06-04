@@ -50,10 +50,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     try {
       // Load all user data in parallel. Use getUserPosts instead of
       // fetching all posts and filtering client-side.
-      const [pointsData, gameHistory, forumPosts] = await Promise.all([
+      const [pointsData, forumPosts] = await Promise.all([
         pointsAPI.getUserPoints(user.id),
-        pointsAPI.getUserGameScores(user.id, undefined, 5),
-        forumAPI.getUserPosts(user.id, 20)
+        forumAPI.getUserPosts(user.id)
       ]);
 
       setUserStats({
@@ -62,10 +61,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         checkersWins: pointsData?.checkers_wins || 0,
         marblesWins: pointsData?.marbles_wins || 0,
         forumPosts: (forumPosts || []).length,
-        joinDate: user.created_at || new Date().toISOString()
+        joinDate: user.createdAt || new Date().toISOString()
       });
 
-      setRecentGames(gameHistory);
+      setRecentGames([]);
     } catch (error) {
       console.error('Error loading user data:', error);
     }
@@ -177,22 +176,22 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
             <div className="space-y-6 animate-in fade-in duration-200">
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl text-center border-2 border-black">
+                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-lg text-center border-2 border-black">
                   <Trophy className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
                   <div className="text-2xl font-black text-yellow-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{userStats.totalPoints}</div>
                   <div className="text-xs font-bold text-yellow-600 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Total Points</div>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl text-center border-2 border-black">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg text-center border-2 border-black">
                   <Gamepad2 className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                   <div className="text-2xl font-black text-blue-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{userStats.gamesPlayed}</div>
                   <div className="text-xs font-bold text-blue-600 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Games Played</div>
                 </div>
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl text-center border-2 border-black">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg text-center border-2 border-black">
                   <MessageSquare className="w-8 h-8 text-green-600 mx-auto mb-2" />
                   <div className="text-2xl font-black text-green-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{userStats.forumPosts}</div>
                   <div className="text-xs font-bold text-green-600 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Forum Posts</div>
                 </div>
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl text-center border-2 border-black">
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg text-center border-2 border-black">
                   <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
                   <div className="text-sm font-black text-purple-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                     {new Date(userStats.joinDate).toLocaleDateString()}
@@ -202,7 +201,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
               </div>
 
               {/* Game Wins */}
-              <div className="bg-gray-50 p-4 rounded-xl border-2 border-black">
+              <div className="bg-gray-50 p-4 rounded-lg border-2 border-black">
                 <h3 className="font-bold text-gray-900 mb-3 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Game Statistics</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-3 bg-white rounded-lg border-2 border-black">
@@ -230,7 +229,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
               ) : (
                 <div className="space-y-3">
                   {recentGames.map((game, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border-2 border-black hover:bg-gray-100 transition-colors">
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border-2 border-black hover:bg-gray-100 transition-colors">
                       <div className="flex items-center space-x-3">
                         <div className={`w-3 h-3 rounded-full border-2 border-black ${
                           game.result === 'win' ? 'bg-green-500' :
@@ -272,14 +271,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
             <div className="space-y-4 animate-in fade-in duration-200">
               <h3 className="font-bold text-gray-900 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Account Settings</h3>
               <div className="space-y-2">
-                <div className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-xl border-2 border-gray-200 opacity-60 cursor-not-allowed">
+                <div className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg border-2 border-gray-200 opacity-60 cursor-not-allowed">
                   <div className="flex items-center space-x-3">
                     <Edit3 className="w-5 h-5 text-gray-400" />
                     <span className="text-gray-500 font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Edit Profile</span>
                   </div>
                   <span className="text-xs font-bold text-gray-400 uppercase border border-gray-300 px-2 py-0.5 rounded" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Soon</span>
                 </div>
-                <div className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-xl border-2 border-gray-200 opacity-60 cursor-not-allowed">
+                <div className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg border-2 border-gray-200 opacity-60 cursor-not-allowed">
                   <div className="flex items-center space-x-3">
                     <Settings className="w-5 h-5 text-gray-400" />
                     <span className="text-gray-500 font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Preferences</span>
@@ -288,7 +287,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center space-x-3 p-3 bg-red-50 rounded-xl border-2 border-black hover:bg-red-100 transition-colors text-red-700"
+                  className="w-full flex items-center space-x-3 p-3 bg-red-50 rounded-lg border-2 border-black hover:bg-red-100 transition-colors text-red-700"
                 >
                   <LogOut className="w-5 h-5" />
                   <span className="font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Sign Out</span>

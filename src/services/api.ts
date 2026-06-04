@@ -1,127 +1,84 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://your-api-domain.com/api'
-  : 'http://localhost:5000/api';
+const BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: `${BASE_URL}/api`,
+  headers: { 'Content-Type': 'application/json' },
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('kz_token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  // Normalize snake_case body keys to camelCase before sending
+  if (config.data && typeof config.data === 'object' && !(config.data instanceof FormData)) {
+    config.data = normalizeRequest(config.data);
   }
-);
+  return config;
+});
 
-// Response interceptor to handle auth errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+// Convert camelCase → snake_case
+function toSnake(key: string) {
+  return key.replace(/[A-Z]/g, l => `_${l.toLowerCase()}`);
+}
+
+// Convert snake_case → camelCase
+function toCamel(key: string) {
+  return key.replace(/_([a-z])/g, (_, l) => l.toUpperCase());
+}
+
+// Normalize outgoing request body: convert all snake_case keys to camelCase
+// so the Express backend (which uses camelCase models) understands them.
+function normalizeRequest(obj: any): any {
+  if (Array.isArray(obj)) return obj.map(normalizeRequest);
+  if (obj && typeof obj === 'object' && !(obj instanceof FormData) && !(obj instanceof Date)) {
+    const out: any = {};
+    for (const key of Object.keys(obj)) {
+      out[toCamel(key)] = normalizeRequest(obj[key]);
     }
-    return Promise.reject(error);
+    return out;
+  }
+  return obj;
+}
+
+// Normalize all API responses:
+//  • _id  → also set id (MongoDB ObjectId as string)
+//  • camelCase keys → also add snake_case aliases (isActive → is_active, etc.)
+// This lets existing UI code that expects Supabase snake_case work with the
+// Express/MongoDB backend without changing every component.
+function normalizeIds(obj: any): any {
+  if (Array.isArray(obj)) return obj.map(normalizeIds);
+  if (obj && typeof obj === 'object' && !(obj instanceof Date)) {
+    const out: any = {};
+    for (const key of Object.keys(obj)) {
+      const val = normalizeIds(obj[key]);
+      out[key] = val;
+      const snake = toSnake(key);
+      if (snake !== key) out[snake] = val;   // add snake_case alias
+    }
+    if (out._id !== undefined && out.id === undefined) {
+      out.id = String(out._id);
+    }
+    // Bridge Express camelCase userId → Supabase-style created_by
+    if (out.userId !== undefined && out.created_by === undefined) {
+      out.created_by = String(out.userId);
+    }
+    return out;
+  }
+  return obj;
+}
+
+api.interceptors.response.use(
+  (r) => {
+    if (r.data !== undefined) r.data = normalizeIds(r.data);
+    return r;
+  },
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('kz_token');
+    }
+    return Promise.reject(err);
   }
 );
 
 export default api;
-
-// API endpoints
-export const authAPI = {
-  login: (data: { email: string; password: string }) =>
-    api.post('/auth/login', data),
-  register: (data: { username: string; email: string; password: string; role?: string }) =>
-    api.post('/auth/register', data),
-  getMe: () => api.get('/auth/me'),
-  updateProfile: (data: any) => api.put('/auth/updatedetails', data),
-  updatePassword: (data: { currentPassword: string; newPassword: string }) =>
-    api.put('/auth/updatepassword', data),
-};
-
-export const productsAPI = {
-  getProducts: (params?: any) => api.get('/products', { params }),
-  getProduct: (id: string) => api.get(`/products/${id}`),
-  createProduct: (data: FormData) => api.post('/products', data, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  updateProduct: (id: string, data: FormData) => api.put(`/products/${id}`, data, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  deleteProduct: (id: string) => api.delete(`/products/${id}`),
-  getCategories: () => api.get('/products/categories/list'),
-  getFeatured: (limit?: number) => api.get('/products/featured', { params: { limit } }),
-};
-
-export const eventsAPI = {
-  getEvents: (params?: any) => api.get('/events', { params }),
-  getEvent: (id: string) => api.get(`/events/${id}`),
-  createEvent: (data: FormData) => api.post('/events', data, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  updateEvent: (id: string, data: FormData) => api.put(`/events/${id}`, data, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  deleteEvent: (id: string) => api.delete(`/events/${id}`),
-  getCategories: () => api.get('/events/categories/list'),
-  getFeatured: (limit?: number) => api.get('/events/featured', { params: { limit } }),
-  getUpcoming: (limit?: number) => api.get('/events/upcoming', { params: { limit } }),
-};
-
-export const videosAPI = {
-  getVideos: (params?: any) => api.get('/videos', { params }),
-  getVideo: (id: string) => api.get(`/videos/${id}`),
-  createVideo: (data: FormData) => api.post('/videos', data, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  updateVideo: (id: string, data: FormData) => api.put(`/videos/${id}`, data, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  deleteVideo: (id: string) => api.delete(`/videos/${id}`),
-  getCategories: () => api.get('/videos/categories/list'),
-  getFeatured: (limit?: number) => api.get('/videos/featured', { params: { limit } }),
-  updateStatistics: (id: string, stats: any) => api.put(`/videos/${id}/statistics`, stats),
-};
-
-export const aboutAPI = {
-  getAbout: () => api.get('/about'),
-  createAbout: (data: FormData) => api.post('/about', data, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  updateAbout: (id: string, data: FormData) => api.put(`/about/${id}`, data, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  deleteAbout: (id: string) => api.delete(`/about/${id}`),
-  getAllAbouts: (params?: any) => api.get('/about/all', { params }),
-  setActive: (id: string) => api.put(`/about/${id}/set-active`),
-};
-
-export const adminAPI = {
-  getStats: () => api.get('/admin/stats'),
-  getUsers: (params?: any) => api.get('/admin/users', { params }),
-  updateUser: (id: string, data: any) => api.put(`/admin/users/${id}`, data),
-  deleteUser: (id: string) => api.delete(`/admin/users/${id}`),
-  getContent: () => api.get('/admin/content'),
-};
-
-export const paymentsAPI = {
-  createPaymentIntent: (data: { amount: number; currency?: string; metadata?: any }) =>
-    api.post('/payments/create-payment-intent', data),
-  createPayPalPayment: (data: any) => api.post('/payments/create-paypal-payment', data),
-  executePayPalPayment: (data: { paymentId: string; payerId: string }) =>
-    api.post('/payments/execute-paypal-payment', data),
-  createEventPaymentIntent: (data: any) => api.post('/payments/create-event-payment-intent', data),
-  getPaymentMethods: () => api.get('/payments/methods'),
-};

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, DollarSign, Clock, CheckCircle, XCircle, AlertCircle, Search, Filter, Trash2, Edit2, X, Plus } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { transactionsAPI } from '../services/admin';
+import api from '../services/api';
 
 const AdminTransactions = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -28,18 +29,11 @@ const AdminTransactions = () => {
   const fetchTransactions = async () => {
     setLoading(true);
     try {
-      const { data: transactionsData, error: transactionsError } = await supabase
-        .from('transactions')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (transactionsError) {
-        console.error('Error fetching transactions:', transactionsError);
-      } else {
-        setTransactions(transactionsData || []);
-      }
+      const data = await transactionsAPI.getAll();
+      setTransactions(data || []);
     } catch (error) {
       console.error('Error fetching transactions:', error);
+      setTransactions([]);
     } finally {
       setLoading(false);
     }
@@ -47,17 +41,9 @@ const AdminTransactions = () => {
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('transactions')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error updating transaction:', error);
-      } else {
-        fetchTransactions();
-        setEditingTransaction(null);
-      }
+      await api.put(`/transactions/${id}`, { status: newStatus });
+      fetchTransactions();
+      setEditingTransaction(null);
     } catch (error) {
       console.error('Error updating transaction:', error);
     }
@@ -65,20 +51,12 @@ const AdminTransactions = () => {
 
   const handleDeleteTransaction = async () => {
     if (!deletingTransaction) return;
-    
-    try {
-      const { error } = await supabase
-        .from('transactions')
-        .delete()
-        .eq('id', deletingTransaction.id);
 
-      if (error) {
-        console.error('Error deleting transaction:', error);
-      } else {
-        fetchTransactions();
-        setShowDeleteModal(false);
-        setDeletingTransaction(null);
-      }
+    try {
+      await transactionsAPI.delete(deletingTransaction._id || deletingTransaction.id);
+      fetchTransactions();
+      setShowDeleteModal(false);
+      setDeletingTransaction(null);
     } catch (error) {
       console.error('Error deleting transaction:', error);
     }
@@ -86,18 +64,10 @@ const AdminTransactions = () => {
 
   const handleCreateTransaction = async () => {
     try {
-      const { data, error } = await supabase
-        .from('transactions')
-        .insert([{
-          ...createFormData,
-          amount: parseFloat(createFormData.amount),
-          created_at: new Date().toISOString()
-        }])
-        .select();
-
-      if (error) throw error;
-
-      setTransactions([data[0], ...transactions]);
+      await transactionsAPI.create({
+        ...createFormData,
+        amount: parseFloat(createFormData.amount),
+      });
       setShowCreateModal(false);
       setCreateFormData({
         amount: '',

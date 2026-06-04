@@ -1,14 +1,17 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Shield, Loader2 } from 'lucide-react';
+import { Shield } from 'lucide-react';
+
+export const STAFF_ROLES = ['admin', 'moderator'] as const;
+export type StaffRole = typeof STAFF_ROLES[number];
 
 interface AdminRouteProps {
   children: React.ReactNode;
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const location = useLocation();
 
   // Show loading state while checking auth
@@ -29,8 +32,8 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
-  // Check if user has admin role
-  if (user.role !== 'admin') {
+  // Check if user has staff role (admin or moderator)
+  if (!STAFF_ROLES.includes(user.role as StaffRole)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
@@ -44,7 +47,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
                 <h3 className="text-lg font-black text-white uppercase tracking-wide drop-shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                   Access Denied
                 </h3>
-                <p className="text-xs text-red-100 font-bold uppercase tracking-wide">Admin privileges required</p>
+                <p className="text-xs text-red-100 font-bold uppercase tracking-wide">Admin or moderator role required</p>
               </div>
             </div>
           </div>

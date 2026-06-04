@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Search, X } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { mediaAPI } from '../services/content';
 import Modal from './Modal';
 
 interface MediaItem {
@@ -35,19 +35,11 @@ const MediaLibrarySelector: React.FC<MediaLibrarySelectorProps> = ({
   const fetchMedia = async () => {
     setLoading(true);
     try {
-      const { data: mediaData, error: mediaError } = await supabase
-        .from('media')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (mediaError) {
-        console.error('Error fetching media:', mediaError);
-      } else {
-        setMedia(mediaData || []);
-      }
+      const data = await mediaAPI.getMedia();
+      setMedia(data || []);
     } catch (error) {
       console.error('Error fetching media:', error);
+      setMedia([]);
     } finally {
       setLoading(false);
     }

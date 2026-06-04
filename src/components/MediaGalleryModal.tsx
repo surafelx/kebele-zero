@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Image as ImageIcon, Upload, Search } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { mediaAPI } from '../services/content';
 
 interface MediaGalleryModalProps {
   isOpen: boolean;
@@ -37,27 +37,11 @@ const MediaGalleryModal: React.FC<MediaGalleryModalProps> = ({ isOpen, onClose, 
   const fetchMediaItems = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('media')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await mediaAPI.getMedia();
       setMediaItems(data || []);
     } catch (error) {
       console.error('Error fetching media:', error);
-      // Fallback to mock data
-      setMediaItems([
-        { id: '1', title: 'Hero Image 1', media_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop', category: 'hero' },
-        { id: '2', title: 'Hero Image 2', media_url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop', category: 'hero' },
-        { id: '3', title: 'Hero Image 3', media_url: 'https://images.unsplash.com/photo-1551818255-e9353de8d1b0?w=800&h=600&fit=crop', category: 'hero' },
-        { id: '4', title: 'Nature 1', media_url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop', category: 'nature' },
-        { id: '5', title: 'Nature 2', media_url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800&h=600&fit=crop', category: 'nature' },
-        { id: '6', title: 'City 1', media_url: 'https://images.unsplash.com/photo-1449824913929-651196d28772?w=800&h=600&fit=crop', category: 'city' },
-        { id: '7', title: 'Abstract 1', media_url: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800&h=600&fit=crop', category: 'abstract' },
-        { id: '8', title: 'People 1', media_url: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=800&h=600&fit=crop', category: 'people' }
-      ]);
+      setMediaItems([]);
     } finally {
       setLoading(false);
     }
@@ -84,16 +68,16 @@ const MediaGalleryModal: React.FC<MediaGalleryModalProps> = ({ isOpen, onClose, 
         onClick={(e) => e.stopPropagation()}
       >
         {/* Retro Title Bar */}
-        <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-purple-600 to-pink-600">
+        <div className="flex items-center justify-between px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-500 to-teal-500">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
-              <ImageIcon className="w-6 h-6 text-purple-600" />
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg">
+              <ImageIcon className="w-5 h-5 text-emerald-500" />
             </div>
             <div>
               <h3 className="text-lg font-black text-white uppercase tracking-wide drop-shadow-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                 Media Gallery
               </h3>
-              <p className="text-xs text-purple-100 font-bold uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
+              <p className="text-xs text-emerald-100 font-bold uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                 {filteredItems.length} images available
               </p>
             </div>
@@ -117,7 +101,7 @@ const MediaGalleryModal: React.FC<MediaGalleryModalProps> = ({ isOpen, onClose, 
                 placeholder="Search images..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white border-2 border-gray-300 focus:border-purple-500 focus:outline-none transition-all font-medium"
+                className="w-full pl-10 pr-4 py-2 bg-white border-2 border-gray-300 focus:border-emerald-500 focus:outline-none transition-all font-medium"
                 style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
               />
             </div>
@@ -128,10 +112,10 @@ const MediaGalleryModal: React.FC<MediaGalleryModalProps> = ({ isOpen, onClose, 
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2 border-black ${
+                  className={`px-4 py-2 text-sm font-bold whitespace-nowrap transition-all border-2 border-black active:translate-y-0.5 ${
                     selectedCategory === category
-                      ? 'bg-purple-600 text-white shadow-lg'
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                      ? 'bg-emerald-600 text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
                   }`}
                   style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
                 >
@@ -146,22 +130,22 @@ const MediaGalleryModal: React.FC<MediaGalleryModalProps> = ({ isOpen, onClose, 
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : filteredItems.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredItems.map((item) => (
                 <div
                   key={item.id}
-                  className="group relative bg-gray-50 rounded-xl overflow-hidden cursor-pointer border-2 border-black hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+                  className="group relative bg-gray-50 rounded-lg overflow-hidden cursor-pointer border-2 border-black hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
                   onClick={() => {
-                    onSelectImage(item.media_url);
+                    onSelectImage(item.url || item.media_url || item.imageUrl || '');
                     onClose();
                   }}
                 >
                   <div className="aspect-square overflow-hidden">
                     <img
-                      src={item.media_url}
+                      src={item.url || item.media_url || item.imageUrl || ''}
                       alt={item.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -189,10 +173,10 @@ const MediaGalleryModal: React.FC<MediaGalleryModalProps> = ({ isOpen, onClose, 
                   setSearchTerm('');
                   setSelectedCategory('all');
                 }}
-                className="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl font-bold border-2 border-black hover:bg-purple-200 transition-colors"
+                className="px-4 py-2 bg-emerald-100 text-emerald-700 font-bold border-2 border-black hover:bg-emerald-200 transition-colors active:translate-y-0.5 uppercase tracking-wide"
                 style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
               >
-                Clear filters
+                Clear Filters
               </button>
             </div>
           )}
@@ -207,7 +191,7 @@ const MediaGalleryModal: React.FC<MediaGalleryModalProps> = ({ isOpen, onClose, 
             <button
               disabled
               title="Use the Admin Media section to upload new images"
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-300 text-gray-500 rounded-xl font-bold border-2 border-gray-400 cursor-not-allowed opacity-60"
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-300 text-gray-500 rounded-lg font-bold border-2 border-gray-400 cursor-not-allowed opacity-60"
               style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
             >
               <Upload className="w-4 h-4" />

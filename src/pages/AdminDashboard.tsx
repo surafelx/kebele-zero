@@ -85,6 +85,7 @@ const AdminDashboard = () => {
     { id: 'gallery', label: 'Media Gallery', icon: GalleryHorizontal, category: 'content' },
     { id: 'radio', label: 'Radio', icon: Radio, category: 'content' },
     { id: 'transactions', label: 'Transactions', icon: CreditCard, category: 'system' },
+    { id: 'payment-requests', label: 'Payment Requests', icon: CreditCard, category: 'system' },
     { id: 'about', label: 'About Page', icon: Info, category: 'system' },
     { id: 'social-links', label: 'Social Links', icon: Link2, category: 'system' },
     { id: 'settings', label: 'Settings', icon: Settings, category: 'system' },

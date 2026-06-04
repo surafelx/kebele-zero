@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import PaymentRequestModal from '../components/PaymentRequestModal';
+import AuthModal from '../components/AuthModal';
 import { ShoppingCart, Heart, Star, Filter, Search, Shirt, Coffee, Book, Music, Gem, Home, X } from 'lucide-react';
 import { productsAPI } from '../services/content';
+import ModalLoader from '../components/ModalLoader';
 
 interface Product {
   id: string;
@@ -15,90 +18,6 @@ interface Product {
   is_featured: boolean;
 }
 
-// Mock products data - Fallback when no Supabase data
-const mockProducts: Product[] = [
-  {
-    id: "1",
-    name: "Handwoven Ethiopian Scarf",
-    description: "Beautiful handwoven scarf made with traditional Ethiopian techniques, perfect for cultural events and daily wear.",
-    price: 45,
-    images: [
-      { url: "https://images.unsplash.com/photo-1601762603332-db5e4b90cc5d?w=400&h=400&fit=crop", alt: "Handwoven scarf" },
-      { url: "https://images.unsplash.com/photo-1582582494368-986c84ba9a0d?w=400&h=400&fit=crop", alt: "Scarf detail" }
-    ],
-    category: "Textiles",
-    stock_quantity: 25,
-    is_active: true,
-    is_featured: true
-  },
-  {
-    id: "2",
-    name: "Ethiopian Coffee Beans",
-    description: "Premium single-origin coffee beans from the highlands of Ethiopia, known for their unique flavor profile.",
-    price: 28,
-    images: [
-      { url: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=400&fit=crop", alt: "Coffee beans" }
-    ],
-    category: "Food",
-    stock_quantity: 50,
-    is_active: true,
-    is_featured: true
-  },
-  {
-    id: "3",
-    name: "Traditional Mesob Basket",
-    description: "Handcrafted mesob basket used for traditional Ethiopian dining, made from local materials.",
-    price: 35,
-    images: [
-      { url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop", alt: "Mesob basket" }
-    ],
-    category: "Home",
-    stock_quantity: 15,
-    is_active: true,
-    is_featured: false
-  },
-  {
-    id: "4",
-    name: "Ethiopian Music CD Collection",
-    description: "Curated collection of traditional Ethiopian music featuring various regional styles and instruments.",
-    price: 22,
-    images: [
-      { url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop", alt: "Music collection" }
-    ],
-    category: "Music",
-    stock_quantity: 30,
-    is_active: true,
-    is_featured: true
-  },
-  {
-    id: "5",
-    name: "Handmade Beaded Jewelry",
-    description: "Beautiful beaded jewelry crafted by Ethiopian artisans, featuring traditional patterns and colors.",
-    price: 18,
-    images: [
-      { url: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop", alt: "Beaded jewelry" }
-    ],
-    category: "Jewelry",
-    stock_quantity: 40,
-    is_active: true,
-    is_featured: false
-  },
-  {
-    id: "6",
-    name: "Injera Baking Kit",
-    description: "Complete kit for making traditional Ethiopian injera at home, includes special pan and starter culture.",
-    price: 65,
-    images: [
-      { url: "https://images.unsplash.com/photo-1551782450-17144efb5723?w=400&h=400&fit=crop", alt: "Injera kit" }
-    ],
-    category: "Food",
-    stock_quantity: 12,
-    is_active: true,
-    is_featured: true
-  }
-];
-
-const mockCategories = ["Textiles", "Food", "Home", "Music", "Jewelry", "Books", "Art"];
 
 const KebeleSouq: React.FC = () => {
   const { user } = useAuth();
@@ -108,6 +27,8 @@ const KebeleSouq: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
   const [cart, setCart] = useState<Array<{ product: Product; quantity: number }>>([]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [paymentItem, setPaymentItem] = useState<{ id: string; type: 'product'; name: string; price: number } | null>(null);
 
   useEffect(() => {
     loadProducts();
@@ -116,54 +37,11 @@ const KebeleSouq: React.FC = () => {
 
   const loadProducts = async () => {
     try {
-      // Fetch from Supabase
-      const data = await productsAPI.getProducts({
-        category: selectedCategory || undefined,
-        search: searchTerm || undefined
-      });
-      
-      // Transform Supabase data to match component format
-      if (data && data.length > 0) {
-        const transformedProducts: Product[] = data.map(product => ({
-          id: product.id,
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          images: product.image_url ? [{ url: product.image_url, alt: product.name }] : [],
-          category: product.category,
-          stock_quantity: product.stock_quantity || 0,
-          is_active: product.is_active,
-          is_featured: product.is_featured
-        }));
-        setProducts(transformedProducts);
-      } else {
-        // Fallback to mock data
-        let filteredProducts = mockProducts;
-        if (searchTerm) {
-          filteredProducts = filteredProducts.filter(product =>
-            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            product.category.toLowerCase().includes(searchTerm.toLowerCase())
-          );
-        }
-        if (selectedCategory) {
-          filteredProducts = filteredProducts.filter(product => product.category === selectedCategory);
-        }
-        setProducts(filteredProducts);
-      }
+      const data = await productsAPI.getProducts({ category: selectedCategory || undefined });
+      setProducts(data);
     } catch (error) {
       console.error('Error loading products:', error);
-      // Fallback to mock data on error
-      let filteredProducts = mockProducts;
-      if (searchTerm) {
-        filteredProducts = filteredProducts.filter(product =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-      if (selectedCategory) {
-        filteredProducts = filteredProducts.filter(product => product.category === selectedCategory);
-      }
-      setProducts(filteredProducts);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -171,16 +49,11 @@ const KebeleSouq: React.FC = () => {
 
   const loadCategories = async () => {
     try {
-      // Fetch categories from Supabase
       const data = await productsAPI.getCategories();
-      if (data && data.length > 0) {
-        setCategories(data);
-      } else {
-        setCategories(mockCategories);
-      }
+      setCategories(data);
     } catch (error) {
       console.error('Error loading categories:', error);
-      setCategories(mockCategories);
+      setCategories([]);
     }
   };
 
@@ -198,39 +71,17 @@ const KebeleSouq: React.FC = () => {
     });
   };
 
-  const handlePurchase = async (product: Product) => {
+  const handlePurchase = (product: Product) => {
     if (!user) {
-      alert('Please login to make a purchase');
+      setShowAuthModal(true);
       return;
     }
-
-    // Mock payment process
-    alert(`Mock payment successful! You purchased "${product.name}" for $${product.price}`);
+    setPaymentItem({ id: product.id, type: 'product', name: product.name, price: product.price });
   };
 
   const cartTotal = cart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center">
-        <div className="retro-window retro-floating text-center p-8 max-w-sm w-full">
-          <div className="retro-titlebar retro-titlebar-teal mb-4">
-            <div className="flex items-center justify-center">
-              <ShoppingCart className="w-5 h-5 retro-icon" />
-            </div>
-            <div className="retro-window-controls">
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
-              <div className="retro-window-dot"></div>
-            </div>
-          </div>
-          <div className="retro-spinner w-16 h-16 mx-auto mb-6"></div>
-          <div className="retro-title text-lg font-bold uppercase tracking-wider">Loading Souq...</div>
-          <p className="retro-text text-sm mt-4 opacity-80">Discovering amazing Ethiopian products</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <ModalLoader label="Loading Souq..." fullHeight />;
 
   return (
     <div className="min-h-screen retro-bg retro-bg-enhanced">
@@ -410,6 +261,20 @@ const KebeleSouq: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        feature="Souq"
+      />
+
+      {/* Payment Request Modal */}
+      <PaymentRequestModal
+        isOpen={!!paymentItem}
+        onClose={() => setPaymentItem(null)}
+        item={paymentItem ?? { id: '', type: 'product', name: '', price: 0 }}
+      />
     </div>
   );
 };

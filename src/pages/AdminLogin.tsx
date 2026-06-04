@@ -135,13 +135,13 @@ const AdminLogin: React.FC = () => {
                     id="password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
-                    autoComplete={isLogin ? 'current-password' : 'new-password'}
+                    autoComplete="current-password"
                     required
                     value={credentials.password}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 pr-12 bg-gray-50 border-2 border-gray-300 focus:border-blue-500 focus:outline-none transition-all font-medium placeholder-gray-400"
                     style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}
-                    placeholder={isLogin ? 'Enter your password' : 'Create a password'}
+                    placeholder="Enter your password"
                   />
                   <button
                     type="button"

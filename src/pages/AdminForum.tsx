@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Users, Calendar, ShoppingBag, Radio, Image, Settings, BarChart3, Edit3, Trash2, Plus, ArrowLeft, Save, X, LogOut, LogIn, CreditCard, Trophy, Gamepad2, Filter, Search, MoreVertical, Eye, Ban, CheckCircle, Info, Upload, Camera, Menu, PanelLeftClose, ChevronDown, User, ChevronUp } from 'lucide-react';
-import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { forumAPI } from '../services/forum';
-import { pointsAPI } from '../services/points';
 import Modal from '../components/Modal';
 
 const AdminForum = () => {
@@ -91,43 +89,11 @@ const AdminForum = () => {
   const fetchForumData = async () => {
     setLoading(true);
     try {
-      // Fetch forum posts
-      const { data: postsData, error: postsError } = await supabase
-        .from('forum_posts')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (postsError) {
-        console.error('Error fetching forum posts:', postsError);
-      } else {
-        setForumPosts(postsData || []);
-      }
-
-      // Fetch users for post authors
-      const { data: usersData, error: usersError } = await supabase
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (usersError) {
-        console.error('Error fetching users:', usersError);
-      } else {
-        setUsers(usersData || []);
-      }
-
-      // Fetch user points
-      const { data: pointsData, error: pointsError } = await supabase
-        .from('user_points')
-        .select('*')
-        .order('total_points', { ascending: false });
-
-      if (pointsError) {
-        console.error('Error fetching user points:', pointsError);
-      } else {
-        setUserPoints(pointsData || []);
-      }
+      const result = await forumAPI.getPosts(undefined, 1, 50);
+      setForumPosts(result.posts || result);
     } catch (error) {
       console.error('Error fetching forum data:', error);
+      setForumPosts([]);
     } finally {
       setLoading(false);
     }
@@ -147,15 +113,7 @@ const AdminForum = () => {
 
   const handleEditPost = async (postData: any) => {
     try {
-      const { data, error } = await supabase
-        .from('forum_posts')
-        .update(postData)
-        .eq('id', editingPost.id)
-        .select();
-
-      if (error) throw error;
-
-      setForumPosts(forumPosts.map(p => p.id === editingPost.id ? data[0] : p));
+      await forumAPI.updatePost(editingPost._id || editingPost.id, postData);
       setEditingPost(null);
       fetchForumData();
     } catch (error) {

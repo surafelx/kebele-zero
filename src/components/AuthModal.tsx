@@ -104,7 +104,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, feature }) => {
     >
       {/* Retro Window Card */}
       <div 
-        className="max-w-md w-full bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
+        className="max-w-md w-full bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Retro Title Bar */}
@@ -135,7 +135,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, feature }) => {
         </div>
 
         {/* Form */}
-        <div className="p-6 bg-white">
+        <div className="p-6 bg-white flex-1 overflow-y-auto">
 
           {/* Post-registration confirmation */}
           {registered && (
@@ -159,7 +159,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, feature }) => {
             </div>
           )}
 
-          {!registered && <form onSubmit={handleSubmit} className="space-y-4">
+          {!registered && (<><form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
               <div className="space-y-2">
                 <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Username</label>
@@ -288,7 +288,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, feature }) => {
               {isSignUp ? 'Sign In' : 'Create Account'}
             </button>
           </div>
-          </form>}
+          </>)}
 
         </div>
       </div>

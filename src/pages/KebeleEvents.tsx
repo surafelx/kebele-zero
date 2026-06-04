@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from '../components/AuthModal';
+import PaymentRequestModal from '../components/PaymentRequestModal';
 import { Calendar, MapPin, Clock, Users, Ticket, Star, Heart, Share2, Music, Film, BookOpen, Coffee, Zap, Sparkles, Search, X, Play, ChevronRight } from 'lucide-react';
 import { eventsAPI } from '../services/content';
+import ModalLoader from '../components/ModalLoader';
 
 interface Event {
   id: string;
@@ -37,8 +39,8 @@ interface Event {
   capacity: number;
 }
 
-// Mock events data - Fallback when no Supabase data
-const mockEvents: Event[] = [
+// _REMOVED mock events — all data now comes from the API
+const _REMOVED_mockEvents_UNUSED = [
   {
     id: "1",
     title: "Ethiopian Cultural Festival 2024",
@@ -187,7 +189,6 @@ const mockEvents: Event[] = [
   }
 ];
 
-const mockCategories = ["Cultural", "Music", "Workshop", "Religious", "Sports", "Art", "Food"];
 
 const KebeleEvents: React.FC = () => {
   const { user } = useAuth();
@@ -201,6 +202,7 @@ const KebeleEvents: React.FC = () => {
   const [showEventModal, setShowEventModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'detail'>('grid');
+  const [paymentItem, setPaymentItem] = useState<{ id: string; type: 'event'; name: string; price: number } | null>(null);
 
   useEffect(() => {
     loadEvents();
@@ -209,60 +211,11 @@ const KebeleEvents: React.FC = () => {
 
   const loadEvents = async () => {
     try {
-      // Fetch from Supabase
-      const data = await eventsAPI.getEvents({
-        category: selectedCategory || undefined
-      });
-      
-      // Transform Supabase data to match component format
-      if (data && data.length > 0) {
-        const transformedEvents: Event[] = data.map(event => ({
-          id: event.id,
-          title: event.title,
-          description: event.description,
-          short_description: event.short_description || '',
-          category: event.category,
-          start_date: event.start_date,
-          end_date: event.end_date,
-          location: event.location || { venue: '', address: { city: '', country: '' } },
-          images: event.images || [{ url: '', alt: event.title }],
-          tickets: event.tickets || [],
-          organizer: event.organizer || { name: '' },
-          tags: event.tags || [],
-          is_active: event.is_active,
-          is_featured: event.is_featured,
-          capacity: event.capacity || 0
-        }));
-        setEvents(transformedEvents);
-      } else {
-        // Fallback to mock data
-        let filteredEvents = mockEvents;
-        if (searchTerm) {
-          filteredEvents = filteredEvents.filter(event =>
-            event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            event.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-          );
-        }
-        if (selectedCategory) {
-          filteredEvents = filteredEvents.filter(event => event.category === selectedCategory);
-        }
-        setEvents(filteredEvents);
-      }
+      const data = await eventsAPI.getEvents({ category: selectedCategory || undefined });
+      setEvents(data);
     } catch (error) {
       console.error('Error loading events:', error);
-      // Fallback to mock data on error
-      let filteredEvents = mockEvents;
-      if (searchTerm) {
-        filteredEvents = filteredEvents.filter(event =>
-          event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          event.description.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-      if (selectedCategory) {
-        filteredEvents = filteredEvents.filter(event => event.category === selectedCategory);
-      }
-      setEvents(filteredEvents);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
@@ -270,16 +223,11 @@ const KebeleEvents: React.FC = () => {
 
   const loadCategories = async () => {
     try {
-      // Fetch categories from Supabase
       const data = await eventsAPI.getCategories();
-      if (data && data.length > 0) {
-        setCategories(data);
-      } else {
-        setCategories(mockCategories);
-      }
+      setCategories(data);
     } catch (error) {
       console.error('Error loading categories:', error);
-      setCategories(mockCategories);
+      setCategories([]);
     }
   };
 
@@ -319,14 +267,17 @@ const KebeleEvents: React.FC = () => {
     return events.filter(event => event.id !== featured?.id);
   };
 
-  const handleTicketPurchase = async (event: Event, ticketType: any) => {
+  const handleTicketPurchase = (event: Event, ticketType: any) => {
     if (!user) {
       setShowAuthModal(true);
       return;
     }
-
-    // Mock payment process
-    alert(`Mock payment successful! You purchased 1 ${ticketType.name} ticket for $${ticketType.price} for "${event.title}"`);
+    setPaymentItem({
+      id: event.id,
+      type: 'event',
+      name: `${event.title} — ${ticketType.name}`,
+      price: ticketType.price,
+    });
   };
 
   const EventDetailView: React.FC<{ event: Event }> = ({ event }) => {
@@ -662,24 +613,7 @@ const KebeleEvents: React.FC = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center">
-        <div className="text-center w-80">
-          <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-4">
-            <div className="flex items-center justify-center px-4 py-3 border-b-4 border-black bg-gradient-to-r from-emerald-600 to-teal-600">
-              <Calendar className="w-5 h-5 text-white" />
-            </div>
-            <div className="p-4">
-              <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
-              <div className="text-sm font-bold uppercase tracking-wide mb-2" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Loading Events...</div>
-              <p className="text-xs opacity-80">Discovering amazing Ethiopian cultural events</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <ModalLoader label="Loading Events..." fullHeight />;
 
   return (
     <div className="retro-bg retro-bg-enhanced">
@@ -852,6 +786,13 @@ const KebeleEvents: React.FC = () => {
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
           feature="events"
+        />
+
+        {/* Payment Request Modal */}
+        <PaymentRequestModal
+          isOpen={!!paymentItem}
+          onClose={() => setPaymentItem(null)}
+          item={paymentItem ?? { id: '', type: 'event', name: '', price: 0 }}
         />
       </div>
     </div>

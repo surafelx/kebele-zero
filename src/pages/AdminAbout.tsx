@@ -1,29 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Info, Edit3, Save, X, Plus, Trash2, Mail, Phone, MapPin, Globe, Linkedin, Twitter, Instagram, Globe2, Eye, ExternalLink, Trophy, Users, Calendar, ShoppingBag, Play, Link } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { aboutAPI } from '../services/content';
+import { teamMembersAPI } from '../services/admin';
 import ImageUpload from '../components/ImageUpload';
 import TeamForm from '../components/TeamForm';
 import SocialLinksForm from '../components/SocialLinksForm';
 import Modal from '../components/Modal';
 import AboutKebele from './AboutKebele';
 
-// Mock data for fallback
-const mockAboutData = {
-  title: 'Empowering Ethiopian Communities Through Culture & Innovation',
-  hero_section_title: 'WELCOME TO KEBELE',
-  content: 'Kebele represents the heart of Ethiopian community - the traditional neighborhood unit that forms the foundation of our social structure.',
-  summary: 'Empowering Ethiopian communities through culture, commerce, and connection',
-  mission: 'To preserve and promote Ethiopian cultural heritage while fostering economic growth and community development through innovative digital platforms.',
-  vision: 'To become the leading digital hub connecting Ethiopians worldwide, celebrating our rich culture, supporting local businesses, and building stronger communities.',
+// Empty initial state — content comes from the API (Admin → About Page)
+const emptyAboutData = {
+  title: '',
+  hero_section_title: '',
+  content: '',
+  summary: '',
+  mission: '',
+  vision: '',
   mission_title: 'OUR MISSION',
   vision_title: 'OUR VISION',
   story_title: 'OUR STORY',
   impact_title: 'OUR IMPACT',
-  history: 'Founded in 2020, Kebele emerged from a vision to bridge the gap between traditional Ethiopian culture and modern digital platforms.',
-  hero_image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1200&h=800&fit=crop',
-  contact_email: 'hello@kebele.com',
-  contact_phone: '+251 911 123 456',
-  contact_address: '123 Addis Ababa Street, Addis Ababa, Ethiopia'
+  history: '',
+  hero_image: '',
+  contact_email: '',
+  contact_phone: '',
+  contact_address: ''
 };
 
 // Default stats
@@ -53,52 +54,34 @@ const AdminAbout = () => {
   const fetchAboutData = async () => {
     setLoading(true);
     try {
-      const { data: aboutContent, error: aboutContentError } = await supabase
-        .from('about_content')
-        .select('*')
-        .eq('is_active', true);
+      const [aboutContent, teamData] = await Promise.all([
+        aboutAPI.getAbout().catch(() => null),
+        teamMembersAPI.getAll().catch(() => []),
+      ]);
 
-      const { data: teamData, error: teamError } = await supabase
-        .from('team_members')
-        .select('*')
-        .eq('is_active', true)
-        .order('display_order', { ascending: true });
+      // aboutContent may be an array of sections or a single object
+      const sections: any[] = Array.isArray(aboutContent) ? aboutContent : (aboutContent ? [aboutContent] : []);
+      const statsSection = sections.find((s: any) => s.section === 'stats');
 
-      const { data: statsContent, error: statsError } = await supabase
-        .from('about_content')
-        .select('*')
-        .eq('section', 'stats');
-
-      if (aboutContentError) {
-        console.error('Error fetching about content:', aboutContentError);
-      }
-      if (teamError) {
-        console.error('Error fetching team members:', teamError);
-      }
-      if (statsError && statsError.code !== 'PGRST116') {
-        // PGRST116 is expected when no stats exist
-        console.error('Error fetching stats:', statsError);
-      }
-
-      if (aboutContent && aboutContent.length > 0) {
-        const transformedData: any = { ...mockAboutData };
+      if (sections.length > 0) {
+        const transformedData: any = { ...emptyAboutData };
         
-        aboutContent.forEach((item: any) => {
+        sections.forEach((item: any) => {
           if (item.section === 'title') {
-            transformedData.title = item.content || mockAboutData.title;
+            transformedData.title = item.content || emptyAboutData.title;
           } else if (item.section === 'hero') {
-            transformedData.hero_section_title = item.title || mockAboutData.hero_section_title;
-            transformedData.summary = item.content || mockAboutData.summary;
-            transformedData.hero_image = (item.image_url && item.image_url.startsWith('http')) ? item.image_url : mockAboutData.hero_image;
+            transformedData.hero_section_title = item.title || emptyAboutData.hero_section_title;
+            transformedData.summary = item.content || emptyAboutData.summary;
+            transformedData.hero_image = (item.image_url && item.image_url.startsWith('http')) ? item.image_url : emptyAboutData.hero_image;
           } else if (item.section === 'mission') {
-            transformedData.mission_title = item.title || mockAboutData.mission_title;
-            transformedData.mission = item.content || mockAboutData.mission;
+            transformedData.mission_title = item.title || emptyAboutData.mission_title;
+            transformedData.mission = item.content || emptyAboutData.mission;
           } else if (item.section === 'vision') {
-            transformedData.vision_title = item.title || mockAboutData.vision_title;
-            transformedData.vision = item.content || mockAboutData.vision;
+            transformedData.vision_title = item.title || emptyAboutData.vision_title;
+            transformedData.vision = item.content || emptyAboutData.vision;
           } else if (item.section === 'story') {
-            transformedData.story_title = item.title || mockAboutData.story_title;
-            transformedData.history = item.content || mockAboutData.history;
+            transformedData.story_title = item.title || emptyAboutData.story_title;
+            transformedData.history = item.content || emptyAboutData.history;
           } else if (item.section === 'contact') {
             const lines = (item.content || '').split('\n');
             lines.forEach((line: string) => {
@@ -115,7 +98,7 @@ const AdminAbout = () => {
         
         setAboutData(transformedData);
       } else {
-        setAboutData(mockAboutData);
+        setAboutData(emptyAboutData);
       }
 
       if (teamData && teamData.length > 0) {
@@ -123,10 +106,9 @@ const AdminAbout = () => {
       }
 
       // Load stats from database or use default
-      const dbStats = statsContent && statsContent.length > 0 ? statsContent[0] : null;
-      if (dbStats?.content) {
+      if (statsSection?.content) {
         try {
-          setStats(JSON.parse(dbStats.content));
+          setStats(JSON.parse(statsSection.content));
         } catch (e) {
           setStats(defaultStats);
         }
@@ -135,7 +117,7 @@ const AdminAbout = () => {
       }
     } catch (error) {
       console.error('Error fetching about data:', error);
-      setAboutData(mockAboutData);
+      setAboutData(emptyAboutData);
       setStats(defaultStats);
     } finally {
       setLoading(false);
@@ -155,7 +137,7 @@ const AdminAbout = () => {
       ];
 
       for (const section of sections) {
-        await supabase.from('about_content').upsert(section, { onConflict: 'section' });
+        await aboutAPI.upsertSection(section.section, section);
       }
 
       setEditingAbout(false);
@@ -186,11 +168,9 @@ const AdminAbout = () => {
 
   const handleCreateTeamMember = async (memberData: any) => {
     try {
-      const { data, error } = await supabase.from('team_members').insert([memberData]).select();
-      if (!error && data) {
-        setTeamMembers([...teamMembers, data[0]]);
-        setShowTeamForm(false);
-      }
+      const data = await teamMembersAPI.create(memberData);
+      setTeamMembers([...teamMembers, data]);
+      setShowTeamForm(false);
     } catch (error) {
       console.error('Error creating team member:', error);
       alert('Error adding team member');
@@ -199,12 +179,10 @@ const AdminAbout = () => {
 
   const handleUpdateTeamMember = async (memberData: any, memberId: string) => {
     try {
-      const { data, error } = await supabase.from('team_members').update(memberData).eq('id', memberId).select();
-      if (!error && data) {
-        setTeamMembers(teamMembers.map(m => m.id === memberId ? data[0] : m));
-        setShowTeamForm(false);
-        setEditingTeamMember(null);
-      }
+      const data = await teamMembersAPI.update(memberId, memberData);
+      setTeamMembers(teamMembers.map(m => m.id === memberId ? data : m));
+      setShowTeamForm(false);
+      setEditingTeamMember(null);
     } catch (error) {
       console.error('Error updating team member:', error);
       alert('Error updating team member');
@@ -214,10 +192,8 @@ const AdminAbout = () => {
   const handleDeleteTeamMember = async (id: string) => {
     if (!confirm('Are you sure you want to delete this team member?')) return;
     try {
-      const { error } = await supabase.from('team_members').delete().eq('id', id);
-      if (!error) {
-        setTeamMembers(teamMembers.filter(m => m.id !== id));
-      }
+      await teamMembersAPI.delete(id);
+      setTeamMembers(teamMembers.filter(m => m.id !== id));
     } catch (error) {
       console.error('Error deleting team member:', error);
       alert('Error deleting team member');

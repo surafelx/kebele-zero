@@ -100,45 +100,33 @@ export default class CrossroadsSection
                         active: true
                     })
             
-                    // Set up area interactions
+                    // Area interactions — fire a custom event that App.tsx listens to
                     this.souqArea.on('interact', () => {
-                        console.log('Souq area clicked');
-                        if (window.openKebeleModal) {
-                            window.openKebeleModal('souq');
-                        } else {
-                            // Fallback to custom event
-                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'souq' }));
-                        }
+                        window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'souq' }));
                     })
-            
+
                     this.radioArea.on('interact', () => {
-                        console.log('Radio area clicked');
-                        if (window.openKebeleModal) {
-                            window.openKebeleModal('radio');
-                        } else {
-                            // Fallback to custom event
-                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'radio' }));
-                        }
+                        window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'radio' }));
                     })
-            
+
                     this.eventsArea.on('interact', () => {
-                        console.log('Events area clicked');
-                        if (window.openKebeleModal) {
-                            window.openKebeleModal('events');
-                        } else {
-                            // Fallback to custom event
-                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'events' }));
-                        }
+                        window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'events' }));
                     })
             
                     this.aboutArea.on('interact', () => {
-                        console.log('About area clicked');
-                        if (window.openKebeleModal) {
-                            window.openKebeleModal('about');
-                        } else {
-                            // Fallback to custom event
-                            window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'about' }));
-                        }
+                        window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'about' }));
+                    })
+
+                    this.gamesArea.on('interact', () => {
+                        window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'games' }));
+                    })
+
+                    this.mediaArea.on('interact', () => {
+                        window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'media' }));
+                    })
+
+                    this.forumArea.on('interact', () => {
+                        window.dispatchEvent(new CustomEvent('openKebeleModal', { detail: 'forum' }));
                     })
 
         }

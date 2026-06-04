@@ -63,28 +63,20 @@ const UserDashboardModal: React.FC<UserDashboardModalProps> = ({ isOpen, onClose
     setDataLoading(true);
 
     // Fetch all data in parallel — failures are isolated so one timeout doesn't block others
-    const [pointsResult, postsResult, notifResult] = await Promise.allSettled([
+    const [pointsResult, postsResult] = await Promise.allSettled([
       Promise.race([
         pointsAPI.getUserPoints(user.id),
         new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
       ]),
       Promise.race([
-        forumAPI.getUserPosts(user.id, 3),
+        forumAPI.getUserPosts(user.id),
         new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
       ]),
-      Promise.race([
-        forumAPI.getUserNotifications(user.id),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
-      ])
     ]);
 
     setUserPoints(pointsResult.status === 'fulfilled' ? (pointsResult.value as UserPoints) : null);
     setUserPosts(postsResult.status === 'fulfilled' ? (postsResult.value as ForumPost[]) : []);
-    setNotifications(
-      notifResult.status === 'fulfilled'
-        ? notifResult.value
-        : { likes: [], comments: [], replies: [] }
-    );
+    setNotifications({ likes: [], comments: [], replies: [] });
     setDataLoading(false);
   };
 
@@ -174,27 +166,27 @@ const UserDashboardModal: React.FC<UserDashboardModalProps> = ({ isOpen, onClose
             {dataLoading ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="bg-gray-100 rounded-xl p-4 text-center border-2 border-black animate-pulse h-24" />
+                  <div key={i} className="bg-gray-100 rounded-lg p-4 text-center border-2 border-black animate-pulse h-24" />
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-4 text-center border-2 border-black">
+                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 text-center border-2 border-black">
                   <Trophy className="w-5 h-5 mx-auto mb-1 text-yellow-600" />
                   <p className="text-2xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{userPoints?.total_points ?? 0}</p>
                   <p className="text-xs font-bold text-gray-500 uppercase" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Points</p>
                 </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 text-center border-2 border-black">
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 text-center border-2 border-black">
                   <Gamepad2 className="w-5 h-5 mx-auto mb-1 text-green-600" />
                   <p className="text-2xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{userPoints?.games_played ?? 0}</p>
                   <p className="text-xs font-bold text-gray-500 uppercase" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Played</p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 text-center border-2 border-black">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 text-center border-2 border-black">
                   <MessageSquare className="w-5 h-5 mx-auto mb-1 text-blue-600" />
                   <p className="text-2xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{userPosts.length}</p>
                   <p className="text-xs font-bold text-gray-500 uppercase" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Posts</p>
                 </div>
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 text-center border-2 border-black">
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 text-center border-2 border-black">
                   <Trophy className="w-5 h-5 mx-auto mb-1 text-orange-600" />
                   <p className="text-2xl font-black text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{totalWins}</p>
                   <p className="text-xs font-bold text-gray-500 uppercase" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Wins</p>
@@ -210,7 +202,7 @@ const UserDashboardModal: React.FC<UserDashboardModalProps> = ({ isOpen, onClose
                   <span>Notifications ({notifCount})</span>
                 </h3>
                 {notifications.comments.slice(0, 2).map((comment: any) => (
-                  <div key={comment.id} className="bg-blue-50 rounded-xl p-3 border-2 border-black flex items-start space-x-3">
+                  <div key={comment.id} className="bg-blue-50 rounded-lg p-3 border-2 border-black flex items-start space-x-3">
                     <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center border-2 border-black shrink-0">
                       <MessageSquare className="w-4 h-4 text-blue-600" />
                     </div>
@@ -221,7 +213,7 @@ const UserDashboardModal: React.FC<UserDashboardModalProps> = ({ isOpen, onClose
                   </div>
                 ))}
                 {notifications.replies.slice(0, 2).map((reply: any) => (
-                  <div key={reply.id} className="bg-green-50 rounded-xl p-3 border-2 border-black flex items-start space-x-3">
+                  <div key={reply.id} className="bg-green-50 rounded-lg p-3 border-2 border-black flex items-start space-x-3">
                     <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center border-2 border-black shrink-0">
                       <MessageSquare className="w-4 h-4 text-green-600" />
                     </div>
@@ -241,7 +233,7 @@ const UserDashboardModal: React.FC<UserDashboardModalProps> = ({ isOpen, onClose
                   Recent Posts
                 </h3>
                 {userPosts.map((post) => (
-                  <div key={post.id} className="bg-gray-50 rounded-xl p-3 border-2 border-black flex items-center space-x-3">
+                  <div key={post.id} className="bg-gray-50 rounded-lg p-3 border-2 border-black flex items-center space-x-3">
                     <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center border-2 border-black shrink-0">
                       <MessageSquare className="w-4 h-4 text-purple-600" />
                     </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Calendar, ShoppingBag, Radio, Image, CreditCard, MessageSquare, Trophy, TrendingUp, ArrowRight } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { adminAPI } from '../services/admin';
 
 interface StatCardProps {
   title: string;
@@ -78,40 +78,16 @@ const AdminOverview: React.FC<{ onNavigateToTab?: (tab: string) => void }> = ({ 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          setDisplayUser({
-            email: session.user.email,
-            role: 'admin',
-            id: session.user.id
-          });
+        const stats = await adminAPI.getStats();
+        if (stats) {
+          setUsers(Array(stats.totalUsers || 0).fill({}));
+          setEvents(Array(stats.totalEvents || 0).fill({}));
+          setVideos(Array(stats.totalMedia || 0).fill({}));
+          setTransactions(Array(stats.totalTransactions || 0).fill({}));
+          setForumPosts(Array(stats.totalPosts || 0).fill({}));
+          setGameScores(Array(stats.totalGames || 0).fill({}));
+          setProducts(Array(stats.totalProducts || 0).fill({}));
         }
-
-        const [
-          usersRes,
-          eventsRes,
-          videosRes,
-          transactionsRes,
-          forumPostsRes,
-          gameScoresRes,
-          productsRes
-        ] = await Promise.all([
-          supabase.from('users').select('*'),
-          supabase.from('events').select('*'),
-          supabase.from('videos').select('*'),
-          supabase.from('transactions').select('*'),
-          supabase.from('forum_posts').select('*'),
-          supabase.from('game_scores').select('*'),
-          supabase.from('products').select('*')
-        ]);
-
-        setUsers(usersRes.data || []);
-        setEvents(eventsRes.data || []);
-        setVideos(videosRes.data || []);
-        setTransactions(transactionsRes.data || []);
-        setForumPosts(forumPostsRes.data || []);
-        setGameScores(gameScoresRes.data || []);
-        setProducts(productsRes.data || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {

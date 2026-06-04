@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Award, MapPin, Mail, Phone, Globe, Heart, Target, Eye, Star, Zap, Shield, Trophy, BookOpen, Calendar, ShoppingBag, Radio, Facebook, Twitter, Instagram, Youtube, Linkedin, Github, Globe2, ExternalLink, Video, Play, MessageCircle, Heart as HeartIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { pointsAPI } from '../services/points';
-import { supabase } from '../services/supabase';
+import { aboutAPI } from '../services/content';
+import { socialLinksAPI } from '../services/admin';
+import { mediaAPI } from '../services/content';
+import ModalLoader from '../components/ModalLoader';
 
 interface AboutData {
    title: string;
@@ -175,140 +177,40 @@ const AboutKebele: React.FC = () => {
   useEffect(() => {
     const loadAboutData = async () => {
       try {
-        // Fetch about content, team members, stats, media, videos, and social links from database
-        const [aboutContentResult, teamResult, statsResult, mediaResult, videosResult, socialResult] = await Promise.all([
-          supabase
-            .from('about_content')
-            .select('*')
-            .eq('is_active', true),
-          supabase
-            .from('team_members')
-            .select('*')
-            .eq('is_active', true)
-            .order('display_order', { ascending: true }),
-          supabase
-            .from('about_content')
-            .select('*')
-            .eq('section', 'stats'),
-          supabase
-            .from('media')
-            .select('*')
-            .eq('is_active', true)
-            .eq('status', 'published')
-            .limit(4),
-          supabase
-            .from('videos')
-            .select('*')
-            .eq('is_active', true)
-            .eq('is_featured', true)
-            .limit(3),
-          supabase
-            .from('social_links')
-            .select('*')
-            .eq('is_active', true)
-            .order('display_order', { ascending: true })
+        const [aboutResult, mediaResult, socialResult] = await Promise.all([
+          aboutAPI.getAbout().catch(() => null),
+          mediaAPI.getMedia().catch(() => []),
+          socialLinksAPI.getLinks().catch(() => [])
         ]);
 
-        const { data: aboutContent, error: aboutError } = aboutContentResult;
-        const { data: teamMembers, error: teamError } = teamResult;
-        const { data: statsContent, error: statsError } = statsResult;
-        const { data: mediaItems, error: mediaError } = mediaResult;
-        const { data: videoItems, error: videosError } = videosResult;
-        const { data: socialLinksData, error: socialError } = socialResult;
-
-        if (aboutError) {
-          console.error('Error fetching about content:', aboutError);
+        if (socialResult && socialResult.length > 0) {
+          setSocialLinks(socialResult);
         }
-        if (teamError) {
-          console.error('Error fetching team members:', teamError);
-        }
-        if (statsError && statsError.code !== 'PGRST116') {
-          // PGRST116 is expected when no stats exist
-          console.error('Error fetching stats:', statsError);
-        }
-        if (mediaError) {
-          console.error('Error fetching media:', mediaError);
-        }
-        if (videosError) {
-          console.error('Error fetching videos:', videosError);
-        }
-        if (socialError) {
-          console.error('Error fetching social links:', socialError);
+        if (mediaResult && mediaResult.length > 0) {
+          setMediaItems(mediaResult.slice(0, 4));
         }
 
-        // Get stats from database (may be empty)
-        const dbStats = statsContent && statsContent.length > 0 ? statsContent[0] : null;
-
-        // Transform social links
-        const transformedSocialMedia: Record<string, string> = {};
-        if (socialLinksData && socialLinksData.length > 0) {
-          socialLinksData.forEach(link => {
-            transformedSocialMedia[link.platform] = link.url;
-          });
-          setSocialLinks(socialLinksData);
-        }
-
-        if ((aboutContent && aboutContent.length > 0) || (teamMembers && teamMembers.length > 0)) {
-          // Transform database content to match component structure
+        if (aboutResult && (aboutResult.sections?.length > 0 || aboutResult.title)) {
+          // Map Express response to component structure
+          const sections: any[] = aboutResult.sections || [];
+          const findSection = (key: string) => sections.find((s: any) => s.section === key || s.key === key);
           const transformedData: AboutData = {
-            title: aboutContent?.find(c => c.section === 'title')?.content || defaultAboutData.title,
-            hero_section_title: aboutContent?.find(c => c.section === 'hero')?.title || 'WELCOME TO KEBELE',
-            summary: aboutContent?.find(c => c.section === 'hero')?.content || defaultAboutData.summary,
-            mission: aboutContent?.find(c => c.section === 'mission')?.content || defaultAboutData.mission,
-            vision: aboutContent?.find(c => c.section === 'vision')?.content || defaultAboutData.vision,
-            mission_title: aboutContent?.find(c => c.section === 'mission')?.title || 'OUR MISSION',
-            vision_title: aboutContent?.find(c => c.section === 'vision')?.title || 'OUR VISION',
-            story_title: aboutContent?.find(c => c.section === 'story')?.title || 'OUR STORY',
-            impact_title: aboutContent?.find(c => c.section === 'impact')?.title || 'OUR IMPACT',
-            values: defaultAboutData.values,
-            history: aboutContent?.find(c => c.section === 'story')?.content || defaultAboutData.history,
-            content: aboutContent?.find(c => c.section === 'impact')?.content || defaultAboutData.content,
-            team: teamMembers && teamMembers.length > 0 ? teamMembers.map(member => ({
-              id: member.id,
-              name: member.name,
-              role: member.role,
-              bio: member.bio,
-              image_url: member.image_url,
-              linkedin_url: member.linkedin_url,
-              twitter_url: member.twitter_url,
-              instagram_url: member.instagram_url,
-              website_url: member.website_url
-            })) : defaultAboutData.team,
-            contact: {
-              ...defaultAboutData.contact,
-              socialMedia: Object.keys(transformedSocialMedia).length > 0 ? transformedSocialMedia : defaultAboutData.contact.socialMedia
-            },
-            images: [
-              {
-                url: (aboutContent?.find(c => c.section === 'hero')?.image_url && aboutContent?.find(c => c.section === 'hero')?.image_url.startsWith('http')) 
-                  ? aboutContent?.find(c => c.section === 'hero')?.image_url 
-                  : defaultAboutData.images[0].url,
-                alt: aboutContent?.find(c => c.section === 'hero')?.title || defaultAboutData.images[0].alt,
-                caption: aboutContent?.find(c => c.section === 'hero')?.title || defaultAboutData.images[0].caption,
-                isHero: true
-              },
-              ...defaultAboutData.images.slice(1)
-            ],
-            // Use stats from database or default
-            stats: dbStats?.content ? JSON.parse(dbStats.content) : defaultAboutData.stats
+            ...defaultAboutData,
+            title: aboutResult.title || findSection('title')?.content || defaultAboutData.title,
+            hero_section_title: aboutResult.heroTitle || findSection('hero')?.title || defaultAboutData.hero_section_title,
+            summary: aboutResult.summary || findSection('hero')?.content || defaultAboutData.summary,
+            mission: aboutResult.mission || findSection('mission')?.content || defaultAboutData.mission,
+            vision: aboutResult.vision || findSection('vision')?.content || defaultAboutData.vision,
+            history: aboutResult.history || findSection('story')?.content || defaultAboutData.history,
+            team: aboutResult.team || defaultAboutData.team,
+            stats: aboutResult.stats || defaultAboutData.stats,
           };
-          
-          // Store media and videos for mini cards
-          if (mediaItems && mediaItems.length > 0) {
-            setMediaItems(mediaItems);
-          }
-          if (videoItems && videoItems.length > 0) {
-            setVideoItems(videoItems);
-          }
-          
           setAboutData(transformedData);
         } else {
-          // No database content, use default data
           setAboutData(defaultAboutData);
         }
       } catch (error) {
         console.error('Error loading about data:', error);
-        // Fallback to default data on error
         setAboutData(defaultAboutData);
       } finally {
         setLoading(false);
@@ -317,21 +219,7 @@ const AboutKebele: React.FC = () => {
     loadAboutData();
   }, []);
 
-  // Loading spinner
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center p-16">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-black rounded-full"></div>
-          <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-emerald-500 rounded-full animate-spin"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <span className="text-2xl">K</span>
-          </div>
-        </div>
-        <p className="mt-4 text-lg font-bold text-gray-700 uppercase tracking-wide">Loading...</p>
-      </div>
-    );
-  }
+  if (loading) return <ModalLoader label="Loading About..." fullHeight />;
 
   if (!aboutData) {
     return null;

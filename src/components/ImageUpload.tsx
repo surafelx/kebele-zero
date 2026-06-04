@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { cloudinaryService } from '../services/cloudinary';
-import { supabase } from '../services/supabase';
+import { mediaAPI } from '../services/content';
 
 const ImageUpload: React.FC<{
   value: string;
@@ -78,28 +78,25 @@ const ImageUpload: React.FC<{
 
       const cloudinaryUrl = cloudinaryResult.secure_url;
 
-      // Save to media table in Supabase
+      // Save to media via Express API
       if (saveToMedia) {
-        const { data: mediaData, error: mediaError } = await supabase
-          .from('media')
-          .insert([{
+        try {
+          const mediaData = await mediaAPI.uploadMedia({
             title: file.name,
             description: '',
-            alt_text: '',
-            caption: '',
+            url: cloudinaryUrl,
             media_url: cloudinaryUrl,
             cloudinary_public_id: cloudinaryResult.public_id,
             category: category,
             folder: folder,
+            type: 'image',
             status: 'published'
-          }])
-          .select()
-          .single();
-
-        if (mediaError) {
-          console.error('Error saving to media table:', mediaError);
-        } else if (mediaData && onMediaUpdate) {
-          onMediaUpdate(mediaData);
+          });
+          if (mediaData && onMediaUpdate) {
+            onMediaUpdate(mediaData);
+          }
+        } catch (mediaError) {
+          console.error('Error saving to media:', mediaError);
         }
       }
 

@@ -68,9 +68,7 @@ export class FloorMaterial extends ShaderMaterial {
     backgroundTexture.magFilter = LinearFilter;
     backgroundTexture.needsUpdate = true;
 
-
-    console.log(backgroundTexture)
-
     this.uniforms.tBackground.value = backgroundTexture;
   }
 }
+

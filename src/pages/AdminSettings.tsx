@@ -11,13 +11,16 @@ import {
   AlertTriangle,
   RefreshCw
 } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { settingsAPI } from '../services/admin';
 
 interface SiteSettings {
   id?: string;
   site_name: string;
   site_description: string;
   contact_email: string;
+  support_email: string;
+  contact_phone: string;
+  contact_address: string;
   maintenance_mode: boolean;
   allow_registration: boolean;
   enable_notifications: boolean;
@@ -38,6 +41,9 @@ const defaultSettings: SiteSettings = {
   site_name: 'Kebele Zero',
   site_description: 'Empowering Ethiopian communities through culture, commerce, and connection',
   contact_email: 'contact@kebelezero.com',
+  support_email: 'support@kebelezero.com',
+  contact_phone: '+251 123 456 789',
+  contact_address: 'Addis Ababa, Ethiopia',
   maintenance_mode: false,
   allow_registration: true,
   enable_notifications: true,
@@ -61,15 +67,8 @@ const AdminSettings = () => {
   const fetchSettings = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('site_settings')
-        .select('*')
-        .limit(1)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching settings:', error);
-      } else if (data) {
+      const data = await settingsAPI.getSettings();
+      if (data) {
         setSettings({ ...defaultSettings, ...data });
       }
     } catch (error) {
@@ -83,16 +82,7 @@ const AdminSettings = () => {
     setSaving(true);
     setMessage(null);
     try {
-      const { error } = await supabase
-        .from('site_settings')
-        .upsert([{
-          ...settings,
-          updated_at: new Date().toISOString()
-        }])
-        .select();
-
-      if (error) throw error;
-
+      await settingsAPI.saveSettings(settings);
       setMessage({ type: 'success', text: 'Settings saved successfully!' });
       setTimeout(() => setMessage(null), 3000);
     } catch (error) {
@@ -450,7 +440,8 @@ const AdminSettings = () => {
                     <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Support Email</label>
                     <input
                       type="email"
-                      defaultValue="support@kebelezero.com"
+                      value={settings.support_email}
+                      onChange={(e) => handleInputChange('support_email', e.target.value)}
                       className="retro-input"
                       placeholder="support@example.com"
                     />
@@ -459,7 +450,8 @@ const AdminSettings = () => {
                     <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Phone Number</label>
                     <input
                       type="tel"
-                      defaultValue="+251 123 456 789"
+                      value={settings.contact_phone}
+                      onChange={(e) => handleInputChange('contact_phone', e.target.value)}
                       className="retro-input"
                       placeholder="+251 123 456 789"
                     />
@@ -468,7 +460,8 @@ const AdminSettings = () => {
                     <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Address</label>
                     <input
                       type="text"
-                      defaultValue="Addis Ababa, Ethiopia"
+                      value={settings.contact_address}
+                      onChange={(e) => handleInputChange('contact_address', e.target.value)}
                       className="retro-input"
                       placeholder="Enter address"
                     />

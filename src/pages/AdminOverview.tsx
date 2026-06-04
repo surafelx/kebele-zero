@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Calendar, ShoppingBag, Radio, Image, BarChart3, MessageSquare, Trophy, CreditCard } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { adminAPI } from '../services/admin';
 import { useAuth } from '../contexts/AuthContext';
 
 const AdminOverview = () => {
@@ -29,84 +29,17 @@ const AdminOverview = () => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      // Fetch users
-      const { data: usersData, error: usersError } = await supabase
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!usersError) {
-        setUsers(usersData || []);
-      }
-
-      // Fetch events
-      const { data: eventsData, error: eventsError } = await supabase
-        .from('events')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!eventsError) {
-        setEvents(eventsData || []);
-      }
-
-      // Fetch videos
-      const { data: videosData, error: videosError } = await supabase
-        .from('videos')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!videosError) {
-        setVideos(videosData || []);
-      }
-
-      // Fetch radio tracks
-      const { data: radioData, error: radioError } = await supabase
-        .from('radio')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!radioError) {
-        setRadioTracks(radioData || []);
-      }
-
-      // Fetch transactions
-      const { data: transactionsData, error: transactionsError } = await supabase
-        .from('transactions')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!transactionsError) {
-        setTransactions(transactionsData || []);
-      }
-
-      // Fetch forum posts
-      const { data: postsData, error: postsError } = await supabase
-        .from('forum_posts')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!postsError) {
-        setForumPosts(postsData || []);
-      }
-
-      // Fetch game scores
-      const { data: scoresData, error: scoresError } = await supabase
-        .from('game_scores')
-        .select('*')
-        .order('played_at', { ascending: false });
-
-      if (!scoresError) {
-        setGameScores(scoresData || []);
-      }
-
-      // Fetch products
-      const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!productsError) {
-        setProducts(productsData || []);
+      const stats = await adminAPI.getStats();
+      // Map stats to state arrays with dummy length arrays for count display
+      if (stats) {
+        setUsers(Array(stats.totalUsers || 0).fill({}));
+        setEvents(Array(stats.totalEvents || 0).fill({}));
+        setVideos(Array(stats.totalMedia || 0).fill({}));
+        setRadioTracks(Array(stats.totalRadio || 0).fill({}));
+        setTransactions(Array(stats.totalTransactions || 0).fill({}));
+        setForumPosts(Array(stats.totalPosts || 0).fill({}));
+        setGameScores(Array(stats.totalGames || 0).fill({}));
+        setProducts(Array(stats.totalProducts || 0).fill({}));
       }
     } catch (error) {
       console.error('Error fetching data:', error);

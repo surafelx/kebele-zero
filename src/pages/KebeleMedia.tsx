@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Image, X, Calendar, Tag, Search, Upload, Plus } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { mediaAPI } from '../services/content';
+import ModalLoader from '../components/ModalLoader';
 
 interface MediaItem {
   id: string;
@@ -11,73 +12,6 @@ interface MediaItem {
   date: string;
 }
 
-// Mock media data
-const mockMedia: MediaItem[] = [
-  {
-    id: "1",
-    title: "Traditional Ethiopian Wedding",
-    description: "Beautiful celebration of love and culture in the highlands",
-    imageUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop",
-    category: "Culture",
-    date: "2024-10-15"
-  },
-  {
-    id: "2",
-    title: "Coffee Ceremony in Action",
-    description: "The ancient ritual of Ethiopian coffee preparation",
-    imageUrl: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=400&fit=crop",
-    category: "Tradition",
-    date: "2024-09-22"
-  },
-  {
-    id: "3",
-    title: "Ethiopian Orthodox Church",
-    description: "Sacred architecture and spiritual atmosphere",
-    imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop",
-    category: "Religion",
-    date: "2024-08-30"
-  },
-  {
-    id: "4",
-    title: "Market Day in Addis Ababa",
-    description: "Vibrant local markets showcasing Ethiopian craftsmanship",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop",
-    category: "Commerce",
-    date: "2024-07-18"
-  },
-  {
-    id: "5",
-    title: "Simien Mountains Landscape",
-    description: "Breathtaking natural beauty of Ethiopia's highlands",
-    imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=600&h=400&fit=crop",
-    category: "Nature",
-    date: "2024-06-12"
-  },
-  {
-    id: "6",
-    title: "Traditional Music Performance",
-    description: "Azmari musicians bringing ancient melodies to life",
-    imageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=400&fit=crop",
-    category: "Music",
-    date: "2024-05-28"
-  },
-  {
-    id: "7",
-    title: "Ethiopian Textile Art",
-    description: "Intricate patterns and vibrant colors of traditional weaving",
-    imageUrl: "https://images.unsplash.com/photo-1601762603332-db5e4b90cc5d?w=600&h=400&fit=crop",
-    category: "Art",
-    date: "2024-04-15"
-  },
-  {
-    id: "8",
-    title: "Children at Play",
-    description: "Joyful moments of Ethiopian youth in traditional settings",
-    imageUrl: "https://images.unsplash.com/photo-1524503033411-c9566986fc8d?w=600&h=400&fit=crop",
-    category: "Community",
-    date: "2024-03-20"
-  }
-];
 
 const KebeleMedia: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -93,29 +27,19 @@ const KebeleMedia: React.FC = () => {
 
   const fetchMediaItems = async () => {
     try {
-      const { data, error } = await supabase
-        .from('media')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Transform database format to component format
-      const transformedData = (data || []).map(item => ({
-        id: item.id,
+      const data = await mediaAPI.getMedia();
+      const transformedData = (data || []).map((item: any) => ({
+        id: item._id || item.id,
         title: item.title,
         description: item.description || '',
-        imageUrl: item.media_url,
+        imageUrl: item.url || item.media_url || item.imageUrl,
         category: item.category || 'General',
-        date: item.created_at
+        date: item.createdAt || item.created_at
       }));
-
       setMediaItems(transformedData);
     } catch (error) {
       console.error('Error fetching media:', error);
-      // Fallback to mock data if database fails
-      setMediaItems(mockMedia);
+      setMediaItems([]);
     } finally {
       setLoading(false);
     }
@@ -124,36 +48,7 @@ const KebeleMedia: React.FC = () => {
   const handleUpload = async (file: File, title: string, description: string, category: string) => {
     setUploading(true);
     try {
-      // Upload to Supabase Storage (assuming you have storage set up)
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `media/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('media')
-        .getPublicUrl(filePath);
-
-      // Save to database
-      const { error: dbError } = await supabase
-        .from('media')
-        .insert([{
-          title,
-          description,
-          media_url: publicUrl,
-          category,
-          media_type: 'image',
-          is_active: true
-        }]);
-
-      if (dbError) throw dbError;
-
+      await mediaAPI.uploadMedia({ title, description, category, url: '', type: 'image' });
       setShowUploadModal(false);
       fetchMediaItems(); // Refresh the list
     } catch (error) {
@@ -356,10 +251,7 @@ const KebeleMedia: React.FC = () => {
         {/* Gallery Grid - Enhanced Visual Layout */}
         <div className="mb-8">
           {loading ? (
-            <div className="retro-window retro-floating text-center p-12">
-              <div className="retro-spinner w-16 h-16 mx-auto mb-6"></div>
-              <p className="retro-text text-lg">Loading media gallery...</p>
-            </div>
+            <ModalLoader label="Loading Media..." />
           ) : filteredMedia.length === 0 ? (
             <div className="retro-window retro-floating text-center p-12">
               <div className="retro-titlebar retro-titlebar-sky mb-6">

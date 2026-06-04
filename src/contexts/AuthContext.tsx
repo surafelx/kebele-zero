@@ -1,241 +1,66 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode
-} from 'react'
-import { supabase } from '../services/supabase'
-import { pointsAPI } from '../services/points'
-
-/* ===================== TYPES ===================== */
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import api from '../services/api'
 
 interface User {
   id: string
+  _id?: string
   email: string
   username: string
-  role: 'user' | 'admin'
-  created_at?: string
-  profile?: {
-    firstName?: string
-    lastName?: string
-    bio?: string
-    avatar?: string
-  }
+  role: 'user' | 'moderator' | 'admin'
+  createdAt?: string
 }
 
 interface AuthContextType {
   user: User | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (data: {
-    username: string
-    email: string
-    password: string
-    role?: 'user' | 'admin'
-  }) => Promise<void>
+  register: (data: { username: string; email: string; password: string; role?: string }) => Promise<void>
   logout: () => Promise<void>
 }
 
-/* ===================== CONTEXT ===================== */
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export const useAuth = () => {
+export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
 }
 
-interface AuthProviderProps {
-  children: ReactNode
-}
-
-/* ===================== PROVIDER ===================== */
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  /* ========== INITIAL SESSION + LISTENER ========== */
+  // normalise _id → id
+  const normalise = (u: any): User => ({ ...u, id: u._id || u.id })
 
   useEffect(() => {
-    console.log('[Auth] Provider mounted')
-
-    let mounted = true
-
-    // onAuthStateChange fires immediately with the current session (INITIAL_SESSION),
-    // then again on SIGNED_IN / SIGNED_OUT. We handle everything here so there is
-    // no duplicate profile load and no race between getSession() and this listener.
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('[Auth] Auth state change:', event)
-
-        if (!mounted) return
-
-        if (session?.user) {
-          await loadUserProfile(session.user)
-        } else {
-          setUser(null)
-        }
-
-        if (mounted) setLoading(false)
-      }
-    )
-
-    return () => {
-      mounted = false
-      listener.subscription.unsubscribe()
-      console.log('[Auth] Provider unmounted')
-    }
+    const token = localStorage.getItem('kz_token')
+    if (!token) { setLoading(false); return }
+    api.get('/auth/me')
+      .then(r => setUser(normalise(r.data.user)))
+      .catch(() => localStorage.removeItem('kz_token'))
+      .finally(() => setLoading(false))
   }, [])
 
-  /* ===================== PROFILE LOADER ===================== */
-
-const loadUserProfile = async (authUser: any) => {
-  console.log('[Auth] Loading profile for:', authUser.id)
-
-  // Default role from metadata (used as fallback)
-  const metadataRole = authUser.user_metadata?.role === 'admin' ? 'admin' : 'user'
-
-  const profile: User = {
-    id: authUser.id,
-    email: authUser.email || '',
-    username:
-      authUser.user_metadata?.username ||
-      authUser.email?.split('@')[0] ||
-      'user',
-    role: metadataRole,
-    created_at: authUser.created_at,
-    profile: {
-      firstName: authUser.user_metadata?.firstName || '',
-      lastName: authUser.user_metadata?.lastName || '',
-      bio: authUser.user_metadata?.bio || '',
-      avatar: authUser.user_metadata?.avatar_url || ''
-    }
-  }
-
-  // Check the users table — it is the authoritative source for roles
-  try {
-    const { data: existingUser, error: userCheckError } = await supabase
-      .from('users')
-      .select('id, role, username')
-      .eq('id', authUser.id)
-      .single()
-
-    if (userCheckError && userCheckError.code === 'PGRST116') {
-      // User doesn't exist in users table, create them
-      console.log('[Auth] Creating user record in users table')
-      const { error: createError } = await supabase
-        .from('users')
-        .insert([{
-          id: authUser.id,
-          email: authUser.email,
-          username: profile.username,
-          role: profile.role,
-          is_active: true
-        }])
-
-      if (createError) {
-        console.error('[Auth] Error creating user record:', createError)
-      } else {
-        console.log('[Auth] User record created successfully')
-      }
-    } else if (existingUser) {
-      // Use role from users table (authoritative — admin can change it via AdminUsers UI)
-      profile.role = existingUser.role === 'admin' ? 'admin' : 'user'
-      if (existingUser.username) profile.username = existingUser.username
-      console.log('[Auth] Role resolved from users table:', profile.role)
-    }
-  } catch (err) {
-    console.error('[Auth] Error checking/creating user record:', err)
-  }
-
-  console.log('[Auth] Setting user from auth data')
-  setUser(profile)
-
-  // Fire & forget
-  pointsAPI.getUserPoints(authUser.id)
-    .then(() => console.log('[Auth] Points OK'))
-    .catch(() => console.warn('[Auth] Points API skipped'))
-}
-
-  /* ===================== AUTH ACTIONS ===================== */
-
   const login = async (email: string, password: string) => {
-    console.log('[Auth] Login:', email)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) throw error
+    const r = await api.post('/auth/login', { email, password })
+    localStorage.setItem('kz_token', r.data.token)
+    setUser(normalise(r.data.user))
   }
 
-  const register = async ({
-    email,
-    password,
-    username,
-    role = 'user'
-  }: {
-    username: string
-    email: string
-    password: string
-    role?: 'user' | 'admin'
-  }) => {
-    console.log('[Auth] Register:', email, 'role:', role)
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { username, role }
-      }
-    })
-
-    if (error) throw error
-
-    // If signup was successful and we have a user, create a record in the users table
-    if (data.user) {
-      try {
-        const { error: userError } = await supabase
-          .from('users')
-          .insert([{
-            id: data.user.id,
-            email: email,
-            username: username,
-            role: role,
-            is_active: true
-          }])
-
-        if (userError) {
-          console.error('[Auth] Error creating user record:', userError)
-          // Don't throw here as the auth signup succeeded
-        } else {
-          console.log('[Auth] User record created in users table')
-        }
-      } catch (err) {
-        console.error('[Auth] Failed to create user record:', err)
-      }
-    }
-
-    console.log('[Auth] Signup complete – waiting for email confirmation if enabled')
+  const register = async (data: { username: string; email: string; password: string; role?: string }) => {
+    const r = await api.post('/auth/register', data)
+    localStorage.setItem('kz_token', r.data.token)
+    setUser(normalise(r.data.user))
   }
 
   const logout = async () => {
-    console.log('[Auth] Logout')
-    await supabase.auth.signOut()
+    localStorage.removeItem('kz_token')
     setUser(null)
   }
 
-  /* ===================== PROVIDER ===================== */
-
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        login,
-        register,
-        logout
-      }}
-    >
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )

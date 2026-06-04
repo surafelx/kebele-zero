@@ -208,42 +208,42 @@ const EventForm: React.FC<{
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center space-x-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+              className="retro-btn px-3 py-2 text-sm flex items-center space-x-2"
             >
-              <Upload className="w-4 h-4 text-blue-600" />
-              <span className="text-sm text-blue-700">Upload</span>
+              <Upload className="w-4 h-4" />
+              <span>Upload</span>
             </button>
             <button
               type="button"
               onClick={handleUrlAdd}
-              className="flex items-center space-x-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+              className="retro-btn px-3 py-2 text-sm flex items-center space-x-2"
             >
-              <Link className="w-4 h-4 text-green-600" />
-              <span className="text-sm text-green-700">Add URL</span>
+              <Link className="w-4 h-4" />
+              <span>Add URL</span>
             </button>
             <button
               type="button"
               onClick={onOpenMediaLibrary}
-              className="flex items-center space-x-2 px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
+              className="retro-btn px-3 py-2 text-sm flex items-center space-x-2"
             >
-              <ImageIcon className="w-4 h-4 text-purple-600" />
-              <span className="text-sm text-purple-700">Media Library</span>
+              <ImageIcon className="w-4 h-4" />
+              <span>Media Library</span>
             </button>
           </div>
 
           {/* Drag and Drop Area */}
           <div
-            className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+            className={`border-4 border-dashed p-6 text-center transition-colors ${
               dragOver
-                ? 'border-blue-400 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
+                ? 'border-black bg-emerald-50'
+                : 'border-gray-400 hover:border-black'
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            <Upload className={`w-8 h-8 mx-auto mb-2 ${dragOver ? 'text-blue-500' : 'text-gray-400'}`} />
-            <p className="text-sm text-gray-600">
+            <Upload className={`w-8 h-8 mx-auto mb-2 ${dragOver ? 'text-emerald-600' : 'text-gray-400'}`} />
+            <p className="font-medium text-sm text-gray-600" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
               {dragOver ? 'Drop images here' : 'Drag & drop images here, or click upload above'}
             </p>
           </div>
@@ -262,7 +262,7 @@ const EventForm: React.FC<{
           {formData.images.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
               {formData.images.map((image, index) => (
-                <div key={index} className="relative group border rounded-lg overflow-hidden">
+                <div key={index} className="relative group border-2 border-black overflow-hidden">
                   <img
                     src={image.url}
                     alt={image.alt}

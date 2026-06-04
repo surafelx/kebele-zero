@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Eye, Trophy, ArrowLeft, Plus, Search, Filter, Heart, Reply, Flag } from 'lucide-react';
+import { MessageSquare, Eye, Trophy, ArrowLeft, Plus, Search, Filter, Heart, Reply, Flag, Trash2 } from 'lucide-react';
 import { forumAPI } from '../services/forum';
 import { pointsAPI } from '../services/points';
 import { useAuth } from '../contexts/AuthContext';
+import ModalLoader from '../components/ModalLoader';
 
 interface ForumPost {
   id: string;
@@ -55,91 +56,6 @@ const KebeleForum: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<ForumPost | null>(null);
   const [comments, setComments] = useState<ForumComment[]>([]);
 
-  // Mock comments data
-  const [mockComments] = useState<Record<string, ForumComment[]>>({
-    '1': [
-      {
-        id: 'c1',
-        post_id: '1',
-        content: 'Welcome! I\'m so excited to be here too. The community already feels so welcoming and supportive.',
-        created_by: 'NewMember123',
-        created_at: '2024-12-20T11:30:00Z',
-        updated_at: '2024-12-20T11:30:00Z'
-      },
-      {
-        id: 'c2',
-        post_id: '1',
-        content: 'Great to have you here! Looking forward to collaborating on some amazing projects together.',
-        created_by: 'CommunityBuilder',
-        created_at: '2024-12-20T12:15:00Z',
-        updated_at: '2024-12-20T12:15:00Z'
-      }
-    ],
-    '2': [
-      {
-        id: 'c3',
-        post_id: '2',
-        content: 'I find that controlling the center of the board early is crucial. Also, try to create multiple jump opportunities!',
-        created_by: 'StrategyMaster',
-        created_at: '2024-12-19T16:45:00Z',
-        updated_at: '2024-12-19T16:45:00Z'
-      },
-      {
-        id: 'c4',
-        post_id: '2',
-        content: 'Don\'t forget about kinging your pieces! Having kings changes the game dynamics completely.',
-        created_by: 'CheckersPro',
-        created_at: '2024-12-19T17:20:00Z',
-        updated_at: '2024-12-19T17:20:00Z'
-      }
-    ],
-    '3': [
-      {
-        id: 'c5',
-        post_id: '3',
-        content: 'Timket is absolutely magical! The colors, the music, the energy - it\'s unforgettable. Highly recommend attending if you can.',
-        created_by: 'FestivalGoer',
-        created_at: '2024-12-18T10:30:00Z',
-        updated_at: '2024-12-18T10:30:00Z'
-      }
-    ],
-    '7': [
-      {
-        id: 'c6',
-        post_id: '7',
-        content: 'English is everything in pool! Learning to control the cue ball\'s spin and path after contact is what separates good players from great ones.',
-        created_by: 'BilliardsExpert',
-        created_at: '2024-12-14T15:00:00Z',
-        updated_at: '2024-12-14T15:00:00Z'
-      },
-      {
-        id: 'c7',
-        post_id: '7',
-        content: 'For break shots, I always aim for the head ball with medium speed and a slight draw. Consistency is key!',
-        created_by: 'PoolShark',
-        created_at: '2024-12-14T16:30:00Z',
-        updated_at: '2024-12-14T16:30:00Z'
-      }
-    ],
-    '8': [
-      {
-        id: 'c8',
-        post_id: '8',
-        content: 'Pimsleur Amharic is excellent for beginners! Also check out the Amharic courses on Memrise.',
-        created_by: 'Polyglot',
-        created_at: '2024-12-13T11:45:00Z',
-        updated_at: '2024-12-13T11:45:00Z'
-      },
-      {
-        id: 'c9',
-        post_id: '8',
-        content: 'Practice with locals at coffee shops! Nothing beats real conversation practice.',
-        created_by: 'LanguageNerd',
-        created_at: '2024-12-13T12:20:00Z',
-        updated_at: '2024-12-13T12:20:00Z'
-      }
-    ]
-  });
   const [userPoints, setUserPoints] = useState<UserPoints | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -155,294 +71,47 @@ const KebeleForum: React.FC = () => {
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [upvotedPosts, setUpvotedPosts] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
   const postsPerPage = 10;
 
-  // User ID to name mapping for display
-  const getUserDisplayName = (userId: string) => {
-    // For mock data, return as-is since they already have names
-    if (typeof userId === 'string' && !userId.includes('@') && userId.length < 50) {
-      return userId; // Already a name
-    }
-    // For real user IDs, try to get user info
-    if (user && user.id === userId) {
-      return user.email?.split('@')[0] || 'You';
-    }
-    // For other users, generate a friendly name from ID
-    return `User ${userId.slice(-4)}`;
+  // User ID to short display name
+  const getUserDisplayName = (userId?: string) => {
+    if (!userId) return 'Anonymous';
+    if (user && user.id === userId) return 'You';
+    // MongoDB ObjectId: 24 hex chars
+    if (/^[0-9a-f]{24}$/i.test(userId)) return `User…${userId.slice(-6)}`;
+    // UUID: 8-4-4-4-12
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}/i.test(userId)) return userId.slice(0, 8);
+    return userId;
   };
 
-  // Mock high scores data
-  const [highScores] = useState({
-    checkers: [
-      { name: 'Player1', score: 1500, wins: 45 },
-      { name: 'Player2', score: 1420, wins: 38 },
-      { name: 'Player3', score: 1380, wins: 42 }
-    ],
-    marbles: [
-      { name: 'PlayerA', score: 2100, wins: 67 },
-      { name: 'PlayerB', score: 1950, wins: 58 },
-      { name: 'PlayerC', score: 1820, wins: 51 }
-    ]
-  });
 
-  // Mock forum posts data
-  const [mockPosts] = useState<ForumPost[]>([
-    {
-      id: '1',
-      title: 'Welcome to Kebele Zero Community!',
-      content: 'Hello everyone! I\'m excited to be part of this amazing community. Kebele Zero has brought together so many talented people from different backgrounds. Let\'s share our experiences, learn from each other, and build something amazing together. What are you most excited about in this community?',
-      category: 'general',
-      tags: ['welcome', 'community', 'introduction'],
-      is_pinned: true,
-      is_locked: false,
-      created_by: 'Admin',
-      created_at: '2024-12-20T10:00:00Z',
-      updated_at: '2024-12-20T10:00:00Z',
-      upvotes: 24,
-      likes: 18,
-      views: 156
-    },
-    {
-      id: '2',
-      title: 'Best strategies for Checkers tournament',
-      content: 'I\'ve been playing checkers for a few weeks now and I\'m really enjoying it! I\'ve noticed some players have really advanced strategies. Can anyone share their best tips for winning games? I\'m particularly interested in opening moves and endgame tactics.',
-      category: 'games',
-      tags: ['checkers', 'strategy', 'tournament'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'CheckersFan',
-      created_at: '2024-12-19T15:30:00Z',
-      updated_at: '2024-12-19T15:30:00Z',
-      upvotes: 15,
-      likes: 12,
-      views: 89
-    },
-    {
-      id: '3',
-      title: 'Upcoming Cultural Events in Addis Ababa',
-      content: 'I\'ve been researching traditional Ethiopian cultural events and festivals. There are so many amazing celebrations throughout the year! I\'m particularly interested in the Timket festival and traditional coffee ceremonies. Has anyone attended these events? What was your experience like?',
-      category: 'culture',
-      tags: ['culture', 'events', 'addis-ababa', 'tradition'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'CultureLover',
-      created_at: '2024-12-18T09:15:00Z',
-      updated_at: '2024-12-18T09:15:00Z',
-      upvotes: 31,
-      likes: 27,
-      views: 203
-    },
-    {
-      id: '4',
-      title: 'Marbles Game: Tips for beginners',
-      content: 'Just started playing marbles and I\'m finding it quite challenging! The physics and aiming seem really important. Can someone explain the best techniques for shooting marbles? Also, what are some good strategies for positioning your pieces?',
-      category: 'games',
-      tags: ['marbles', 'beginners', 'tips'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'NewPlayer',
-      created_at: '2024-12-17T14:20:00Z',
-      updated_at: '2024-12-17T14:20:00Z',
-      upvotes: 8,
-      likes: 6,
-      views: 67
-    },
-    {
-      id: '5',
-      title: 'Community Meetup Ideas',
-      content: 'I think it would be amazing to organize some community meetups! Whether it\'s virtual coffee chats, local gatherings, or collaborative projects. What kind of meetups would you be interested in? I\'m thinking about tech discussions, cultural exchanges, or even game tournaments.',
-      category: 'events',
-      tags: ['meetup', 'community', 'collaboration'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'CommunityBuilder',
-      created_at: '2024-12-16T11:45:00Z',
-      updated_at: '2024-12-16T11:45:00Z',
-      upvotes: 19,
-      likes: 15,
-      views: 134
-    },
-    {
-      id: '6',
-      title: 'Traditional Ethiopian Music Recommendations',
-      content: 'I\'m looking to expand my knowledge of Ethiopian music. I\'ve heard about azmari music and traditional instruments like the krar and masenqo. Can anyone recommend some good artists or albums to start with? Also interested in modern Ethiopian music that blends traditional and contemporary styles.',
-      category: 'culture',
-      tags: ['music', 'ethiopian', 'recommendations'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'MusicExplorer',
-      created_at: '2024-12-15T16:30:00Z',
-      updated_at: '2024-12-15T16:30:00Z',
-      upvotes: 22,
-      likes: 20,
-      views: 178
-    },
-    {
-      id: '7',
-      title: 'Pool 9-Ball: Advanced Shooting Techniques',
-      content: 'I\'ve been practicing pool for a while now and I\'m really getting into the strategy aspect. The key is definitely positioning for the next shot. Anyone have tips on english (spin) and how it affects ball trajectories? Also, what are your favorite break shots?',
-      category: 'games',
-      tags: ['pool', '9-ball', 'advanced', 'technique'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'PoolMaster',
-      created_at: '2024-12-14T13:45:00Z',
-      updated_at: '2024-12-14T13:45:00Z',
-      upvotes: 28,
-      likes: 24,
-      views: 145
-    },
-    {
-      id: '8',
-      title: 'Learning Amharic: Resources and Tips',
-      content: 'I\'ve decided to learn Amharic to better connect with the local community. Does anyone have recommendations for good learning resources? I\'ve tried some apps but I\'m looking for more comprehensive courses. Also, any tips for practicing conversation skills?',
-      category: 'culture',
-      tags: ['amharic', 'language', 'learning', 'resources'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'LanguageLearner',
-      created_at: '2024-12-13T10:20:00Z',
-      updated_at: '2024-12-13T10:20:00Z',
-      upvotes: 35,
-      likes: 29,
-      views: 267
-    },
-    {
-      id: '9',
-      title: 'Virtual Game Night - This Friday!',
-      content: 'Hey everyone! Let\'s organize a virtual game night this Friday evening. We can play checkers, marbles, or pool tournaments. I\'ll set up a voice chat room. Who\'s interested? What games would you like to play? Let\'s make it fun!',
-      category: 'events',
-      tags: ['virtual', 'game-night', 'tournament', 'social'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'GameNightHost',
-      created_at: '2024-12-12T18:15:00Z',
-      updated_at: '2024-12-12T18:15:00Z',
-      upvotes: 42,
-      likes: 38,
-      views: 189
-    },
-    {
-      id: '10',
-      title: 'Ethiopian Coffee Culture: A Deep Dive',
-      content: 'Ethiopian coffee culture is so rich and fascinating! From the traditional jebena brewing to the social aspects of coffee ceremonies. I\'d love to hear about everyone\'s favorite coffee experiences. What are your go-to brewing methods? Any special coffee traditions in your family?',
-      category: 'culture',
-      tags: ['coffee', 'tradition', 'culture', 'brewing'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'CoffeeEnthusiast',
-      created_at: '2024-12-11T08:30:00Z',
-      updated_at: '2024-12-11T08:30:00Z',
-      upvotes: 51,
-      likes: 45,
-      views: 312
-    },
-    {
-      id: '11',
-      title: 'Technical Support: Game Loading Issues',
-      content: 'Hi everyone, I\'m having trouble loading the games on my browser. The 3D environment loads fine but when I try to start a game, it just shows a loading spinner forever. I\'ve tried Chrome, Firefox, and Safari. Any suggestions for troubleshooting?',
-      category: 'help',
-      tags: ['technical', 'support', 'games', 'loading', 'browser'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'TechSupportNeeded',
-      created_at: '2024-12-10T16:45:00Z',
-      updated_at: '2024-12-10T16:45:00Z',
-      upvotes: 5,
-      likes: 3,
-      views: 78
-    },
-    {
-      id: '12',
-      title: 'Community Art Showcase',
-      content: 'I\'ve been working on some digital art inspired by Ethiopian patterns and colors. I\'d love to share my work and see what everyone else is creating! Whether it\'s traditional art, modern interpretations, or completely original pieces. Let\'s create a virtual art gallery!',
-      category: 'culture',
-      tags: ['art', 'showcase', 'digital', 'creative', 'gallery'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'DigitalArtist',
-      created_at: '2024-12-09T12:00:00Z',
-      updated_at: '2024-12-09T12:00:00Z',
-      upvotes: 33,
-      likes: 28,
-      views: 156
-    },
-    {
-      id: '13',
-      title: 'Weekly Checkers Championship Results',
-      content: 'Great games everyone! This week\'s championship had some intense matches. Congratulations to all our winners! Here are the final standings. Next week we\'ll have a special tournament with different rules. Who\'s ready for round 2?',
-      category: 'games',
-      tags: ['checkers', 'championship', 'results', 'tournament'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'TournamentAdmin',
-      created_at: '2024-12-08T20:30:00Z',
-      updated_at: '2024-12-08T20:30:00Z',
-      upvotes: 16,
-      likes: 14,
-      views: 98
-    },
-    {
-      id: '14',
-      title: 'Local Artisan Marketplace',
-      content: 'I\'ve discovered some amazing local artisans in Addis Ababa who create beautiful handcrafted items. From traditional woven baskets to modern jewelry with Ethiopian motifs. Has anyone found good places to buy authentic local crafts? I\'d love recommendations!',
-      category: 'culture',
-      tags: ['artisan', 'marketplace', 'local', 'crafts', 'shopping'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'CraftHunter',
-      created_at: '2024-12-07T14:10:00Z',
-      updated_at: '2024-12-07T14:10:00Z',
-      upvotes: 27,
-      likes: 22,
-      views: 134
-    },
-    {
-      id: '15',
-      title: 'New Feature Request: Dark Mode',
-      content: 'I\'ve been using the platform a lot lately and I think a dark mode would be amazing! Especially for late-night gaming sessions. What do you all think? Should we petition the admins for this feature? Any other UI improvements you\'d like to see?',
-      category: 'general',
-      tags: ['feature-request', 'dark-mode', 'ui', 'improvements'],
-      is_pinned: false,
-      is_locked: false,
-      created_by: 'NightOwl',
-      created_at: '2024-12-06T22:45:00Z',
-      updated_at: '2024-12-06T22:45:00Z',
-      upvotes: 38,
-      likes: 31,
-      views: 203
-    }
-  ]);
+  // Re-fetch when category or page changes
+  useEffect(() => {
+    fetchPosts();
+  }, [selectedCategory, currentPage]);
 
   useEffect(() => {
-    // Allow demo access - fetch data even without authentication
-    fetchPosts();
     fetchCategories();
-    if (user) {
-      fetchUserPoints();
-    }
+    if (user) fetchUserPoints();
   }, [user]);
 
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      const data = await forumAPI.getPosts(selectedCategory || undefined);
-      // If no real posts, use mock data
-      if (data.length === 0) {
-        const filteredMockPosts = selectedCategory
-          ? mockPosts.filter(post => post.category === selectedCategory)
-          : mockPosts;
-        setPosts(filteredMockPosts);
+      const result = await forumAPI.getPosts(selectedCategory || undefined, currentPage, postsPerPage);
+      // Backend returns { posts, total, page } or a plain array
+      if (result && typeof result === 'object' && 'posts' in result) {
+        setPosts(result.posts || []);
+        setTotalPosts(result.total || 0);
       } else {
-        setPosts(data);
+        setPosts(Array.isArray(result) ? result : []);
+        setTotalPosts(Array.isArray(result) ? result.length : 0);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
-      // Fallback to mock data on error
-      const filteredMockPosts = selectedCategory
-        ? mockPosts.filter(post => post.category === selectedCategory)
-        : mockPosts;
-      setPosts(filteredMockPosts);
+      setPosts([]);
+      setTotalPosts(0);
     } finally {
       setLoading(false);
     }
@@ -451,7 +120,9 @@ const KebeleForum: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const data = await forumAPI.getCategories();
-      setCategories(data);
+      // API may return objects {name, slug} or plain strings
+      const names = data.map((c: any) => (typeof c === 'string' ? c : c.name || c.slug));
+      setCategories(names.filter(Boolean));
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -470,18 +141,10 @@ const KebeleForum: React.FC = () => {
   const fetchComments = async (postId: string) => {
     try {
       const data = await forumAPI.getComments(postId);
-      // If no real comments, use mock data
-      if (data.length === 0) {
-        const mockData = mockComments[postId] || [];
-        setComments(mockData);
-      } else {
-        setComments(data);
-      }
+      setComments(data);
     } catch (error) {
       console.error('Error fetching comments:', error);
-      // Fallback to mock data on error
-      const mockData = mockComments[postId] || [];
-      setComments(mockData);
+      setComments([]);
     }
   };
 
@@ -501,25 +164,13 @@ const KebeleForum: React.FC = () => {
 
     try {
       await forumAPI.createPost(postData);
+      setNewPost({ title: '', content: '', category: 'general' });
+      setShowCreateForm(false);
+      fetchPosts();
     } catch (error) {
       console.error('Error creating post:', error);
-      // Add to mock data if API fails
-      const newPostWithId = {
-        ...postData,
-        id: Date.now().toString(),
-        created_by: user.email || 'Anonymous',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        upvotes: 0,
-        likes: 0,
-        views: 0
-      };
-      mockPosts.unshift(newPostWithId);
+      alert('Failed to create post. Please try again.');
     }
-
-    setNewPost({ title: '', content: '', category: 'general' });
-    setShowCreateForm(false);
-    fetchPosts();
   };
 
   const handleCreateComment = async (e: React.FormEvent) => {
@@ -531,10 +182,7 @@ const KebeleForum: React.FC = () => {
     if (!selectedPost || !newComment.trim()) return;
 
     try {
-      await forumAPI.createComment({
-        post_id: selectedPost.id,
-        content: newComment
-      });
+      await forumAPI.createComment(selectedPost.id, newComment);
       setNewComment('');
       fetchComments(selectedPost.id);
     } catch (error) {
@@ -584,20 +232,35 @@ const KebeleForum: React.FC = () => {
     });
   };
 
+  const handleDeletePost = async (postId: string) => {
+    if (!window.confirm('Are you sure you want to delete this post?')) return;
+    try {
+      await forumAPI.deletePost(postId);
+      setSelectedPost(null);
+      setActiveTab('posts');
+      fetchPosts();
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      alert('Failed to delete post. Please try again.');
+    }
+  };
+
+  // Client-side search filter on the already server-fetched page
   const filteredPosts = posts.filter(post =>
+    !searchQuery ||
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     post.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  const totalPages = Math.ceil(totalPosts / postsPerPage);
   const startIndex = (currentPage - 1) * postsPerPage;
-  const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
+  // Posts are already paginated by the server; just render them
+  const paginatedPosts = filteredPosts;
 
-  // Reset to page 1 when search or filter changes
+  // Reset to page 1 on search change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery]);
 
   const renderPostsList = () => (
     <div className="space-y-6">
@@ -618,15 +281,16 @@ const KebeleForum: React.FC = () => {
         <div className="sm:w-48">
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
             className="retro-input w-full px-4 py-3 text-base"
           >
             <option value="">All Categories</option>
-            <option value="general">General</option>
-            <option value="games">Games</option>
-            <option value="culture">Culture</option>
-            <option value="events">Events</option>
-            <option value="help">Help</option>
+            {(categories.length > 0
+              ? categories
+              : ['general', 'games', 'culture', 'events', 'help']
+            ).map(cat => (
+              <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+            ))}
           </select>
         </div>
         <div className="sm:w-auto flex items-center">
@@ -648,12 +312,7 @@ const KebeleForum: React.FC = () => {
 
       {/* Posts List */}
       {loading ? (
-        <div className="text-center py-20">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-blue-600"></div>
-          </div>
-          <p className="text-gray-600 text-xl font-medium">Loading discussions...</p>
-        </div>
+        <ModalLoader label="Loading Discussions..." />
       ) : paginatedPosts.length === 0 ? (
         <div className="text-center py-20">
           <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
@@ -704,7 +363,7 @@ const KebeleForum: React.FC = () => {
                       )}
                     </div>
                     <div className="flex items-center space-x-1 text-xs text-gray-700 font-medium">
-                      <span>💬{comments.filter(c => c.post_id === post.id).length}</span>
+                      <span>💬{(post as any).commentCount ?? (post as any).comment_count ?? 0}</span>
                       <span>❤️{post.likes || 0}</span>
                       <span>👁️{post.views || 0}</span>
                     </div>
@@ -722,7 +381,7 @@ const KebeleForum: React.FC = () => {
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
                         <span className="text-xs font-bold text-gray-700">
-                          {post.created_by.charAt(0).toUpperCase()}
+                          {(post.created_by || '?').charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div>
@@ -817,6 +476,16 @@ const KebeleForum: React.FC = () => {
           Back
         </button>
 
+        {user && (selectedPost.created_by === user.id || (user as any).role === 'admin') && (
+          <button
+            onClick={() => handleDeletePost(selectedPost.id)}
+            className="retro-btn text-xs py-2 px-3 font-bold uppercase mb-4 ml-2 bg-red-500 border-red-700 hover:bg-red-600 text-white"
+          >
+            <Trash2 className="w-4 h-4 mr-1 inline" />
+            Delete
+          </button>
+        )}
+
         {/* Post Content - Cleaner and more compact */}
         <div className="retro-window">
           <div className="retro-titlebar retro-titlebar-blue p-3">
@@ -831,7 +500,7 @@ const KebeleForum: React.FC = () => {
                 )}
               </div>
               <div className="flex items-center space-x-2 text-xs text-gray-700 font-medium">
-                <span className="flex items-center space-x-1"><MessageSquare className="w-3 h-3" /><span>{comments.filter(c => c.post_id === selectedPost.id).length}</span></span>
+                <span className="flex items-center space-x-1"><MessageSquare className="w-3 h-3" /><span>{comments.length}</span></span>
                 <span className="flex items-center space-x-1"><Heart className="w-3 h-3" /><span>{selectedPost.likes || 0}</span></span>
                 <span className="flex items-center space-x-1"><Eye className="w-3 h-3" /><span>{selectedPost.views || 0}</span></span>
               </div>
@@ -845,7 +514,7 @@ const KebeleForum: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
                   <span className="text-xs font-bold text-gray-700">
-                    {selectedPost.created_by.charAt(0).toUpperCase()}
+                    {(selectedPost.created_by || '?').charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
@@ -897,7 +566,7 @@ const KebeleForum: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <div className="w-5 h-5 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
                         <span className="text-xs font-bold text-gray-600">
-                          {comment.created_by.charAt(0).toUpperCase()}
+                          {(comment.created_by || '?').charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <span className="font-medium retro-text">{getUserDisplayName(comment.created_by)}</span>
@@ -1101,28 +770,28 @@ const KebeleForum: React.FC = () => {
               </div>
               <div className="p-2 space-y-2">
                 <button
-                  onClick={() => setSelectedCategory('')}
+                  onClick={() => { setSelectedCategory(''); setCurrentPage(1); }}
                   className="w-full retro-btn py-2 px-3 font-bold text-xs uppercase flex items-center justify-center space-x-2"
                 >
                   <span>📋</span>
                   <span>All Posts</span>
                 </button>
                 <button
-                  onClick={() => setSelectedCategory('games')}
+                  onClick={() => { setSelectedCategory('games'); setCurrentPage(1); }}
                   className="w-full retro-btn py-2 px-3 font-bold text-xs uppercase flex items-center justify-center space-x-2"
                 >
                   <span>🎮</span>
                   <span>Games</span>
                 </button>
                 <button
-                  onClick={() => setSelectedCategory('culture')}
+                  onClick={() => { setSelectedCategory('culture'); setCurrentPage(1); }}
                   className="w-full retro-btn py-2 px-3 font-bold text-xs uppercase flex items-center justify-center space-x-2"
                 >
                   <span>🎨</span>
                   <span>Culture</span>
                 </button>
                 <button
-                  onClick={() => setSelectedCategory('events')}
+                  onClick={() => { setSelectedCategory('events'); setCurrentPage(1); }}
                   className="w-full retro-btn py-2 px-3 font-bold text-xs uppercase flex items-center justify-center space-x-2"
                 >
                   <span>📅</span>

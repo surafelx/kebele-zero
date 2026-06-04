@@ -180,12 +180,6 @@ export default class
             this.startingScreen.area.in(true)
         }
 
-        // Auto-interact after 3 seconds
-        setTimeout(() =>
-        {
-            this.startingScreen.area.interact()
-        }, 5000)
-
         // On interact, reveal
         this.startingScreen.area.on('interact', () =>
         {

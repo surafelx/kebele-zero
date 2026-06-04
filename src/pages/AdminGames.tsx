@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Plus, Search, Filter, Gamepad2, Users, Target, Award, BarChart3, History, Settings, Edit, Trash2, Save, ChevronLeft, ChevronRight, X, Edit3 } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { pointsAPI } from '../services/points';
+import api from '../services/api';
 import Modal from '../components/Modal';
 
 interface Level {
@@ -55,28 +56,16 @@ const AdminGames = () => {
   const fetchGameData = async () => {
     setLoading(true);
     try {
-      const { data: scoresData, error: scoresError } = await supabase
-        .from('game_scores')
-        .select('*')
-        .order('played_at', { ascending: false });
-      if (!scoresError) setGameScores(scoresData || []);
-
-      const { data: pointsData, error: pointsError } = await supabase
-        .from('user_points')
-        .select('*')
-        .order('total_points', { ascending: false });
-      if (!pointsError) setUserPoints(pointsData || []);
-
-      const { data: levelsData, error: levelsError } = await supabase
-        .from('user_levels')
-        .select('*')
-        .order('min_points', { ascending: true });
-      if (!levelsError) setUserLevels(levelsData || []);
-
-      const { data: usersData, error: usersError } = await supabase.from('users').select('*');
-      if (!usersError) setUsers(usersData || []);
+      const [leaderboardData, scoresRes] = await Promise.all([
+        pointsAPI.getLeaderboard(),
+        api.get('/points/leaderboard').catch(() => ({ data: [] }))
+      ]);
+      setUserPoints(leaderboardData || []);
+      setGameScores(scoresRes.data || []);
     } catch (error) {
       console.error('Error fetching game data:', error);
+      setUserPoints([]);
+      setGameScores([]);
     } finally {
       setLoading(false);
     }
@@ -85,14 +74,9 @@ const AdminGames = () => {
   const handleUpdateUserPoints = async () => {
     if (!editingPoints) return;
     try {
-      const { data, error } = await supabase
-        .from('user_points')
-        .update({ ...pointsFormData, updated_at: new Date().toISOString() })
-        .eq('id', editingPoints.id)
-        .select();
-      if (error) throw error;
-      setUserPoints(userPoints.map(p => p.id === editingPoints.id ? data[0] : p));
+      await api.put('/points/game', { ...pointsFormData });
       setEditingPoints(null);
+      fetchGameData();
     } catch (error) {
       console.error('Error updating user points:', error);
       alert('Error updating user points');
@@ -101,12 +85,7 @@ const AdminGames = () => {
 
   const handleCreateGameScore = async () => {
     try {
-      const { data, error } = await supabase
-        .from('game_scores')
-        .insert([gameScoreFormData])
-        .select();
-      if (error) throw error;
-      setGameScores([...gameScores, data[0]]);
+      await api.post('/points/game', gameScoreFormData);
       setShowGameScoreForm(false);
       fetchGameData();
     } catch (error) {
@@ -116,46 +95,16 @@ const AdminGames = () => {
   };
 
   const handleCreateLevel = async () => {
-    try {
-      const { data, error } = await supabase.from('user_levels').insert([newLevel]).select();
-      if (error) throw error;
-      setUserLevels([...userLevels, data[0]]);
-      setNewLevel({ level_name: '', min_points: 0, max_points: null, color: '#007bff', icon: '⭐' });
-      fetchGameData();
-    } catch (error) {
-      console.error('Error creating level:', error);
-      alert('Error creating level');
-    }
+    // User levels not supported in Express backend — show info
+    alert('Level management is not available in the current backend');
   };
 
   const handleUpdateLevel = async () => {
-    try {
-      if (!editingLevel || !editingLevel.id) return;
-      const { data, error } = await supabase
-        .from('user_levels')
-        .update(editingLevel)
-        .eq('id', editingLevel.id)
-        .select();
-      if (error) throw error;
-      setUserLevels(userLevels.map(level => level.id === editingLevel.id ? data[0] : level));
-      setEditingLevel(null);
-      fetchGameData();
-    } catch (error) {
-      console.error('Error updating level:', error);
-      alert('Error updating level');
-    }
+    alert('Level management is not available in the current backend');
   };
 
-  const handleDeleteLevel = async (levelId: string) => {
-    try {
-      const { error } = await supabase.from('user_levels').delete().eq('id', levelId);
-      if (error) throw error;
-      setUserLevels(userLevels.filter(level => level.id !== levelId));
-      fetchGameData();
-    } catch (error) {
-      console.error('Error deleting level:', error);
-      alert('Error deleting level');
-    }
+  const handleDeleteLevel = async (_levelId: string) => {
+    alert('Level management is not available in the current backend');
   };
 
   const totalGames = gameScores.length;

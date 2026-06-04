@@ -199,7 +199,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onClose, on
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold uppercase tracking-wide transition-colors border-2 border-gray-300"
+            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold uppercase tracking-wide transition-colors border-2 border-black active:translate-y-0.5"
           >
             Cancel
           </button>

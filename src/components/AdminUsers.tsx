@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Users, CheckCircle, Shield, Trophy, MessageSquare, Gamepad2, Plus, Search, Filter, X, Mail, User as UserIcon, Edit, Trash2 } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { adminAPI } from '../services/admin';
+import api from '../services/api';
 
 const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
-  const [userPoints, setUserPoints] = useState<any[]>([]);
-  const [forumPosts, setForumPosts] = useState<any[]>([]);
-  const [gameScores, setGameScores] = useState<any[]>([]);
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [userFilterStatus, setUserFilterStatus] = useState('');
   const [showUserForm, setShowUserForm] = useState(false);
@@ -15,31 +13,19 @@ const AdminUsers: React.FC = () => {
     email: '',
     username: '',
     role: 'user',
-    is_active: true
+    is_active: true,
+    password: ''
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [
-          usersRes,
-          userPointsRes,
-          forumPostsRes,
-          gameScoresRes
-        ] = await Promise.all([
-          supabase.from('users').select('*'),
-          supabase.from('user_points').select('*'),
-          supabase.from('forum_posts').select('*'),
-          supabase.from('game_scores').select('*')
-        ]);
-
-        setUsers(usersRes.data || []);
-        setUserPoints(userPointsRes.data || []);
-        setForumPosts(forumPostsRes.data || []);
-        setGameScores(gameScoresRes.data || []);
+        const data = await adminAPI.getUsers();
+        setUsers(data || []);
       } catch (error) {
         console.error('Error fetching data:', error);
+        setUsers([]);
       } finally {
         setLoading(false);
       }
@@ -56,16 +42,17 @@ const AdminUsers: React.FC = () => {
       (userFilterStatus === 'active' && user.is_active) ||
       (userFilterStatus === 'inactive' && !user.is_active) ||
       (userFilterStatus === 'admin' && user.role === 'admin') ||
+      (userFilterStatus === 'moderator' && user.role === 'moderator') ||
       (userFilterStatus === 'user' && user.role === 'user');
     return matchesSearch && matchesFilter;
   });
 
   const totalUsers = users.length;
-  const activeUsers = users.filter(u => u.is_active).length;
+  const activeUsers = users.filter(u => u.isActive !== false).length;
   const adminUsers = users.filter(u => u.role === 'admin').length;
-  const totalPoints = userPoints.reduce((sum, p) => sum + (p.total_points || 0), 0);
-  const totalPosts = forumPosts.length;
-  const totalGames = gameScores.length;
+  const totalPoints = 0;
+  const totalPosts = 0;
+  const totalGames = 0;
 
   return (
     <div className="space-y-6">
@@ -82,7 +69,7 @@ const AdminUsers: React.FC = () => {
             </div>
           </div>
           <button
-            onClick={() => { setShowUserForm(true); setEditingUser(null); setUserFormData({ email: '', username: '', role: 'user', is_active: true }); }}
+            onClick={() => { setShowUserForm(true); setEditingUser(null); setUserFormData({ email: '', username: '', role: 'user', is_active: true, password: '' }); }}
             className="retro-btn px-4 py-2 bg-white text-black"
           >
             <Plus className="w-4 h-4 inline mr-2" />
@@ -182,23 +169,25 @@ const AdminUsers: React.FC = () => {
                 e.preventDefault();
                 try {
                   if (editingUser) {
-                    const { error } = await supabase
-                      .from('users')
-                      .update(userFormData)
-                      .eq('id', editingUser.id);
-                    if (error) throw error;
-                    setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...userFormData } : u));
+                    const { password, ...updatePayload } = userFormData;
+                    await api.put(`/admin/users/${editingUser._id || editingUser.id}`, updatePayload);
+                    setUsers(users.map(u => (u._id || u.id) === (editingUser._id || editingUser.id) ? { ...u, ...updatePayload } : u));
                   } else {
-                    const { data, error } = await supabase
-                      .from('users')
-                      .insert([userFormData])
-                      .select();
-                    if (error) throw error;
-                    setUsers([...users, data[0]]);
+                    const regRes = await api.post('/auth/register', {
+                      username: userFormData.username,
+                      email: userFormData.email,
+                      password: userFormData.password,
+                    });
+                    const newUserId = regRes.data?.user?._id || regRes.data?.user?.id;
+                    if (newUserId && userFormData.role !== 'user') {
+                      await adminAPI.updateUserRole(newUserId, userFormData.role as 'user' | 'moderator' | 'admin');
+                    }
+                    const refreshed = await adminAPI.getUsers();
+                    setUsers(refreshed || []);
                   }
                   setShowUserForm(false);
                   setEditingUser(null);
-                  setUserFormData({ email: '', username: '', role: 'user', is_active: true });
+                  setUserFormData({ email: '', username: '', role: 'user', is_active: true, password: '' });
                 } catch (error) {
                   console.error('Error saving user:', error);
                   alert('Error saving user');
@@ -226,6 +215,20 @@ const AdminUsers: React.FC = () => {
                     placeholder="username"
                   />
                 </div>
+                {!editingUser && (
+                  <div className="space-y-2">
+                    <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Password</label>
+                    <input
+                      type="password"
+                      required
+                      value={userFormData.password}
+                      onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
+                      className="retro-input w-full"
+                      placeholder="Min 6 characters"
+                      minLength={6}
+                    />
+                  </div>
+                )}
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Role</label>
                   <select
@@ -233,9 +236,29 @@ const AdminUsers: React.FC = () => {
                     onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
                     className="retro-input w-full"
                   >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
+                    <option value="user">User — browse, post, submit payment requests</option>
+                    <option value="moderator">Moderator — + approve/reject payment requests, manage forum</option>
+                    <option value="admin">Admin — full access including users & settings</option>
                   </select>
+                  {/* Permission matrix preview */}
+                  <div className="mt-2 p-3 bg-gray-50 border-2 border-black text-xs space-y-1">
+                    {[
+                      { perm: 'Browse & post content',           roles: ['user','moderator','admin'] },
+                      { perm: 'Submit payment requests',         roles: ['user','moderator','admin'] },
+                      { perm: 'Approve / reject payment reqs',   roles: ['moderator','admin'] },
+                      { perm: 'Manage events, products, radio',  roles: ['admin'] },
+                      { perm: 'Manage users & roles',            roles: ['admin'] },
+                      { perm: 'Site settings',                   roles: ['admin'] },
+                    ].map(({ perm, roles }) => {
+                      const has = roles.includes(userFormData.role);
+                      return (
+                        <div key={perm} className="flex items-center justify-between">
+                          <span style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }} className="text-gray-600">{perm}</span>
+                          <span className={`font-bold ${has ? 'text-emerald-600' : 'text-gray-300'}`}>{has ? '✓' : '–'}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
@@ -253,7 +276,7 @@ const AdminUsers: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setShowUserForm(false); setEditingUser(null); setUserFormData({ email: '', username: '', role: 'user', is_active: true }); }}
+                    onClick={() => { setShowUserForm(false); setEditingUser(null); setUserFormData({ email: '', username: '', role: 'user', is_active: true, password: '' }); }}
                     className="flex-1 retro-btn bg-gray-400 border-gray-500"
                   >
                     Cancel
@@ -296,6 +319,7 @@ const AdminUsers: React.FC = () => {
                 <option value="active">Active Users</option>
                 <option value="inactive">Inactive Users</option>
                 <option value="admin">Admins</option>
+                <option value="moderator">Moderators</option>
                 <option value="user">Regular Users</option>
               </select>
             </div>
@@ -337,9 +361,6 @@ const AdminUsers: React.FC = () => {
               </thead>
               <tbody>
                 {filteredUsers.map((user) => {
-                  const userStats = userPoints.find(p => p.user_id === user.id);
-                  const userPostsCount = forumPosts.filter(p => p.created_by === user.id).length;
-                  const userGamesCount = gameScores.filter(g => g.user_id === user.id).length;
                   return (
                     <tr key={user.id} className="border-b-2 border-black hover:bg-gray-50">
                       <td className="p-4">
@@ -360,32 +381,28 @@ const AdminUsers: React.FC = () => {
                           value={user.role || 'user'}
                           onChange={async (e) => {
                             try {
-                              const { error } = await supabase
-                                .from('users')
-                                .update({ role: e.target.value })
-                                .eq('id', user.id);
-                              if (error) throw error;
-                              setUsers(users.map(u => u.id === user.id ? { ...u, role: e.target.value } : u));
-                              alert('User role updated!');
+                              await adminAPI.updateUserRole(user._id || user.id, e.target.value as 'user' | 'moderator' | 'admin');
+                              setUsers(users.map(u => (u._id || u.id) === (user._id || user.id) ? { ...u, role: e.target.value } : u));
                             } catch (error) {
                               console.error('Error updating user role:', error);
                               alert('Error updating user role');
                             }
                           }}
-                          className="retro-input w-32 py-2"
+                          className="retro-input w-40 py-2"
                         >
                           <option value="user">User</option>
+                          <option value="moderator">Moderator</option>
                           <option value="admin">Admin</option>
                         </select>
                       </td>
                       <td className="p-4">
-                        <span className="font-black text-gray-900 retro-title text-lg">{userStats?.total_points || 0}</span>
+                        <span className="font-black text-gray-900 retro-title text-lg">{user.totalPoints || 0}</span>
                       </td>
                       <td className="p-4">
-                        <span className="font-black text-gray-900 retro-title text-lg">{userPostsCount}</span>
+                        <span className="font-black text-gray-900 retro-title text-lg">—</span>
                       </td>
                       <td className="p-4">
-                        <span className="font-black text-gray-900 retro-title text-lg">{userGamesCount}</span>
+                        <span className="font-black text-gray-900 retro-title text-lg">—</span>
                       </td>
                       <td className="p-4">
                         <span className="retro-text text-sm">{new Date(user.created_at).toLocaleDateString()}</span>
@@ -399,7 +416,8 @@ const AdminUsers: React.FC = () => {
                                 email: user.email || '',
                                 username: user.username || '',
                                 role: user.role || 'user',
-                                is_active: user.is_active || true
+                                is_active: user.is_active || true,
+                                password: ''
                               });
                               setShowUserForm(true);
                             }}
@@ -410,18 +428,13 @@ const AdminUsers: React.FC = () => {
                           </button>
                           <button
                             onClick={async () => {
-                              if (!confirm('Deactivate this user?')) return;
+                              if (!confirm('Delete this user?')) return;
                               try {
-                                const { error } = await supabase
-                                  .from('users')
-                                  .update({ is_active: false })
-                                  .eq('id', user.id);
-                                if (error) throw error;
-                                setUsers(users.map(u => u.id === user.id ? { ...u, is_active: false } : u));
-                                alert('User deactivated!');
+                                await adminAPI.deleteUser(user._id || user.id);
+                                setUsers(users.filter(u => (u._id || u.id) !== (user._id || user.id)));
                               } catch (error) {
-                                console.error('Error deactivating user:', error);
-                                alert('Error deactivating user');
+                                console.error('Error deleting user:', error);
+                                alert('Error deleting user');
                               }
                             }}
                             className="p-2 bg-white border-2 border-black rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"

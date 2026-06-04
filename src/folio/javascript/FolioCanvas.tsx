@@ -73,9 +73,9 @@ export default function FolioCanvas() {
   return (
     <div className="relative w-screen h-screen">
       <Canvas
+        frameloop="never"
         gl={{
           pixelRatio: 2,
-          physicallyCorrectLights: true,
           autoClear: false,
           outputEncoding: LinearEncoding,
           toneMapping: NoToneMapping,

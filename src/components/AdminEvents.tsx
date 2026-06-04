@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Plus, Edit3, Trash2, Search, Filter, MapPin, Clock, Users } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { eventsAPI } from '../services/content';
 import Modal from './Modal';
 import EventForm from './EventForm';
 
@@ -20,18 +20,11 @@ const AdminEvents = () => {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const { data: eventsData, error: eventsError } = await supabase
-        .from('events')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (eventsError) {
-        console.error('Error fetching events:', eventsError);
-      } else {
-        setEvents(eventsData || []);
-      }
+      const data = await eventsAPI.getEvents();
+      setEvents(data || []);
     } catch (error) {
       console.error('Error fetching events:', error);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
@@ -39,14 +32,7 @@ const AdminEvents = () => {
 
   const handleCreateEvent = async (eventData: any) => {
     try {
-      const { data, error } = await supabase
-        .from('events')
-        .insert([eventData])
-        .select();
-
-      if (error) throw error;
-
-      setEvents([...events, data[0]]);
+      await eventsAPI.createEvent(eventData);
       setShowEventForm(false);
       fetchEvents();
     } catch (error) {
@@ -59,15 +45,8 @@ const AdminEvents = () => {
     if (!confirm('Are you sure you want to delete this event?')) return;
 
     try {
-      const { error } = await supabase
-        .from('events')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setEvents(events.filter(event => event.id !== id));
-      alert('Event deleted successfully!');
+      await eventsAPI.deleteEvent(id);
+      setEvents(events.filter(event => (event._id || event.id) !== id));
     } catch (error) {
       console.error('Error deleting event:', error);
       alert('Error deleting event');

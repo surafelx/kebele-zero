@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Edit3, Trash2, Globe, Mail, Github, Linkedin, Twitter, Instagram, Youtube, Facebook, Twitch } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { socialLinksAPI } from '../services/admin';
 
 interface SocialLink {
   id: string;
@@ -49,18 +49,11 @@ const SocialLinksForm: React.FC<SocialLinksFormProps> = ({ onClose, onSave }) =>
 
   const fetchLinks = async () => {
     try {
-      const { data, error } = await supabase
-        .from('social_links')
-        .select('*')
-        .order('display_order', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching social links:', error);
-      } else if (data) {
-        setLinks(data);
-      }
+      const data = await socialLinksAPI.getLinks();
+      setLinks(data || []);
     } catch (error) {
       console.error('Error fetching social links:', error);
+      setLinks([]);
     } finally {
       setLoading(false);
     }
@@ -68,29 +61,12 @@ const SocialLinksForm: React.FC<SocialLinksFormProps> = ({ onClose, onSave }) =>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (editingId) {
-        const { error } = await supabase
-          .from('social_links')
-          .update(formData)
-          .eq('id', editingId);
-        
-        if (error) {
-          console.error('Error updating social link:', error);
-          alert('Error updating social link');
-          return;
-        }
+        await socialLinksAPI.updateLink(editingId, formData);
       } else {
-        const { error } = await supabase
-          .from('social_links')
-          .insert([formData]);
-        
-        if (error) {
-          console.error('Error creating social link:', error);
-          alert('Error creating social link');
-          return;
-        }
+        await socialLinksAPI.createLink(formData);
       }
 
       fetchLinks();
@@ -103,7 +79,7 @@ const SocialLinksForm: React.FC<SocialLinksFormProps> = ({ onClose, onSave }) =>
   };
 
   const handleEdit = (link: SocialLink) => {
-    setEditingId(link.id);
+    setEditingId((link as any)._id || link.id);
     setFormData({
       platform: link.platform,
       label: link.label,
@@ -116,19 +92,9 @@ const SocialLinksForm: React.FC<SocialLinksFormProps> = ({ onClose, onSave }) =>
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this social link?')) return;
-    
+
     try {
-      const { error } = await supabase
-        .from('social_links')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting social link:', error);
-        alert('Error deleting social link');
-        return;
-      }
-
+      await socialLinksAPI.deleteLink(id);
       fetchLinks();
       onSave();
     } catch (error) {
@@ -293,7 +259,7 @@ const SocialLinksForm: React.FC<SocialLinksFormProps> = ({ onClose, onSave }) =>
                       <Edit3 className="w-3 h-3" />
                     </button>
                     <button
-                      onClick={() => handleDelete(link.id)}
+                      onClick={() => handleDelete((link as any)._id || link.id)}
                       className="p-2 bg-white border-2 border-black hover:bg-red-100"
                     >
                       <Trash2 className="w-3 h-3 text-red-500" />

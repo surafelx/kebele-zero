@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Trophy, Users, Gamepad2, ArrowLeft, Play, Star, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Trophy, Gamepad2, Play, Star, X } from 'lucide-react';
 import { pointsAPI } from '../services/points';
 import { useAuth } from '../contexts/AuthContext';
+import ModalLoader from '../components/ModalLoader';
 
 // Extend window interface for global functions
 declare global {
@@ -12,7 +12,7 @@ declare global {
 }
 
 // Checkers Game Component
-const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' | 'computer'; user: any }> = ({ onClose, gameMode, user }) => {
+const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' | 'computer'; user: any; onScoreUpdate?: () => void }> = ({ onClose, gameMode, user, onScoreUpdate }) => {
    // Board representation: 0=empty, 1=human man, 2=human king, -1=AI man, -2=AI king
    const initialBoard = useMemo(() => {
      const board: number[][] = Array(8).fill(null).map(() => Array(8).fill(0));
@@ -56,7 +56,7 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
      for (let row = 0; row < 8; row++) {
        for (let col = 0; col < 8; col++) {
          const piece = board[row][col];
-         if (Math.abs(piece) === playerValue || Math.abs(piece) === playerValue * 2) {
+         if (piece !== 0 && piece * playerValue > 0) {
            const pieceMoves = getPieceMoves(board, row, col, piece);
            moves.push(...pieceMoves.map(move => ({from: {row, col}, ...move})));
          }
@@ -120,7 +120,7 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
        captureMoves.forEach(move => {
          if (move.to.row >= 0 && move.to.row < 8 && move.to.col >= 0 && move.to.col < 8 &&
              board[move.to.row][move.to.col] === 0 &&
-             board[move.jumped.row][move.jumped.col] === opponent) {
+             board[move.jumped.row][move.jumped.col] * opponent > 0) {
            moves.push({to: move.to, captures: [move.jumped]});
          }
        });
@@ -135,7 +135,7 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
        kingCaptures.forEach(move => {
          if (move.to.row >= 0 && move.to.row < 8 && move.to.col >= 0 && move.to.col < 8 &&
              board[move.to.row][move.to.col] === 0 &&
-             board[move.jumped.row][move.jumped.col] === opponent) {
+             board[move.jumped.row][move.jumped.col] * opponent > 0) {
            moves.push({to: move.to, captures: [move.jumped]});
          }
        });
@@ -144,13 +144,13 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
      return moves;
    };
 
-   const handleSquareClick = (row: number, col: number) => {
+   const handleSquareClick = async (row: number, col: number) => {
      if (isComputerThinking || (gameMode === 'computer' && currentPlayer === 'ai') || gameOver) return;
 
      if (multiJumpPiece) {
        // Must continue multi-jump
        if (validMoves.some(move => move.row === row && move.col === col)) {
-         executeMove(multiJumpPiece.row, multiJumpPiece.col, row, col);
+         await executeMove(multiJumpPiece.row, multiJumpPiece.col, row, col);
        }
        return;
      }
@@ -158,7 +158,7 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
      if (selectedSquare) {
        // Try to move to this square
        if (validMoves.some(move => move.row === row && move.col === col)) {
-         executeMove(selectedSquare.row, selectedSquare.col, row, col);
+         await executeMove(selectedSquare.row, selectedSquare.col, row, col);
        } else {
          setSelectedSquare(null);
          setValidMoves([]);
@@ -174,8 +174,8 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
      }
    };
 
-   const executeMove = (fromRow: number, fromCol: number, toRow: number, toCol: number) => {
-     const newBoard = board.map(row => [...row]);
+   const executeMove = async (fromRow: number, fromCol: number, toRow: number, toCol: number, boardState?: number[][]) => {
+     const newBoard = (boardState || board).map(row => [...row]);
      const piece = newBoard[fromRow][fromCol];
 
      // Calculate captures
@@ -225,12 +225,12 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
      const nextPlayer = currentPlayer === 'human' ? 'ai' : 'human';
      setCurrentPlayer(nextPlayer);
 
-     // Check win condition after turn switch
-     checkWinCondition(newBoard, currentPlayer);
+     // Check win condition — returns true if game is over
+     const isOver = await checkWinCondition(newBoard, currentPlayer);
 
-     // AI turn
-     if (gameMode === 'computer' && nextPlayer === 'ai' && !gameOver) {
-       setTimeout(() => makeAIMove(newBoard), 1000);
+     // AI turn — only if game is still running
+     if (gameMode === 'computer' && nextPlayer === 'ai' && !isOver) {
+       setTimeout(() => makeAIMove(newBoard), 800);
      }
    };
 
@@ -238,18 +238,21 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
      setIsComputerThinking(true);
 
      setTimeout(() => {
-       // Simple AI: random move (can be upgraded to minimax)
        const legalMoves = generateLegalMoves(currentBoard, 'ai');
+
        if (legalMoves.length > 0) {
-         const randomMove = legalMoves[Math.floor(Math.random() * legalMoves.length)];
-         executeMove(randomMove.from.row, randomMove.from.col, randomMove.to.row, randomMove.to.col);
+         // Prefer captures over normal moves
+         const captures = legalMoves.filter(m => m.captures.length > 0);
+         const pool = captures.length > 0 ? captures : legalMoves;
+         const chosenMove = pool[Math.floor(Math.random() * pool.length)];
+         executeMove(chosenMove.from.row, chosenMove.from.col, chosenMove.to.row, chosenMove.to.col, currentBoard);
        }
 
        setIsComputerThinking(false);
      }, 1000);
    };
 
-   const checkWinCondition = async (board: number[][], playerWhoJustMoved: 'human' | 'ai') => {
+   const checkWinCondition = async (board: number[][], playerWhoJustMoved: 'human' | 'ai'): Promise<boolean> => {
      const humanPieces = board.flat().filter(piece => piece > 0).length;
      const aiPieces = board.flat().filter(piece => piece < 0).length;
 
@@ -288,13 +291,16 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
          await pointsAPI.addGameScore({
            user_id: user.id,
            game_type: 'checkers',
-           score: winner === 'human' ? 10 : 0, // 10 points for win, 0 for loss
+           score: winner === 'human' ? 10 : 0,
            result: winner === 'human' ? 'win' : 'loss'
          });
+         onScoreUpdate?.();
        } catch (error) {
          console.error('Error updating points:', error);
        }
      }
+
+     return winner !== null;
    };
 
    const resetGame = () => {
@@ -395,7 +401,7 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
  };
 
 // Marbles Game Component (Peg Solitaire)
-const MarblesGameComponent: React.FC<{ onClose: () => void; user?: any }> = ({ onClose, user }) => {
+const MarblesGameComponent: React.FC<{ onClose: () => void; user?: any; onScoreUpdate?: () => void }> = ({ onClose, user, onScoreUpdate }) => {
  // Board: 0=empty, 1=marble, -1=invalid
  const initialBoard = useMemo(() => {
    const board: number[][] = Array(7).fill(null).map(() => Array(7).fill(-1));
@@ -422,7 +428,8 @@ const MarblesGameComponent: React.FC<{ onClose: () => void; user?: any }> = ({ o
    return (row >= 2 && row <= 4) || (col >= 2 && col <= 4);
  };
 
- const getValidMoves = (row: number, col: number) => {
+ const getValidMoves = (row: number, col: number, boardState?: number[][]) => {
+   const b = boardState || board;
    const moves: {row: number, col: number}[] = [];
    const directions = [
      {dr: -1, dc: 0}, {dr: 1, dc: 0}, {dr: 0, dc: -1}, {dr: 0, dc: 1}
@@ -436,8 +443,8 @@ const MarblesGameComponent: React.FC<{ onClose: () => void; user?: any }> = ({ o
 
      if (jumpRow >= 0 && jumpRow < 7 && jumpCol >= 0 && jumpCol < 7 &&
          isValidPosition(jumpRow, jumpCol) &&
-         board[jumpRow][jumpCol] === 0 &&
-         board[midRow][midCol] === 1) {
+         b[jumpRow][jumpCol] === 0 &&
+         b[midRow][midCol] === 1) {
        moves.push({row: jumpRow, col: jumpCol});
      }
    });
@@ -502,14 +509,14 @@ const MarblesGameComponent: React.FC<{ onClose: () => void; user?: any }> = ({ o
          game_type: 'marbles',
          score: 10, // 10 points for winning marbles
          result: 'win'
-       }).catch(error => console.error('Error updating points:', error));
+       }).then(() => onScoreUpdate?.()).catch(error => console.error('Error updating points:', error));
      }
    } else {
-     // Check if any moves left
+     // Check if any moves left — use newBoard, not stale closure board
      let hasMoves = false;
      for (let r = 0; r < 7; r++) {
        for (let c = 0; c < 7; c++) {
-         if (newBoard[r][c] === 1 && getValidMoves(r, c).length > 0) {
+         if (newBoard[r][c] === 1 && getValidMoves(r, c, newBoard).length > 0) {
            hasMoves = true;
            break;
          }
@@ -526,7 +533,7 @@ const MarblesGameComponent: React.FC<{ onClose: () => void; user?: any }> = ({ o
            game_type: 'marbles',
            score: 0,
            result: 'loss'
-         }).catch(error => console.error('Error updating points:', error));
+         }).then(() => onScoreUpdate?.()).catch(error => console.error('Error updating points:', error));
        }
      }
    }
@@ -617,29 +624,18 @@ interface UserPoints {
 }
 
 const KebeleGames: React.FC = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [userPoints, setUserPoints] = useState<UserPoints | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // Real high scores data - will be fetched from database
-  const [highScores, setHighScores] = useState({
-    checkers: [
-      { name: 'ChessMaster22', score: 2850, wins: 124 },
-      { name: 'QueenSlayer', score: 2780, wins: 112 },
-      { name: 'DoubleJumpPro', score: 2640, wins: 98 }
-    ],
-    marbles: [
-      { name: 'LastMarble', score: 3120, wins: 187 },
-      { name: 'PegEliminator', score: 2980, wins: 165 },
-      { name: 'BoardMaster', score: 2850, wins: 142 }
-    ]
-  });
+  const [checkersLeaderboard, setCheckersLeaderboard] = useState<any[]>([]);
+  const [marblesLeaderboard, setMarblesLeaderboard] = useState<any[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchUserPoints();
     }
+    fetchLeaderboards();
   }, [user]);
 
   const fetchUserPoints = async () => {
@@ -649,6 +645,22 @@ const KebeleGames: React.FC = () => {
       setUserPoints(data);
     } catch (error) {
       console.error('Error fetching user points:', error);
+    }
+  };
+
+  const fetchLeaderboards = async () => {
+    setLeaderboardLoading(true);
+    try {
+      const [checkers, marbles] = await Promise.all([
+        pointsAPI.getLeaderboard('checkers', 10),
+        pointsAPI.getLeaderboard('marbles', 10),
+      ]);
+      setCheckersLeaderboard(checkers || []);
+      setMarblesLeaderboard(marbles || []);
+    } catch (err) {
+      console.error('Error fetching leaderboards:', err);
+    } finally {
+      setLeaderboardLoading(false);
     }
   };
 
@@ -766,29 +778,38 @@ const KebeleGames: React.FC = () => {
               </div>
             </div>
             <div className="p-6">
-              <div className="space-y-4">
-                {highScores.checkers.map((player, index) => (
-                  <div key={index} className="flex items-center justify-between retro-window retro-hover p-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold retro-title text-sm">
-                        {index + 1}
+              {leaderboardLoading ? (
+                <ModalLoader label="Loading Scores..." />
+              ) : checkersLeaderboard.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 retro-text text-sm">No scores yet. Be the first to play!</div>
+              ) : (
+                <div className="space-y-4">
+                  {checkersLeaderboard.map((player, index) => (
+                    <div key={player.user_id || index} className="flex items-center justify-between retro-window retro-hover p-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold retro-title text-sm">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900 retro-title text-sm">
+                            {player.userId?.username || player.user_id?.username || 'Player'}
+                          </p>
+                          <p className="text-xs text-gray-600 retro-text">{player.checkers_wins} wins</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-gray-900 retro-title text-sm">{player.name}</p>
-                        <p className="text-xs text-gray-600 retro-text">{player.wins} wins</p>
+                      <div className="text-right">
+                        <p className="font-bold text-red-600 retro-title text-sm">{player.total_points}</p>
+                        <p className="text-xs text-gray-500 retro-text">points</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-red-600 retro-title text-sm">{player.score}</p>
-                      <p className="text-xs text-gray-500 retro-text">points</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
-  
-            {/* Marbles Leaderboard */}
-            <div className="retro-window">
+          </div>
+
+          {/* Marbles Leaderboard */}
+          <div className="retro-window">
               <div className="retro-titlebar retro-titlebar-blue p-6">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center retro-icon">
@@ -801,28 +822,34 @@ const KebeleGames: React.FC = () => {
                 </div>
               </div>
               <div className="p-6">
-                <div className="space-y-4">
-                  {highScores.marbles.map((player, index) => (
-                    <div key={index} className="flex items-center justify-between retro-window retro-hover p-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold retro-title text-sm">
-                          {index + 1}
+                {leaderboardLoading ? (
+                  <ModalLoader label="Loading Scores..." />
+                ) : marblesLeaderboard.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 retro-text text-sm">No scores yet. Be the first to play!</div>
+                ) : (
+                  <div className="space-y-4">
+                    {marblesLeaderboard.map((player, index) => (
+                      <div key={player.user_id || index} className="flex items-center justify-between retro-window retro-hover p-3">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold retro-title text-sm">
+                            {index + 1}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 retro-title text-sm">
+                              {player.userId?.username || player.user_id?.username || 'Player'}
+                            </p>
+                            <p className="text-xs text-gray-600 retro-text">{player.marbles_wins} wins</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-gray-900 retro-title text-sm">{player.name}</p>
-                          <p className="text-xs text-gray-600 retro-text">{player.wins} wins</p>
+                        <div className="text-right">
+                          <p className="font-bold text-blue-600 retro-title text-sm">{player.total_points}</p>
+                          <p className="text-xs text-gray-500 retro-text">points</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-blue-600 retro-title text-sm">{player.score}</p>
-                        <p className="text-xs text-gray-500 retro-text">points</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-  
           </div>
         </div>
 
@@ -869,7 +896,7 @@ const KebeleGames: React.FC = () => {
 
       {/* Game Mode Selection Modal */}
       {showGameModeModal && currentGame && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
           <div 
             className="max-w-md w-full bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
@@ -940,7 +967,7 @@ const KebeleGames: React.FC = () => {
 
       {/* Game Modal */}
       {currentGame && selectedGameMode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
           <div 
             className="max-w-5xl w-full bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden max-h-[95vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
@@ -964,8 +991,8 @@ const KebeleGames: React.FC = () => {
             </div>
             
             <div className="p-6 flex-1 overflow-y-auto max-h-[calc(95vh-80px)]">
-              {currentGame === 'checkers' && <CheckersGameComponent onClose={closeGame} gameMode={selectedGameMode} user={user} />}
-              {currentGame === 'marbles' && <MarblesGameComponent onClose={closeGame} user={user} />}
+              {currentGame === 'checkers' && <CheckersGameComponent onClose={closeGame} gameMode={selectedGameMode} user={user} onScoreUpdate={fetchLeaderboards} />}
+              {currentGame === 'marbles' && <MarblesGameComponent onClose={closeGame} user={user} onScoreUpdate={fetchLeaderboards} />}
             </div>
           </div>
         </div>

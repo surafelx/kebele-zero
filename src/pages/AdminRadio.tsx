@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Radio, Plus, Edit3, Trash2, Search, Play, Star, Music, Mic } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { radioAPI } from '../services/content';
 import Modal from '../components/Modal';
 
 const AdminRadio = () => {
@@ -28,18 +28,11 @@ const AdminRadio = () => {
   const fetchRadioTracks = async () => {
     setLoading(true);
     try {
-      const { data: radioData, error: radioError } = await supabase
-        .from('radio')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (radioError) {
-        console.error('Error fetching radio:', radioError);
-      } else {
-        setRadioTracks(radioData || []);
-      }
+      const data = await radioAPI.getStations();
+      setRadioTracks(data || []);
     } catch (error) {
       console.error('Error fetching radio tracks:', error);
+      setRadioTracks([]);
     } finally {
       setLoading(false);
     }
@@ -47,14 +40,7 @@ const AdminRadio = () => {
 
   const handleCreateRadioTrack = async (trackData: any) => {
     try {
-      const { data, error } = await supabase
-        .from('radio')
-        .insert([trackData])
-        .select();
-
-      if (error) throw error;
-
-      setRadioTracks([...radioTracks, data[0]]);
+      await radioAPI.createStation(trackData);
       setShowRadioForm(false);
       fetchRadioTracks();
     } catch (error) {
@@ -66,15 +52,7 @@ const AdminRadio = () => {
   const handleUpdateRadioTrack = async (trackData: any) => {
     if (!editingTrack) return;
     try {
-      const { data, error } = await supabase
-        .from('radio')
-        .update(trackData)
-        .eq('id', editingTrack.id)
-        .select();
-
-      if (error) throw error;
-
-      setRadioTracks(radioTracks.map(t => t.id === editingTrack.id ? data[0] : t));
+      await radioAPI.updateStation(editingTrack._id || editingTrack.id, trackData);
       setShowRadioForm(false);
       setEditingTrack(null);
       setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false });
@@ -89,15 +67,8 @@ const AdminRadio = () => {
     if (!confirm('Are you sure you want to delete this track?')) return;
 
     try {
-      const { error } = await supabase
-        .from('radio')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setRadioTracks(radioTracks.filter(track => track.id !== id));
-      alert('Track deleted successfully!');
+      await radioAPI.deleteStation(id);
+      setRadioTracks(radioTracks.filter(track => (track._id || track.id) !== id));
     } catch (error) {
       console.error('Error deleting track:', error);
       alert('Error deleting track');

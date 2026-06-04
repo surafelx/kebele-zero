@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, MessageSquare, Trophy, CreditCard, BarChart3, Settings, TrendingUp, Clock, Activity, DollarSign } from 'lucide-react';
-import { supabase } from '../services/supabase';
-import { forumAPI } from '../services/forum';
+import { adminAPI } from '../services/admin';
 
 interface StatCardProps {
   title: string;
@@ -47,32 +46,14 @@ const AdminAnalytics: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [
-          usersRes,
-          forumPostsRes,
-          gameScoresRes,
-          transactionsRes,
-          videosRes
-        ] = await Promise.all([
-          supabase.from('users').select('*'),
-          supabase.from('forum_posts').select('*'),
-          supabase.from('game_scores').select('*'),
-          supabase.from('transactions').select('*'),
-          supabase.from('videos').select('*')
-        ]);
-
-        setUsers(usersRes.data || []);
-        setForumPosts(forumPostsRes.data || []);
-        setGameScores(gameScoresRes.data || []);
-        setTransactions(transactionsRes.data || []);
-        setVideos(videosRes.data || []);
-
-        const allComments: any[] = [];
-        for (const post of forumPostsRes.data || []) {
-          const comments = await forumAPI.getComments(post.id);
-          allComments.push(...comments);
+        const stats = await adminAPI.getStats();
+        if (stats) {
+          setUsers(Array(stats.totalUsers || 0).fill({}));
+          setForumPosts(Array(stats.totalPosts || 0).fill({}));
+          setGameScores(Array(stats.totalGames || 0).fill({}));
+          setTransactions(Array(stats.totalTransactions || 0).fill({}));
+          setVideos(Array(stats.totalMedia || 0).fill({}));
         }
-        setForumComments(allComments);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {

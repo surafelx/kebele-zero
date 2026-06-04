@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Plus, Trash2, Search, Play, Eye, Folder, Edit3 } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { mediaAPI } from '../services/content';
 import Modal from '../components/Modal';
 
 const AdminMedia = () => {
@@ -26,18 +26,11 @@ const AdminMedia = () => {
   const fetchVideos = async () => {
     setLoading(true);
     try {
-      const { data: videosData, error: videosError } = await supabase
-        .from('videos')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (videosError) {
-        console.error('Error fetching videos:', videosError);
-      } else {
-        setVideos(videosData || []);
-      }
+      const data = await mediaAPI.getMedia();
+      setVideos(data || []);
     } catch (error) {
       console.error('Error fetching videos:', error);
+      setVideos([]);
     } finally {
       setLoading(false);
     }
@@ -45,14 +38,7 @@ const AdminMedia = () => {
 
   const handleCreateVideo = async (videoData: any) => {
     try {
-      const { data, error } = await supabase
-        .from('videos')
-        .insert([videoData])
-        .select();
-
-      if (error) throw error;
-
-      setVideos([...videos, data[0]]);
+      await mediaAPI.uploadMedia(videoData);
       setShowVideoForm(false);
       fetchVideos();
     } catch (error) {
@@ -64,15 +50,7 @@ const AdminMedia = () => {
   const handleUpdateVideo = async (videoData: any) => {
     if (!editingVideo) return;
     try {
-      const { data, error } = await supabase
-        .from('videos')
-        .update(videoData)
-        .eq('id', editingVideo.id)
-        .select();
-
-      if (error) throw error;
-
-      setVideos(videos.map(v => v.id === editingVideo.id ? data[0] : v));
+      await mediaAPI.uploadMedia({ ...videoData, id: editingVideo._id || editingVideo.id });
       setShowVideoForm(false);
       setEditingVideo(null);
       setVideoFormData({ title: '', description: '', youtube_id: '', category: 'cultural' });
@@ -87,15 +65,8 @@ const AdminMedia = () => {
     if (!confirm('Are you sure you want to delete this video?')) return;
 
     try {
-      const { error } = await supabase
-        .from('videos')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setVideos(videos.filter(video => video.id !== id));
-      alert('Video deleted successfully!');
+      await mediaAPI.deleteMedia(id);
+      setVideos(videos.filter(video => (video._id || video.id) !== id));
     } catch (error) {
       console.error('Error deleting video:', error);
       alert('Error deleting video');
