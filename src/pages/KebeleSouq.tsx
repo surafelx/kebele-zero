@@ -12,6 +12,8 @@ interface Product {
   description: string;
   price: number;
   images: Array<{ url: string; alt: string }>;
+  imageUrl?: string;
+  image_url?: string;
   category: string;
   stock_quantity: number;
   is_active: boolean;

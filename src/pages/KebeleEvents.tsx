@@ -22,6 +22,8 @@ interface Event {
     };
   };
   images: Array<{ url: string; alt: string }>;
+  imageUrl?: string;
+  image_url?: string;
   tickets: Array<{
     type: string;
     name: string;
