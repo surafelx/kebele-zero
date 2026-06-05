@@ -6,8 +6,12 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
+    "build": "echo 'No build step required for the Node backend'",
     "test": "jest --runInBand",
     "test:coverage": "jest --runInBand --coverage"
+  },
+  "engines": {
+    "node": ">=16"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
