@@ -1,0 +1,28 @@
+# Render blueprint for the Kebele Zero backend API.
+# Deploy: Render dashboard → New → Blueprint → pick this repo.
+# Secret values (sync: false) are entered in the Render dashboard, not committed.
+services:
+  - type: web
+    name: kebele-zero-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      # PORT is injected by Render automatically — do not set it.
+      - key: MONGODB_URI          # MongoDB Atlas connection string
+        sync: false
+      - key: JWT_SECRET           # long random string
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
