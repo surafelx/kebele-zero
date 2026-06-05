@@ -13,6 +13,7 @@ const settingsRoutes = require('./routes/settings');
 const socialLinksRoutes = require('./routes/socialLinks');
 const transactionRoutes = require('./routes/transactions');
 const adminRoutes = require('./routes/admin');
+const cloudinaryRoutes = require('./routes/cloudinary');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/social-links', socialLinksRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/cloudinary', cloudinaryRoutes);
 
 // ── Health check ───────────────────────────────────────────────────────────
 app.get('/health', (req, res) => res.json({ status: 'ok' }));

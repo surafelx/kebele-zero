@@ -1,7 +1,9 @@
-// Cloudinary service for image uploads
+// Cloudinary service for image uploads.
+// Only the cloud name + unsigned upload preset live client-side — these are
+// safe to expose. The API key/secret stay on the backend (used for deletes).
+import api from './api';
+
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-const API_KEY = import.meta.env.VITE_CLOUDINARY_API_KEY;
-const API_SECRET = import.meta.env.VITE_CLOUDINARY_API_SECRET;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 export interface CloudinaryUploadResult {
@@ -109,13 +111,10 @@ export const cloudinaryService = {
    * @returns Promise with deletion result
    */
   async deleteImage(publicId: string): Promise<any> {
-    if (!CLOUD_NAME) {
-      throw new Error('Cloudinary configuration is missing.');
-    }
-
-    // Note: This requires server-side implementation with API secret
-    // For client-side, you'd need to implement this on your backend
-    throw new Error('Delete operation requires server-side implementation');
+    if (!publicId) throw new Error('publicId is required to delete an image');
+    // The backend holds the API secret and performs the signed destroy call.
+    const res = await api.delete(`/cloudinary/${encodeURIComponent(publicId)}`);
+    return res.data;
   },
 
   /**
