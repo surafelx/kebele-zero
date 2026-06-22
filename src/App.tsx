@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Leva } from "leva";
 import { Info, Calendar, ShoppingBag, Radio, Image, Menu, X, MessageSquare, Trophy, User, LayoutDashboard, Settings, Music, Play, Pause } from 'lucide-react';
 import "./App.css";
 import "./styles/retro.css";
-import FolioCanvas from "./folio/javascript/FolioCanvas";
 import "./folio/style/main.css";
+
+// Code-split the heavy Three.js scene (R3F + cannon + the folio engine) into
+// its own chunk so it only downloads when the home experience mounts.
+const FolioCanvas = lazy(() => import("./folio/javascript/FolioCanvas"));
 
 // Import pages
 import MaintenancePage from './pages/MaintenancePage';
@@ -367,8 +370,17 @@ function MainApp() {
           </div>
         </div>
 
-        {/* Base 3D Portfolio */}
-        <FolioCanvas />
+        {/* Base 3D Portfolio — lazy-loaded chunk */}
+        <Suspense fallback={
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-900">
+            <div className="text-center text-white">
+              <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="font-bold uppercase text-sm tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Loading 3D Experience…</p>
+            </div>
+          </div>
+        }>
+          <FolioCanvas />
+        </Suspense>
 
         {/* Bottom Action Bar - Left Side */}
         <div className="absolute bottom-6 left-8 z-[90]">

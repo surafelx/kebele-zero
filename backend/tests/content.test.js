@@ -1,6 +1,15 @@
+// Mock Cloudinary so media-delete cleanup never hits the real API.
+jest.mock('../src/config/cloudinary', () => ({
+  cloudinary: {
+    uploader: { destroy: jest.fn().mockResolvedValue({ result: 'ok' }) },
+  },
+  isConfigured: () => true,
+}));
+
 const request = require('supertest');
 const app = require('../src/app');
 const { createUser, createAdmin } = require('./helpers');
+const { cloudinary } = require('../src/config/cloudinary');
 
 describe('Content API', () => {
   // ── Events ─────────────────────────────────────────────────────────────
@@ -211,6 +220,41 @@ describe('Content API', () => {
         .delete(`/api/media/${created.body._id}`)
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
+    });
+
+    it('stores publicId on upload and destroys it from Cloudinary on delete', async () => {
+      cloudinary.uploader.destroy.mockClear();
+      const { token } = await createUser({ username: 'medpub', email: 'medpub@e.com' });
+      const created = await request(app)
+        .post('/api/media')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          title: 'Cloud Image', type: 'image',
+          url: 'https://res.cloudinary.com/x/kebele/abc.jpg',
+          publicId: 'kebele/abc',
+        });
+      expect(created.body.publicId).toBe('kebele/abc');
+
+      await request(app)
+        .delete(`/api/media/${created.body._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(cloudinary.uploader.destroy).toHaveBeenCalledWith('kebele/abc');
+    });
+
+    it('does not call Cloudinary when media has no publicId', async () => {
+      cloudinary.uploader.destroy.mockClear();
+      const { token } = await createUser({ username: 'mednopub', email: 'mednopub@e.com' });
+      const created = await request(app)
+        .post('/api/media')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: 'No Cloud', type: 'image', url: 'https://example.com/x.jpg' });
+
+      await request(app)
+        .delete(`/api/media/${created.body._id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(cloudinary.uploader.destroy).not.toHaveBeenCalled();
     });
 
     it('non-owner cannot delete media', async () => {

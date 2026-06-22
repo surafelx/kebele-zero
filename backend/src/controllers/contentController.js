@@ -114,7 +114,7 @@ async function getMedia(req, res, next) {
 
 async function uploadMedia(req, res, next) {
   try {
-    const { title, description, type, url, category } = req.body;
+    const { title, description, type, url, category, publicId } = req.body;
     const media = await Media.create({
       userId: req.user._id,
       title,
@@ -122,6 +122,7 @@ async function uploadMedia(req, res, next) {
       type,
       url,
       category,
+      publicId: publicId || null,
     });
     res.status(201).json(media);
   } catch (err) { next(err); }
@@ -139,6 +140,18 @@ async function deleteMedia(req, res, next) {
     }
 
     await media.deleteOne();
+
+    // Best-effort cleanup of the underlying Cloudinary asset (never blocks the
+    // response — a failed remote delete shouldn't fail the DB delete).
+    if (media.publicId) {
+      const { cloudinary, isConfigured } = require('../config/cloudinary');
+      if (isConfigured()) {
+        cloudinary.uploader
+          .destroy(media.publicId)
+          .catch((e) => console.error('[cloudinary] destroy failed:', e.message));
+      }
+    }
+
     res.json({ message: 'Media deleted' });
   } catch (err) { next(err); }
 }

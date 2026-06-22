@@ -20,7 +20,27 @@ const app = express();
 
 // ── Security & parsing ─────────────────────────────────────────────────────
 app.use(helmet());
-app.use(cors());
+
+// CORS — restrict to comma-separated origins in CORS_ORIGIN, else allow all.
+// e.g. CORS_ORIGIN=https://kebele-zero.vercel.app,https://kebelezero.com
+const corsOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+app.use(
+  cors(
+    corsOrigins.length > 0
+      ? {
+          origin(origin, cb) {
+            // allow same-origin / curl / server-to-server (no origin header)
+            if (!origin || corsOrigins.includes(origin)) return cb(null, true);
+            cb(new Error('Not allowed by CORS'));
+          },
+        }
+      : undefined // no CORS_ORIGIN set → allow all (dev default)
+  )
+);
+
 app.use(express.json());
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));

@@ -86,7 +86,7 @@ const ImageUpload: React.FC<{
             description: '',
             url: cloudinaryUrl,
             media_url: cloudinaryUrl,
-            cloudinary_public_id: cloudinaryResult.public_id,
+            publicId: cloudinaryResult.public_id,
             category: category,
             folder: folder,
             type: 'image',

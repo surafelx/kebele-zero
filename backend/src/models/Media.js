@@ -25,6 +25,12 @@ const mediaSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Media URL is required'],
     },
+    // Cloudinary public_id — stored so the image can be removed from Cloudinary
+    // when the media record is deleted.
+    publicId: {
+      type: String,
+      default: null,
+    },
     category: {
       type: String,
       default: 'general',
