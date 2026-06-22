@@ -755,13 +755,20 @@ const KebeleForum: React.FC = () => {
                 <h3 className="retro-title text-xs uppercase tracking-wide">Popular Tags</h3>
               </div>
               <div className="p-2">
-                <div className="flex flex-wrap gap-1">
-                  {Array.from(new Set(posts.flatMap(p => p.tags))).slice(0, 6).map((tag) => (
-                    <span key={tag} className="px-1 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 rounded text-xs font-medium hover:bg-purple-200 cursor-pointer transition-colors">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
+                {(() => {
+                  const tags = Array.from(new Set(posts.flatMap(p => p.tags))).slice(0, 6);
+                  return tags.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {tags.map((tag) => (
+                        <span key={tag} className="px-1 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 rounded text-xs font-medium hover:bg-purple-200 cursor-pointer transition-colors">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 italic py-1">No tags yet</p>
+                  );
+                })()}
               </div>
             </div>
 

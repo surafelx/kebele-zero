@@ -398,22 +398,13 @@ const AboutKebele: React.FC = () => {
               </div>
             </div>
             <div className="p-4">
-              {videoItems.length > 0 ? (
-                <>
-                  <img 
-                    src={videoItems[0]?.thumbnail?.url || 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=225&fit=crop'}
-                    alt={videoItems[0]?.title}
-                    className="w-full h-32 object-cover rounded-lg border-2 border-black mb-3"
-                  />
-                  <h3 className="font-black text-gray-800 text-base mb-2 line-clamp-2" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{videoItems[0]?.title || 'Featured Video'}</h3>
-                </>
-              ) : (
-                <img 
-                  src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=225&fit=crop"
-                  alt="Media"
-                  className="w-full h-32 object-cover rounded-lg border-2 border-black mb-3"
-                />
-              )}
+              <img
+                src={videoItems[0]?.thumbnail?.url || ABOUT_PLACEHOLDER}
+                alt={videoItems[0]?.title || 'Media'}
+                className="w-full h-32 object-cover rounded-lg border-2 border-black mb-3 bg-gray-100"
+                onError={(e) => { (e.target as HTMLImageElement).src = ABOUT_PLACEHOLDER; }}
+              />
+              <h3 className="font-black text-gray-800 text-base mb-2 line-clamp-1" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{videoItems[0]?.title || 'Featured Videos'}</h3>
               <p className="font-medium text-gray-600 text-sm mb-3 opacity-90" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{videoItems.length > 0 ? `${videoItems.length} featured videos` : 'No videos yet'}</p>
               <button
                 onClick={() => (window as any).openKebeleModal('media')}
@@ -433,10 +424,11 @@ const AboutKebele: React.FC = () => {
               </div>
             </div>
             <div className="p-4">
-              <img 
+              <img
                 src="https://images.unsplash.com/photo-1551818255-e9353de8d1b0?w=400&h=225&fit=crop"
                 alt="Events"
-                className="w-full h-32 object-cover rounded-lg border-2 border-black mb-3"
+                className="w-full h-32 object-cover rounded-lg border-2 border-black mb-3 bg-gray-100"
+                onError={(e) => { (e.target as HTMLImageElement).src = ABOUT_PLACEHOLDER; }}
               />
               <h3 className="font-black text-gray-800 text-base mb-2" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Upcoming Events</h3>
               <p className="font-medium text-gray-600 text-sm mb-3 opacity-90" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Join cultural celebrations</p>
@@ -458,19 +450,12 @@ const AboutKebele: React.FC = () => {
               </div>
             </div>
             <div className="p-4">
-              {mediaItems.length > 0 ? (
-                <img 
-                  src={mediaItems[0]?.media_url || 'https://images.unsplash.com/photo-1551818255-e9353de8d1b0?w=400&h=225&fit=crop'}
-                  alt={mediaItems[0]?.title}
-                  className="w-full h-32 object-cover rounded-lg border-2 border-black mb-3"
-                />
-              ) : (
-                <img 
-                  src="https://images.unsplash.com/photo-1551818255-e9353de8d1b0?w=400&h=225&fit=crop"
-                  alt="Merchandise"
-                  className="w-full h-32 object-cover rounded-lg border-2 border-black mb-3"
-                />
-              )}
+              <img
+                src={(mediaItems.length > 0 && mediaItems[0]?.media_url) || ABOUT_PLACEHOLDER}
+                alt={mediaItems[0]?.title || 'Merchandise'}
+                className="w-full h-32 object-cover rounded-lg border-2 border-black mb-3 bg-gray-100"
+                onError={(e) => { (e.target as HTMLImageElement).src = ABOUT_PLACEHOLDER; }}
+              />
               <h3 className="font-black text-gray-800 text-base mb-2" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>New Arrivals</h3>
               <p className="font-medium text-gray-600 text-sm mb-3 opacity-90" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Support local artisans</p>
               <button

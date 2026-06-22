@@ -218,18 +218,18 @@ const KebeleSouq: React.FC = () => {
                       {product.description.length > 60 ? `${product.description.substring(0, 60)}...` : product.description}
                     </p>
 
-                    <div className="flex space-x-2">
+                    <div className="flex items-stretch space-x-2">
                       <button
                         onClick={() => addToCart(product)}
-                        className="flex-1 retro-btn text-xs py-1 font-bold uppercase"
+                        className="flex-1 retro-btn text-xs py-1.5 font-bold uppercase whitespace-nowrap"
                       >
-                        ADD TO CART
+                        + Cart
                       </button>
                       <button
                         onClick={() => handlePurchase(product)}
-                        className="flex-1 bg-orange-500 text-white px-2 py-1 rounded-lg retro-title text-xs font-bold uppercase border-2 border-white hover:bg-orange-600 transition-colors"
+                        className="flex-1 retro-btn text-xs py-1.5 font-bold uppercase whitespace-nowrap bg-orange-500 border-orange-700 text-white hover:bg-orange-600"
                       >
-                        BUY NOW
+                        Buy Now
                       </button>
                     </div>
                   </div>
@@ -261,7 +261,7 @@ const KebeleSouq: React.FC = () => {
               <button className="retro-btn text-lg py-4 px-8 font-bold uppercase">
                 BROWSE ALL PRODUCTS
               </button>
-              <button className="bg-paper text-charcoal px-8 py-4 rounded-lg retro-title text-lg font-bold uppercase border-2 border-charcoal hover:bg-mustard hover:text-charcoal transition-colors">
+              <button className="retro-btn-secondary text-lg py-4 px-8 font-bold uppercase">
                 BECOME A SELLER
               </button>
             </div>

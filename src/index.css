@@ -4,6 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global retro typeface — any text without an explicit font-family inherits
+   Comic Sans so headings/labels/buttons stay consistent across every modal.
+   (Fixes the About heading and Sign-In labels rendering in system sans-serif.) */
+body {
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+}
+
 /* Hide Vercel preview banner */
 #vercel-banner, .vercel-banner, [data-vercel-banner] {
   display: none !important;

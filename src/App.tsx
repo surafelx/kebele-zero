@@ -511,8 +511,8 @@ function MainApp() {
                 <Music className="w-4 h-4 text-white" />
                 <span className="font-black text-white uppercase text-xs tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Music Player</span>
               </div>
-              <button onClick={() => setIsMusicPlayerOpen(false)} className="w-6 h-6 bg-red-500 border-2 border-black flex items-center justify-center hover:bg-red-600">
-                <X className="w-3 h-3 text-white" />
+              <button onClick={() => setIsMusicPlayerOpen(false)} className="group p-1 bg-white border-2 border-black shadow hover:bg-red-500 transition-all flex items-center justify-center">
+                <X className="w-3.5 h-3.5 text-black group-hover:text-white transition-colors" />
               </button>
             </div>
 

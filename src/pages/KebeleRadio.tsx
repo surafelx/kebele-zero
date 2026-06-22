@@ -267,7 +267,7 @@ const KebeleRadio: React.FC = () => {
               <button className="retro-btn text-lg py-4 px-8 font-bold uppercase">
                 BROWSE ALL CONTENT
               </button>
-              <button className="bg-paper text-charcoal px-8 py-4 rounded-lg retro-title text-lg font-bold uppercase border-2 border-charcoal hover:bg-mustard hover:text-charcoal transition-colors">
+              <button className="retro-btn-secondary text-lg py-4 px-8 font-bold uppercase">
                 SUBMIT CONTENT
               </button>
             </div>
