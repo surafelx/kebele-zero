@@ -326,7 +326,7 @@ const AdminTransactions = () => {
 
       {/* Edit Modal */}
       {editingTransaction && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 z-[100000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-xl w-full max-w-md border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
             <div className="p-6 border-b-4 border-black flex items-center justify-between">
               <h3 className="text-lg font-black text-gray-800 uppercase tracking-wide">Update Transaction Status</h3>
@@ -371,7 +371,7 @@ const AdminTransactions = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 z-[100000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-xl w-full max-w-md border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
             <div className="p-6 border-b-4 border-black">
               <h3 className="text-lg font-black text-gray-800 uppercase tracking-wide">Delete Transaction</h3>
@@ -405,7 +405,7 @@ const AdminTransactions = () => {
 
       {/* Create Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 z-[100000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-xl w-full max-w-md border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
             <div className="p-6 border-b-4 border-black flex items-center justify-between">
               <h3 className="text-lg font-black text-gray-800 uppercase tracking-wide">Create Transaction</h3>

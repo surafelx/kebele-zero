@@ -73,7 +73,7 @@ const PaymentRequestModal: React.FC<PaymentRequestModalProps> = ({ isOpen, onClo
 
   return (
     <div
-      className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100001] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={handleClose}
     >
       <div
