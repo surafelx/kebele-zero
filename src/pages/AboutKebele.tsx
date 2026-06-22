@@ -6,6 +6,10 @@ import { socialLinksAPI } from '../services/admin';
 import { mediaAPI } from '../services/content';
 import ModalLoader from '../components/ModalLoader';
 
+// Fallback when a hero/section image is missing or fails to load.
+const ABOUT_PLACEHOLDER =
+  'https://placehold.co/600x400/ecfdf5/10b981?text=Kebele+Zero';
+
 interface AboutData {
    title: string;
    hero_section_title: string;
@@ -251,9 +255,10 @@ const AboutKebele: React.FC = () => {
               <div className="flex justify-center lg:justify-end">
                 <div className="relative">
                   <img
-                    src={aboutData.images.find(img => img.isHero)?.url || aboutData.images[0]?.url}
-                    alt={aboutData.images.find(img => img.isHero)?.alt || aboutData.images[0]?.alt}
-                    className="w-full max-w-md h-64 object-cover rounded-lg border-4 border-white shadow-2xl"
+                    src={aboutData.images.find(img => img.isHero)?.url || aboutData.images[0]?.url || ABOUT_PLACEHOLDER}
+                    alt={aboutData.images.find(img => img.isHero)?.alt || aboutData.images[0]?.alt || 'Kebele'}
+                    className="w-full max-w-md h-64 object-cover rounded-lg border-4 border-white shadow-2xl bg-gray-100"
+                    onError={(e) => { (e.target as HTMLImageElement).src = ABOUT_PLACEHOLDER; }}
                   />
                   <div className="absolute -bottom-4 -right-4 bg-mustard text-charcoal px-4 py-2 rounded-lg border-2 border-charcoal text-sm font-bold">
                     {aboutData.images.find(img => img.isHero)?.caption || aboutData.images[0]?.caption}

@@ -20,6 +20,9 @@ interface Product {
   is_featured: boolean;
 }
 
+// Shown when a product has no image, instead of a broken-image icon.
+const PRODUCT_PLACEHOLDER =
+  'https://placehold.co/600x400/ecfdf5/10b981?text=Kebele+Souq';
 
 const KebeleSouq: React.FC = () => {
   const { user } = useAuth();
@@ -176,11 +179,13 @@ const KebeleSouq: React.FC = () => {
               {products.map((product) => (
                 <div key={product.id} className="retro-window retro-floating overflow-hidden">
                   {/* Product Image */}
-                  <div className="aspect-[3/2] overflow-hidden relative">
+                  <div className="aspect-[3/2] overflow-hidden relative bg-gray-100">
                     <img
-                      src={product.imageUrl || product.image_url || product.images?.[0]?.url || ''}
+                      src={product.imageUrl || product.image_url || product.images?.[0]?.url || PRODUCT_PLACEHOLDER}
                       alt={product.name}
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_PLACEHOLDER; }}
                     />
                     {/* Semi-transparent background overlay for better tag visibility */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10"></div>

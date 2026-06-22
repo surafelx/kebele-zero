@@ -383,7 +383,7 @@ const KebeleForum: React.FC = () => {
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
                         <span className="text-xs font-bold text-gray-700">
-                          {(post.created_by || '?').charAt(0).toUpperCase()}
+                          {getUserDisplayName(post.created_by, post).charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div>
@@ -516,7 +516,7 @@ const KebeleForum: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
                   <span className="text-xs font-bold text-gray-700">
-                    {(selectedPost.created_by || '?').charAt(0).toUpperCase()}
+                    {getUserDisplayName(selectedPost.created_by, selectedPost).charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
@@ -568,7 +568,7 @@ const KebeleForum: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <div className="w-5 h-5 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
                         <span className="text-xs font-bold text-gray-600">
-                          {(comment.created_by || '?').charAt(0).toUpperCase()}
+                          {getUserDisplayName(comment.created_by, comment).charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <span className="font-medium retro-text">{getUserDisplayName(comment.created_by, comment)}</span>

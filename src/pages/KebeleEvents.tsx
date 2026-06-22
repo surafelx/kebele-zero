@@ -234,7 +234,9 @@ const KebeleEvents: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const d = new Date(dateString);
+    if (!dateString || isNaN(d.getTime())) return 'Date TBA';
+    return d.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -243,10 +245,22 @@ const KebeleEvents: React.FC = () => {
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', {
+    const d = new Date(dateString);
+    if (!dateString || isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  // Lowest ticket price, or null when an event has no tickets (avoids $Infinity).
+  const lowestPrice = (e: Event): number | null =>
+    e.tickets && e.tickets.length > 0 ? Math.min(...e.tickets.map(t => t.price)) : null;
+
+  const priceLabel = (e: Event): string => {
+    const p = lowestPrice(e);
+    if (p === null) return 'Free';
+    return p === 0 ? 'Free' : `From $${p}`;
   };
 
   const getEventStatus = (event: Event): string => {
@@ -514,23 +528,29 @@ const KebeleEvents: React.FC = () => {
                 <Calendar className="w-4 h-4 text-sky-blue" />
                 <span className="text-sm">{formatDate(event.start_date)}</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Clock className="w-4 h-4 text-mustard" />
-                <span className="text-sm">{formatTime(event.start_date)}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <MapPin className="w-4 h-4 text-red-500" />
-                <span className="text-sm truncate">{event.location.venue}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Users className="w-4 h-4 text-emerald-600" />
-                <span className="text-sm">{event.capacity} capacity</span>
-              </div>
+              {formatTime(event.start_date) && (
+                <div className="flex items-center space-x-2">
+                  <Clock className="w-4 h-4 text-mustard" />
+                  <span className="text-sm">{formatTime(event.start_date)}</span>
+                </div>
+              )}
+              {event.location?.venue && (
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-4 h-4 text-red-500" />
+                  <span className="text-sm truncate">{event.location.venue}</span>
+                </div>
+              )}
+              {event.capacity > 0 && (
+                <div className="flex items-center space-x-2">
+                  <Users className="w-4 h-4 text-emerald-600" />
+                  <span className="text-sm">{event.capacity} capacity</span>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-between">
               <div className="text-xl font-bold" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                From ${Math.min(...event.tickets.map(t => t.price))}
+                {priceLabel(event)}
               </div>
               <button
                 onClick={() => {
@@ -582,7 +602,7 @@ const KebeleEvents: React.FC = () => {
               {event.category}
             </span>
             <span className="font-bold text-emerald-600" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-              ${Math.min(...event.tickets.map(t => t.price))}
+              {priceLabel(event)}
             </span>
           </div>
 
