@@ -340,11 +340,15 @@ const AdminGames = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {userPoints.map((pts) => {
-                    const user = users.find(u => u.id === pts.user_id);
+                    // userId may be a populated user object or a raw id string
+                    const populated = pts.userId && typeof pts.userId === 'object' ? pts.userId : null;
+                    const uid = populated ? (populated._id || populated.id) : (pts.user_id || pts.userId);
+                    const user = users.find(u => u.id === uid);
+                    const displayName = populated?.username || user?.username || user?.email || String(uid || 'Player').slice(0, 8);
                     const isEditing = editingPoints?.id === pts.id;
                     return (
-                      <tr key={pts.id} className={isEditing ? 'bg-yellow-50' : 'hover:bg-gray-50'}>
-                        <td className="p-2 font-bold retro-text">{user?.username || user?.email || pts.user_id?.slice(0, 8)}</td>
+                      <tr key={pts.id || uid} className={isEditing ? 'bg-yellow-50' : 'hover:bg-gray-50'}>
+                        <td className="p-2 font-bold retro-text">{displayName}</td>
                         <td className="p-2 text-center">
                           {isEditing ? (
                             <input type="number" min={0} value={pointsFormData.total_points} onChange={e => setPointsFormData(f => ({ ...f, total_points: +e.target.value }))} className="retro-input w-20 text-center py-1 px-2 text-xs" />

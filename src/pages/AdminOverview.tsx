@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Calendar, ShoppingBag, Radio, Image, BarChart3, MessageSquare, Trophy, CreditCard } from 'lucide-react';
-import { adminAPI } from '../services/admin';
+import { adminAPI, transactionsAPI } from '../services/admin';
+import { eventsAPI } from '../services/content';
 import { useAuth } from '../contexts/AuthContext';
+
+// Safe date format — avoids "Invalid Date" when a record has no/blank date.
+const fmtDate = (d?: string) => {
+  if (!d) return 'TBA';
+  const date = new Date(d);
+  return isNaN(date.getTime()) ? 'TBA' : date.toLocaleDateString();
+};
 
 const AdminOverview = () => {
   const navigate = useNavigate();
@@ -30,17 +38,22 @@ const AdminOverview = () => {
     setLoading(true);
     try {
       const stats = await adminAPI.getStats();
-      // Map stats to state arrays with dummy length arrays for count display
+      // Counts come from stats; the lists below use real data fetched separately.
       if (stats) {
         setUsers(Array(stats.totalUsers || 0).fill({}));
-        setEvents(Array(stats.totalEvents || 0).fill({}));
         setVideos(Array(stats.totalMedia || 0).fill({}));
         setRadioTracks(Array(stats.totalRadio || 0).fill({}));
-        setTransactions(Array(stats.totalTransactions || 0).fill({}));
         setForumPosts(Array(stats.totalPosts || 0).fill({}));
         setGameScores(Array(stats.totalGames || 0).fill({}));
         setProducts(Array(stats.totalProducts || 0).fill({}));
       }
+      // Real data for the "Recent Events" / "Recent Transactions" lists.
+      const [evts, txns] = await Promise.all([
+        eventsAPI.getEvents().catch(() => []),
+        transactionsAPI.getAll().catch(() => []),
+      ]);
+      setEvents(Array.isArray(evts) ? evts : []);
+      setTransactions(Array.isArray(txns) ? txns : []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -245,7 +258,7 @@ const AdminOverview = () => {
                         <div className="flex-1 min-w-0">
                           <p className="text-lg font-bold text-gray-900 truncate retro-title">{event.title}</p>
                           <p className="text-sm retro-text text-gray-500">
-                            📅 {new Date(event.start_date).toLocaleDateString()} • 📍 {event.location?.venue || 'TBD'}
+                            📅 {fmtDate(event.start_date || event.startDate || event.date)} • 📍 {event.location?.venue || 'TBD'}
                           </p>
                         </div>
                         <span className="px-3 py-1 bg-green-100 border-2 border-green-500 rounded-lg text-sm font-bold text-green-800 retro-text">Active</span>
@@ -281,7 +294,7 @@ const AdminOverview = () => {
                               ${transaction.amount} {transaction.currency}
                             </p>
                             <p className="text-sm retro-text text-gray-500">
-                              {new Date(transaction.created_at).toLocaleDateString()}
+                              {fmtDate(transaction.created_at || transaction.createdAt)}
                             </p>
                           </div>
                         </div>

@@ -5,6 +5,14 @@ import Modal from '../components/Modal';
 import EventForm from '../components/EventForm';
 import MediaLibrarySelector from '../components/MediaLibrarySelector';
 
+// Safe date format — shows "TBA" instead of "Invalid Date" for events with no date.
+const eventDate = (e: any) => {
+  const raw = e?.start_date || e?.startDate || e?.date;
+  if (!raw) return 'TBA';
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? 'TBA' : d.toLocaleDateString();
+};
+
 const AdminEvents = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -241,7 +249,7 @@ const AdminEvents = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center text-gray-500">
                       <Clock className="w-4 h-4 mr-2" />
-                      <span className="font-medium text-sm" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{new Date(event.start_date).toLocaleDateString()}</span>
+                      <span className="font-medium text-sm" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{eventDate(event)}</span>
                     </div>
                     <div className="flex items-center text-gray-500">
                       <MapPin className="w-4 h-4 mr-2" />
