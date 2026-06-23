@@ -8,7 +8,8 @@
     "dev": "nodemon src/app.js",
     "build": "echo 'No build step required for the Node backend'",
     "test": "jest --runInBand",
-    "test:coverage": "jest --runInBand --coverage"
+    "test:coverage": "jest --runInBand --coverage",
+    "smoke": "bash scripts/smoke.sh"
   },
   "engines": {
     "node": ">=16"
