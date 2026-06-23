@@ -21,4 +21,18 @@ export const pointsAPI = {
     const r = await api.put('/points/game', { game: score.game_type, result: score.result });
     return r.data;
   },
+  // Admin: individual game-play history
+  getGameScores: async (params?: { gameType?: string; result?: string; search?: string; limit?: number }) => {
+    const r = await api.get('/points/admin/scores', { params });
+    return r.data;
+  },
+  addGameScoreAdmin: async (data: { userId: string; gameType: 'checkers' | 'marbles'; score: number; result: 'win' | 'loss' | 'draw' }) => {
+    const r = await api.post('/points/admin/scores', data);
+    return r.data;
+  },
+  // Admin: directly override a user's aggregate stats
+  setUserPointsAdmin: async (userId: string, data: { totalPoints?: number; gamesPlayed?: number; checkersWins?: number; marblesWins?: number }) => {
+    const r = await api.put(`/points/admin/${userId}`, data);
+    return r.data;
+  },
 };

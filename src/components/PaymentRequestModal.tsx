@@ -118,7 +118,7 @@ const PaymentRequestModal: React.FC<PaymentRequestModalProps> = ({ isOpen, onClo
                 <p className="text-sm font-bold uppercase" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Request Summary</p>
                 <p className="text-sm" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Item: <span className="font-bold">{item.name}</span></p>
                 <p className="text-sm" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Qty: <span className="font-bold">{quantity}</span></p>
-                <p className="text-sm" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Total: <span className="font-black text-emerald-700">${totalAmount.toFixed(2)}</span></p>
+                <p className="text-sm" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Total: <span className="font-black text-emerald-700">{totalAmount.toFixed(2)} ETB</span></p>
                 <p className="text-sm" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Payment: <span className="font-bold capitalize">{paymentMethod.replace('_', ' ')}</span></p>
               </div>
               <button onClick={handleClose} className="retro-btn px-8 py-3 bg-emerald-500 border-emerald-700">
@@ -135,7 +135,7 @@ const PaymentRequestModal: React.FC<PaymentRequestModalProps> = ({ isOpen, onClo
                 </p>
                 <p className="font-black text-lg" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{item.name}</p>
                 <p className="font-bold text-emerald-700 text-xl" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                  ${item.price.toFixed(2)} each
+                  {item.price.toFixed(2)} ETB each
                 </p>
               </div>
 
@@ -159,7 +159,7 @@ const PaymentRequestModal: React.FC<PaymentRequestModalProps> = ({ isOpen, onClo
                   <div className="flex-1 text-right">
                     <p className="text-sm font-bold uppercase text-gray-500" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Total</p>
                     <p className="text-2xl font-black text-emerald-700" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                      ${totalAmount.toFixed(2)}
+                      {totalAmount.toFixed(2)} ETB
                     </p>
                   </div>
                 </div>

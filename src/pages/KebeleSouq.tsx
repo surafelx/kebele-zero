@@ -146,7 +146,7 @@ const KebeleSouq: React.FC = () => {
                 <div className="bg-paper p-3 w-full rounded-lg border-2 border-charcoal retro-title text-xs">
                   <div className="text-charcoal mb-1 uppercase tracking-wide font-bold">Cart</div>
                   <div className="text-charcoal text-sm font-semibold">{cart.length} items</div>
-                  <div className="text-charcoal font-bold">${cartTotal.toFixed(2)}</div>
+                  <div className="text-charcoal font-bold">{cartTotal.toFixed(2)} ETB</div>
                 </div>
               </div>
             </div>
@@ -206,7 +206,7 @@ const KebeleSouq: React.FC = () => {
                         {product.category}
                       </span>
                       <span className="retro-title text-sm font-bold text-charcoal">
-                        ${product.price}
+                        {product.price} ETB
                       </span>
                     </div>
 

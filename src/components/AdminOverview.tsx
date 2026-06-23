@@ -156,7 +156,7 @@ const AdminOverview: React.FC<{ onNavigateToTab?: (tab: string) => void }> = ({ 
         />
         <StatCard 
           title="Revenue" 
-          value={`$${totalRevenue.toLocaleString()}`} 
+          value={`${totalRevenue.toLocaleString()} ETB`}
           icon={CreditCard} 
           color="bg-gradient-to-br from-purple-500 to-purple-600"
           trend="+8%"
@@ -271,7 +271,7 @@ const AdminOverview: React.FC<{ onNavigateToTab?: (tab: string) => void }> = ({ 
               transactions.slice(0, 4).map((transaction) => (
                 <ActivityItem 
                   key={transaction.id}
-                  title={`$${parseFloat(transaction.amount || '0').toFixed(2)}`}
+                  title={`${parseFloat(transaction.amount || '0').toFixed(2)} ETB`}
                   subtitle={transaction.description || transaction.type || 'Payment'}
                   time={transaction.created_at ? new Date(transaction.created_at).toLocaleDateString() : ''}
                   status={transaction.status === 'completed' ? 'success' : transaction.status === 'pending' ? 'warning' : 'error'}

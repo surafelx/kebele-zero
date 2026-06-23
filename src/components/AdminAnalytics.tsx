@@ -113,7 +113,7 @@ const AdminAnalytics: React.FC = () => {
         />
         <StatCard
           title="Revenue"
-          value={`$${totalRevenue.toLocaleString()}`}
+          value={`${totalRevenue.toLocaleString()} ETB`}
           icon={DollarSign}
           color="bg-gradient-to-br from-amber-500 to-amber-600"
           subtitle={`${pendingPayments} pending requests`}
@@ -223,7 +223,7 @@ const AdminAnalytics: React.FC = () => {
                 </div>
                 <span className="font-bold text-gray-800" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Total Revenue</span>
               </div>
-              <span className="text-xl font-black text-amber-600" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>${totalRevenue.toLocaleString()}</span>
+              <span className="text-xl font-black text-amber-600" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{totalRevenue.toLocaleString()} ETB</span>
             </div>
           </div>
         </div>

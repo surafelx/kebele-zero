@@ -132,7 +132,7 @@ const AdminPaymentRequests: React.FC = () => {
           { label: 'Pending',  value: pending,  color: 'text-yellow-700' },
           { label: 'Approved', value: approved, color: 'text-emerald-700' },
           { label: 'Rejected', value: rejected, color: 'text-red-700' },
-          { label: 'Revenue',  value: `$${totalRevenue.toFixed(2)}`, color: 'text-violet-700' },
+          { label: 'Revenue',  value: `${totalRevenue.toFixed(2)} ETB`, color: 'text-violet-700' },
         ].map(stat => (
           <div key={stat.label} className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <div className="p-4 text-center">
@@ -213,7 +213,7 @@ const AdminPaymentRequests: React.FC = () => {
                     </td>
                     <td className="px-4 py-3 font-bold text-sm text-center" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{req.quantity}</td>
                     <td className="px-4 py-3 font-black text-sm text-violet-700" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                      ${Number(req.total_amount).toFixed(2)}
+                      {Number(req.total_amount).toFixed(2)} ETB
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center space-x-1">
@@ -291,10 +291,10 @@ const AdminPaymentRequests: React.FC = () => {
               <div className="bg-gray-50 border-4 border-black p-4">
                 <p className="text-xs font-bold uppercase text-gray-500 mb-1" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Amount</p>
                 <p className="text-2xl font-black text-violet-700" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                  ${Number(selectedRequest.total_amount).toFixed(2)}
+                  {Number(selectedRequest.total_amount).toFixed(2)} ETB
                 </p>
                 <p className="text-xs text-gray-500" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                  {selectedRequest.quantity} × ${Number(selectedRequest.item_price).toFixed(2)}
+                  {selectedRequest.quantity} × {Number(selectedRequest.item_price).toFixed(2)} ETB
                 </p>
               </div>
               <div className="bg-gray-50 border-4 border-black p-4">

@@ -133,7 +133,7 @@ const AdminSouq = () => {
             <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border-4 border-black mx-auto mb-3">
               <DollarSign className="w-6 h-6 text-black" />
             </div>
-            <p className="text-3xl font-black text-gray-900 retro-title">${totalValue.toFixed(0)}</p>
+            <p className="text-3xl font-black text-gray-900 retro-title">{totalValue.toFixed(0)} ETB</p>
             <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Total Value</p>
           </div>
         </div>
@@ -248,7 +248,7 @@ const AdminSouq = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="text-2xl font-black text-pink-600" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>${product.price}</p>
+                    <p className="text-2xl font-black text-pink-600" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{product.price} ETB</p>
                     <p className="text-sm font-medium text-gray-500" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>{product.stock_quantity || 0} in stock</p>
                   </div>
                   {product.stock_quantity < 10 && (

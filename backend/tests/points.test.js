@@ -159,5 +159,106 @@ describe('Points API', () => {
         .send({ game: 'checkers', result: 'win' });
       expect(res.status).toBe(401);
     });
+
+    it('logs a GameScore history entry', async () => {
+      const { token } = await createUser({ username: 'gamer8', email: 'g8@e.com' });
+      await request(app)
+        .put('/api/points/game')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ game: 'checkers', result: 'win' });
+
+      const { token: adminToken } = await createAdmin({ email: 'gsadmin1@example.com' });
+      const res = await request(app)
+        .get('/api/points/admin/scores')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(200);
+      expect(res.body.some((s) => s.gameType === 'checkers' && s.result === 'win')).toBe(true);
+    });
+  });
+
+  // ── GET /api/points/admin/scores ────────────────────────────────────────
+
+  describe('GET /api/points/admin/scores', () => {
+    it('requires admin', async () => {
+      const { token } = await createUser({ username: 'noadmin1', email: 'na1@e.com' });
+      const res = await request(app)
+        .get('/api/points/admin/scores')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('filters by gameType', async () => {
+      const { token: adminToken } = await createAdmin({ email: 'gsadmin2@example.com' });
+      const { token } = await createUser({ username: 'gamer9', email: 'g9@e.com' });
+      await request(app)
+        .put('/api/points/game')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ game: 'marbles', result: 'win' });
+
+      const res = await request(app)
+        .get('/api/points/admin/scores?gameType=marbles')
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(res.status).toBe(200);
+      expect(res.body.every((s) => s.gameType === 'marbles')).toBe(true);
+    });
+  });
+
+  // ── POST /api/points/admin/scores ───────────────────────────────────────
+
+  describe('POST /api/points/admin/scores', () => {
+    it('admin can manually log a score and it updates the aggregate', async () => {
+      const { token: adminToken } = await createAdmin({ email: 'gsadmin3@example.com' });
+      const { user } = await createUser({ username: 'gamer10', email: 'g10@e.com' });
+
+      const res = await request(app)
+        .post('/api/points/admin/scores')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ userId: user._id, gameType: 'checkers', score: 10, result: 'win' });
+      expect(res.status).toBe(201);
+
+      const pointsRes = await request(app)
+        .get(`/api/points/${user._id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+      expect(pointsRes.body.totalPoints).toBe(10);
+      expect(pointsRes.body.checkersWins).toBe(1);
+    });
+
+    it('rejects a non-admin', async () => {
+      const { token } = await createUser({ username: 'noadmin2', email: 'na2@e.com' });
+      const res = await request(app)
+        .post('/api/points/admin/scores')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ userId: 'x', gameType: 'checkers', score: 10, result: 'win' });
+      expect(res.status).toBe(403);
+    });
+  });
+
+  // ── PUT /api/points/admin/:userId ───────────────────────────────────────
+
+  describe('PUT /api/points/admin/:userId', () => {
+    it('admin can directly override a user\'s aggregate stats', async () => {
+      const { token: adminToken } = await createAdmin({ email: 'gsadmin4@example.com' });
+      const { user } = await createUser({ username: 'gamer11', email: 'g11@e.com' });
+
+      const res = await request(app)
+        .put(`/api/points/admin/${user._id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ totalPoints: 500, gamesPlayed: 20, checkersWins: 5, marblesWins: 3 });
+
+      expect(res.status).toBe(200);
+      expect(res.body.totalPoints).toBe(500);
+      expect(res.body.gamesPlayed).toBe(20);
+      expect(res.body.checkersWins).toBe(5);
+      expect(res.body.marblesWins).toBe(3);
+    });
+
+    it('rejects a non-admin', async () => {
+      const { token, user } = await createUser({ username: 'noadmin3', email: 'na3@e.com' });
+      const res = await request(app)
+        .put(`/api/points/admin/${user._id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ totalPoints: 500 });
+      expect(res.status).toBe(403);
+    });
   });
 });
