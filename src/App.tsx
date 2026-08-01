@@ -531,7 +531,7 @@ function MainApp() {
               ) : radioTracks[currentTrackIndex]?.youtube_id ? (
                 <div className="w-full aspect-video bg-black border-b-4 border-black">
                   <iframe
-                    key={radioTracks[currentTrackIndex].youtube_id}
+                    key={`${radioTracks[currentTrackIndex].youtube_id}-${isPlaying}`}
                     src={`https://www.youtube.com/embed/${radioTracks[currentTrackIndex].youtube_id}?autoplay=${isPlaying ? 1 : 0}&controls=1`}
                     className="w-full h-full"
                     allow="autoplay; encrypted-media"

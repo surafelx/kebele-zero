@@ -10,8 +10,6 @@ const AdminRadio = () => {
   const [editingTrack, setEditingTrack] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
   const [radioFormData, setRadioFormData] = useState({
     name: '',
     description: '',
@@ -85,17 +83,6 @@ const AdminRadio = () => {
     const matchesCategory = !filterCategory || track.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
-
-  const totalPages = Math.ceil(filteredTracks.length / itemsPerPage);
-  const paginatedTracks = filteredTracks.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // Reset to page 1 when search/filter changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterCategory]);
 
   const categories = ['music', 'culture', 'religious', 'documentary', 'entertainment', 'education', 'other'];
 
@@ -211,7 +198,7 @@ const AdminRadio = () => {
             <h3 className="font-black text-white uppercase tracking-wide" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>Playlist</h3>
           </div>
           <div className="divide-y-2 divide-black">
-            {paginatedTracks.map((track) => (
+            {filteredTracks.map((track) => (
               <div key={track.id} className="p-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
