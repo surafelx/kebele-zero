@@ -779,7 +779,7 @@ const KebeleGames: React.FC = () => {
                 <span className="retro-title text-sm font-bold uppercase">Your Stats</span>
               </div>
             </div>
-            <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="p-6 grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
               <div>
                 <p className="retro-title text-2xl font-bold text-emerald-600">{userPoints.total_points}</p>
                 <p className="retro-text text-xs uppercase opacity-70">Total Points</p>
@@ -787,6 +787,10 @@ const KebeleGames: React.FC = () => {
               <div>
                 <p className="retro-title text-2xl font-bold text-gray-800">{userPoints.games_played}</p>
                 <p className="retro-text text-xs uppercase opacity-70">Games Played</p>
+              </div>
+              <div>
+                <p className="retro-title text-2xl font-bold text-yellow-600">{userPoints.games_played > 0 ? Math.round(((userPoints.checkers_wins + userPoints.marbles_wins) / userPoints.games_played) * 100) : 0}%</p>
+                <p className="retro-text text-xs uppercase opacity-70">Win Rate</p>
               </div>
               <div>
                 <p className="retro-title text-2xl font-bold text-red-600">{userPoints.checkers_wins}</p>
@@ -802,38 +806,66 @@ const KebeleGames: React.FC = () => {
 
         {/* Games Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {games.map((game) => (
-            <div key={game.id} className="retro-window retro-hover">
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className={`w-12 h-12 bg-gradient-to-br ${game.color} rounded-lg flex items-center justify-center text-2xl retro-icon`}>
-                    {game.icon}
+          {games.map((game) => {
+            const wins = game.id === 'checkers' ? (userPoints?.checkers_wins || 0) : (userPoints?.marbles_wins || 0);
+            const topPlayer = game.id === 'checkers'
+              ? (checkersLeaderboard[0] ? { name: checkersLeaderboard[0].userId?.username || checkersLeaderboard[0].user_id?.username || 'Player', score: checkersLeaderboard[0].total_points } : null)
+              : (marblesLeaderboard[0] ? { name: marblesLeaderboard[0].userId?.username || marblesLeaderboard[0].user_id?.username || 'Player', score: marblesLeaderboard[0].total_points } : null);
+            return (
+              <div key={game.id} className="retro-window retro-hover">
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`w-12 h-12 bg-gradient-to-br ${game.color} rounded-lg flex items-center justify-center text-2xl retro-icon`}>
+                      {game.icon}
+                    </div>
+                    {game.available && (
+                      <button
+                        onClick={() => startGame(game.id)}
+                        className="retro-btn px-3 py-1 flex items-center space-x-1"
+                      >
+                        <Play className="w-3 h-3 retro-icon" />
+                        <span className="text-sm">Play</span>
+                      </button>
+                    )}
                   </div>
-                  {game.available && (
-                    <button
-                      onClick={() => startGame(game.id)}
-                      className="retro-btn px-3 py-1 flex items-center space-x-1"
-                    >
-                      <Play className="w-3 h-3 retro-icon" />
-                      <span className="text-sm">Play</span>
-                    </button>
+                  <h3 className="text-lg font-bold text-gray-900 retro-title mb-1">{game.name}</h3>
+                  <p className="text-gray-600 retro-text text-sm mb-3">{game.description}</p>
+
+                  {/* High Scores */}
+                  {user && (
+                    <div className="flex items-center justify-between pt-2 border-t-2 border-charcoal/10">
+                      <div className="flex items-center space-x-1.5">
+                        <Trophy className="w-3.5 h-3.5 text-yellow-500" />
+                        <span className="retro-text text-xs font-bold text-gray-700">Your Wins: {wins}</span>
+                      </div>
+                      {topPlayer && (
+                        <div className="retro-text text-[10px] text-gray-500 truncate max-w-[120px]" title={`${topPlayer.name}: ${topPlayer.score} pts`}>
+                          Top: {topPlayer.name} ({topPlayer.score})
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!user && (
+                    <div className="pt-2 border-t-2 border-charcoal/10">
+                      <span className="retro-text text-[10px] text-gray-400">Sign in to track your score</span>
+                    </div>
+                  )}
+
+                  {!game.available && (
+                    <div className="flex items-center space-x-1 text-gray-500">
+                      <Star className="w-3 h-3" />
+                      <span className="text-xs retro-text">Coming Soon</span>
+                    </div>
                   )}
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 retro-title mb-1">{game.name}</h3>
-                <p className="text-gray-600 retro-text text-sm mb-3">{game.description}</p>
-                {!game.available && (
-                  <div className="flex items-center space-x-1 text-gray-500">
-                    <Star className="w-3 h-3" />
-                    <span className="text-xs retro-text">Coming Soon</span>
-                  </div>
-                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Leaderboards */}
-        <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Checkers Leaderboard */}
           <div className="retro-window">
             <div className="retro-titlebar retro-titlebar-red p-6">
