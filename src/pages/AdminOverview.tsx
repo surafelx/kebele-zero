@@ -166,7 +166,7 @@ const AdminOverview = () => {
                     <CreditCard className="w-6 h-6 text-black" />
                   </div>
                   <p className="text-3xl font-black text-gray-900 retro-title">
-                    ${transactions.filter(t => t.status === 'completed').reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0).toFixed(0)}
+                    {transactions.filter(t => t.status === 'completed').reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0).toFixed(0)} ETB
                   </p>
                 </div>
                 <p className="text-sm font-bold text-gray-700 uppercase tracking-wide retro-text">Revenue</p>
@@ -291,7 +291,7 @@ const AdminOverview = () => {
                           <div className={`w-4 h-4 rounded-full ${transaction.status === 'completed' ? 'bg-green-500' : transaction.status === 'pending' ? 'bg-yellow-500' : 'bg-red-500'}`}></div>
                           <div>
                             <p className="text-lg font-bold text-gray-900 retro-title">
-                              ${transaction.amount} {transaction.currency}
+                              {transaction.amount} {transaction.currency || 'ETB'}
                             </p>
                             <p className="text-sm retro-text text-gray-500">
                               {fmtDate(transaction.created_at || transaction.createdAt)}

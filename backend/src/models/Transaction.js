@@ -5,7 +5,7 @@ const schema = new mongoose.Schema({
   amount:        { type: Number, required: true },
   description:   { type: String, default: '' },
   paymentMethod: { type: String, default: 'card' },
-  currency:      { type: String, default: 'USD' },
+  currency:      { type: String, default: 'ETB' },
   status:        { type: String, enum: ['pending', 'completed', 'failed', 'refunded'], default: 'pending' },
   reference:     { type: String, default: '' },
 }, { timestamps: true });

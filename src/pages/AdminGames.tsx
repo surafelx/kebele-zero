@@ -1,8 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Plus, Search, Filter, Gamepad2, Users, Target, Award, BarChart3, History, Settings, Edit, Trash2, Save, ChevronLeft, ChevronRight, X, Edit3 } from 'lucide-react';
 import { pointsAPI } from '../services/points';
-import api from '../services/api';
+import { adminAPI } from '../services/admin';
 import Modal from '../components/Modal';
+
+// userId on a points/score record may come back populated ({_id, username, email}) or as a raw id string.
+const playerId = (rec: any): string => {
+  const uid = rec?.userId ?? rec?.user_id;
+  if (uid && typeof uid === 'object') return uid._id || uid.id || '';
+  return uid || '';
+};
+const playerName = (rec: any, users: any[]): string => {
+  const uid = rec?.userId ?? rec?.user_id;
+  const populated = uid && typeof uid === 'object' ? uid : null;
+  const id = playerId(rec);
+  const user = users.find(u => u.id === id);
+  return populated?.username || user?.username || user?.email || (id ? String(id).slice(0, 8) : 'Player');
+};
 
 interface Level {
   id?: string;
@@ -56,12 +70,14 @@ const AdminGames = () => {
   const fetchGameData = async () => {
     setLoading(true);
     try {
-      const [leaderboardData, scoresRes] = await Promise.all([
+      const [leaderboardData, scoresData, usersData] = await Promise.all([
         pointsAPI.getLeaderboard(),
-        api.get('/points/leaderboard').catch(() => ({ data: [] }))
+        pointsAPI.getGameScores().catch(() => []),
+        adminAPI.getUsers().catch(() => []),
       ]);
       setUserPoints(leaderboardData || []);
-      setGameScores(scoresRes.data || []);
+      setGameScores(scoresData || []);
+      setUsers(usersData || []);
     } catch (error) {
       console.error('Error fetching game data:', error);
       setUserPoints([]);
@@ -74,7 +90,13 @@ const AdminGames = () => {
   const handleUpdateUserPoints = async () => {
     if (!editingPoints) return;
     try {
-      await api.put('/points/game', { ...pointsFormData });
+      const uid = playerId(editingPoints);
+      await pointsAPI.setUserPointsAdmin(uid, {
+        totalPoints: pointsFormData.total_points,
+        gamesPlayed: pointsFormData.games_played,
+        checkersWins: pointsFormData.checkers_wins,
+        marblesWins: pointsFormData.marbles_wins,
+      });
       setEditingPoints(null);
       fetchGameData();
     } catch (error) {
@@ -85,7 +107,12 @@ const AdminGames = () => {
 
   const handleCreateGameScore = async () => {
     try {
-      await api.post('/points/game', gameScoreFormData);
+      await pointsAPI.addGameScoreAdmin({
+        userId: gameScoreFormData.user_id,
+        gameType: gameScoreFormData.game_type as 'checkers' | 'marbles',
+        score: gameScoreFormData.score,
+        result: gameScoreFormData.result as 'win' | 'loss' | 'draw',
+      });
       setShowGameScoreForm(false);
       fetchGameData();
     } catch (error) {
@@ -108,7 +135,7 @@ const AdminGames = () => {
   };
 
   const totalGames = gameScores.length;
-  const activePlayers = [...new Set(gameScores.map(score => score.user_id))].length;
+  const activePlayers = [...new Set(gameScores.map(score => playerId(score)))].length;
   const totalPoints = userPoints.reduce((sum, p) => sum + (p.total_points || 0), 0);
   const recentGames = gameScores.filter(score =>
     new Date(score.played_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
@@ -119,8 +146,8 @@ const AdminGames = () => {
 
   const filteredGameScores = gameScores.filter(score => {
     const matchesSearch = searchTerm === '' ||
-      users.find(u => u.id === score.user_id)?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      score.game_type.toLowerCase().includes(searchTerm.toLowerCase());
+      playerName(score, users).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      score.game_type?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGameType = filterGameType === '' || score.game_type === filterGameType;
     const matchesResult = filterResult === '' || score.result === filterResult;
     return matchesSearch && matchesGameType && matchesResult;
@@ -234,7 +261,6 @@ const AdminGames = () => {
             ) : (
               <div className="space-y-3">
                 {topPlayers.map((player, index) => {
-                  const user = users.find(u => u.id === player.user_id);
                   const level = userLevels.find(l => l.id === player.current_level_id);
                   return (
                     <div key={player.id} className="flex items-center justify-between p-3 bg-gray-50 border-2 border-black">
@@ -243,7 +269,7 @@ const AdminGames = () => {
                           #{index + 1}
                         </div>
                         <div>
-                          <p className="font-bold text-gray-800">{user?.username || player.user_id}</p>
+                          <p className="font-bold text-gray-800">{playerName(player, users)}</p>
                           <p className="text-sm text-gray-600">{player.total_points} points</p>
                         </div>
                       </div>
@@ -288,7 +314,7 @@ const AdminGames = () => {
                       </div>
                       <div>
                         <p className="font-bold text-gray-800">
-                          {users.find(u => u.id === score.user_id)?.username || score.user_id}
+                          {playerName(score, users)}
                         </p>
                         <p className="text-sm text-gray-600 capitalize">{score.game_type} • {score.score} pts</p>
                       </div>
@@ -340,11 +366,8 @@ const AdminGames = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {userPoints.map((pts) => {
-                    // userId may be a populated user object or a raw id string
-                    const populated = pts.userId && typeof pts.userId === 'object' ? pts.userId : null;
-                    const uid = populated ? (populated._id || populated.id) : (pts.user_id || pts.userId);
-                    const user = users.find(u => u.id === uid);
-                    const displayName = populated?.username || user?.username || user?.email || String(uid || 'Player').slice(0, 8);
+                    const uid = playerId(pts);
+                    const displayName = playerName(pts, users);
                     const isEditing = editingPoints?.id === pts.id;
                     return (
                       <tr key={pts.id || uid} className={isEditing ? 'bg-yellow-50' : 'hover:bg-gray-50'}>
@@ -417,8 +440,6 @@ const AdminGames = () => {
               <option value="">All Games</option>
               <option value="checkers">Checkers</option>
               <option value="marbles">Marbles</option>
-              <option value="pool">Pool 9-Ball</option>
-              <option value="foosball">Foosball</option>
             </select>
             <select
               value={filterResult}
@@ -480,10 +501,10 @@ const AdminGames = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 text-lg mb-1">
-                      {users.find(u => u.id === score.user_id)?.username || score.user_id}
+                      {playerName(score, users)}
                     </h3>
                     <p className="text-gray-600 text-sm capitalize mb-3">
-                      {score.game_type.replace('_', ' ')}
+                      {score.game_type?.replace('_', ' ')}
                     </p>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500 font-bold">
@@ -572,8 +593,6 @@ const AdminGames = () => {
               >
                 <option value="checkers">Checkers</option>
                 <option value="marbles">Marbles</option>
-                <option value="pool">Pool 9-Ball</option>
-                <option value="foosball">Foosball</option>
               </select>
             </div>
           </div>

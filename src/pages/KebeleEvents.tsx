@@ -260,7 +260,7 @@ const KebeleEvents: React.FC = () => {
   const priceLabel = (e: Event): string => {
     const p = lowestPrice(e);
     if (p === null) return 'Free';
-    return p === 0 ? 'Free' : `From $${p}`;
+    return p === 0 ? 'Free' : `From ${p} ETB`;
   };
 
   const getEventStatus = (event: Event): string => {
@@ -437,7 +437,7 @@ const KebeleEvents: React.FC = () => {
                       {ticket.quantity - ticket.sold}/{ticket.quantity} left
                     </div>
                     <div className="flex justify-between items-center mb-2">
-                      <div className="text-lg font-bold">${ticket.price}</div>
+                      <div className="text-lg font-bold">{ticket.price} ETB</div>
                       <div className="text-xs">Max {ticket.max_per_order}</div>
                     </div>
                   </div>

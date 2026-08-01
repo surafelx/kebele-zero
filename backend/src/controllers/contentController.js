@@ -102,6 +102,10 @@ async function getMedia(req, res, next) {
   try {
     const filter = {};
     if (req.query.type) filter.type = req.query.type;
+    // Videos are managed separately (admin video page + channel sync) and shown
+    // through their own surface. Keep them out of the general media/image feed
+    // unless a caller explicitly asks for type: 'video'.
+    else filter.type = { $ne: 'video' };
     if (req.query.category) filter.category = req.query.category;
     filter.isPublic = true;
     const media = await Media.find(filter)

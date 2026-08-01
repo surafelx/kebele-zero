@@ -730,6 +730,36 @@ const KebeleGames: React.FC = () => {
           </div>
         </div>
 
+        {/* Your Stats */}
+        {user && userPoints && (
+          <div className="retro-window mb-8">
+            <div className="retro-titlebar retro-titlebar-green">
+              <div className="flex items-center space-x-4">
+                <Trophy className="w-5 h-5 retro-icon" />
+                <span className="retro-title text-sm font-bold uppercase">Your Stats</span>
+              </div>
+            </div>
+            <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div>
+                <p className="retro-title text-2xl font-bold text-emerald-600">{userPoints.total_points}</p>
+                <p className="retro-text text-xs uppercase opacity-70">Total Points</p>
+              </div>
+              <div>
+                <p className="retro-title text-2xl font-bold text-gray-800">{userPoints.games_played}</p>
+                <p className="retro-text text-xs uppercase opacity-70">Games Played</p>
+              </div>
+              <div>
+                <p className="retro-title text-2xl font-bold text-red-600">{userPoints.checkers_wins}</p>
+                <p className="retro-text text-xs uppercase opacity-70">Checkers Wins</p>
+              </div>
+              <div>
+                <p className="retro-title text-2xl font-bold text-blue-600">{userPoints.marbles_wins}</p>
+                <p className="retro-text text-xs uppercase opacity-70">Marbles Wins</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Games Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {games.map((game) => (
@@ -785,7 +815,7 @@ const KebeleGames: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   {checkersLeaderboard.map((player, index) => (
-                    <div key={player.user_id || index} className="flex items-center justify-between retro-window retro-hover p-3">
+                    <div key={player.id || player.userId?._id || player.user_id?._id || player.user_id || index} className="flex items-center justify-between retro-window retro-hover p-3">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold retro-title text-sm">
                           {index + 1}
@@ -829,7 +859,7 @@ const KebeleGames: React.FC = () => {
                 ) : (
                   <div className="space-y-4">
                     {marblesLeaderboard.map((player, index) => (
-                      <div key={player.user_id || index} className="flex items-center justify-between retro-window retro-hover p-3">
+                      <div key={player.id || player.userId?._id || player.user_id?._id || player.user_id || index} className="flex items-center justify-between retro-window retro-hover p-3">
                         <div className="flex items-center space-x-3">
                           <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold retro-title text-sm">
                             {index + 1}

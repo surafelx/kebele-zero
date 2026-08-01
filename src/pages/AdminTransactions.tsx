@@ -18,7 +18,7 @@ const AdminTransactions = () => {
     amount: '',
     description: '',
     payment_method: 'card',
-    currency: 'USD',
+    currency: 'ETB',
     status: 'pending'
   });
 
@@ -73,7 +73,7 @@ const AdminTransactions = () => {
         amount: '',
         description: '',
         payment_method: 'card',
-        currency: 'USD',
+        currency: 'ETB',
         status: 'pending'
       });
       fetchTransactions();
@@ -168,7 +168,7 @@ const AdminTransactions = () => {
           <div className="flex items-center justify-between p-4">
             <div>
               <p className="retro-text text-xs uppercase tracking-wide">Total Revenue</p>
-              <p className="text-2xl retro-title">${totalRevenue.toFixed(2)}</p>
+              <p className="text-2xl retro-title">{totalRevenue.toFixed(2)} ETB</p>
             </div>
             <div className="w-10 h-10 bg-white border-2 border-black flex items-center justify-center">
               <DollarSign className="w-5 h-5 text-black" />
@@ -251,7 +251,7 @@ const AdminTransactions = () => {
                       <div>
                         <div className="flex items-center space-x-3">
                           <h4 className="font-bold text-gray-800">
-                            ${parseFloat(transaction.amount || '0').toFixed(2)}
+                            {parseFloat(transaction.amount || '0').toFixed(2)} ETB
                           </h4>
                           <span className={`px-2.5 py-1 text-xs font-bold capitalize border-2 border-black ${
                             transaction.status === 'completed' ? 'bg-green-100 text-green-700' :
@@ -272,7 +272,7 @@ const AdminTransactions = () => {
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="text-right">
-                        <p className="text-sm text-gray-500 font-bold uppercase">{transaction.currency || 'USD'}</p>
+                        <p className="text-sm text-gray-500 font-bold uppercase">{transaction.currency || 'ETB'}</p>
                         <p className="text-xs text-gray-400">{transaction.id?.slice(0, 8)}...</p>
                       </div>
                       <button
@@ -340,7 +340,7 @@ const AdminTransactions = () => {
             <div className="p-6 space-y-4">
               <div>
                 <p className="text-sm retro-text uppercase tracking-wide">Amount</p>
-                <p className="text-lg font-black text-gray-800">${parseFloat(editingTransaction.amount || '0').toFixed(2)}</p>
+                <p className="text-lg font-black text-gray-800">{parseFloat(editingTransaction.amount || '0').toFixed(2)} ETB</p>
               </div>
               <div>
                 <p className="text-sm retro-text uppercase tracking-wide mb-2">New Status</p>
@@ -378,7 +378,7 @@ const AdminTransactions = () => {
             </div>
             <div className="p-6">
               <p className="retro-text">
-                Are you sure you want to delete this transaction for ${parseFloat(deletingTransaction?.amount || '0').toFixed(2)}? This action cannot be undone.
+                Are you sure you want to delete this transaction for {parseFloat(deletingTransaction?.amount || '0').toFixed(2)} ETB? This action cannot be undone.
               </p>
             </div>
             <div className="p-6 border-t-4 border-black flex justify-end gap-3">
@@ -464,6 +464,7 @@ const AdminTransactions = () => {
                     onChange={(e) => setCreateFormData({ ...createFormData, currency: e.target.value })}
                     className="retro-input w-full bg-white"
                   >
+                    <option value="ETB">ETB</option>
                     <option value="USD">USD</option>
                     <option value="EUR">EUR</option>
                     <option value="GBP">GBP</option>
