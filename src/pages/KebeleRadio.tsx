@@ -1,6 +1,6 @@
  import React, { useState, useEffect } from 'react';
 import { Play, Radio, Search } from 'lucide-react';
-import { mediaAPI, radioAPI } from '../services/content';
+import { mediaAPI, radioAPI, videosAPI } from '../services/content';
 import ModalLoader from '../components/ModalLoader';
 
 interface Video {
@@ -41,8 +41,11 @@ const KebeleRadio: React.FC = () => {
 
   const loadVideos = async () => {
     try {
-      const data = await radioAPI.getStations();
-      const transformedVideos: Video[] = (data || []).map((station: any) => ({
+      const [stationData, videoData] = await Promise.all([
+        radioAPI.getStations(),
+        videosAPI.getAdminVideos().catch(() => []),
+      ]);
+      const stationVideos: Video[] = (stationData || []).map((station: any) => ({
         id: station._id || station.id,
         title: station.name || station.title,
         description: station.description || '',
@@ -58,7 +61,32 @@ const KebeleRadio: React.FC = () => {
         is_active: station.isActive !== false,
         is_featured: station.is_featured || false
       }));
-      setVideos(transformedVideos);
+      const mediaVideos: Video[] = (videoData || []).map((vid: any) => ({
+        id: vid._id || vid.id,
+        title: vid.title || 'Untitled',
+        description: vid.description || '',
+        youtube_id: vid.youtubeId || '',
+        youtube_url: vid.youtubeId ? `https://www.youtube.com/watch?v=${vid.youtubeId}` : '',
+        source: 'youtube',
+        soundcloudUrl: '',
+        category: vid.category || 'music',
+        tags: [],
+        duration: '0:00',
+        published_at: vid.publishedAt || vid.createdAt || new Date().toISOString(),
+        statistics: { view_count: 0, like_count: 0, comment_count: 0 },
+        is_active: vid.isPublic !== false,
+        is_featured: false
+      }));
+      const seen = new Set<string>();
+      const merged: Video[] = [];
+      for (const v of [...stationVideos, ...mediaVideos]) {
+        const key = v.youtube_id || v.title;
+        if (!seen.has(key)) {
+          seen.add(key);
+          merged.push(v);
+        }
+      }
+      setVideos(merged);
     } catch (error) {
       console.error('Error loading videos:', error);
       setVideos([]);
@@ -69,8 +97,14 @@ const KebeleRadio: React.FC = () => {
 
   const loadCategories = async () => {
     try {
-      const data = await radioAPI.getStations();
-      const cats = [...new Set((data || []).map((s: any) => s.genre || s.category).filter(Boolean))] as string[];
+      const [stationData, videoData] = await Promise.all([
+        radioAPI.getStations(),
+        videosAPI.getAdminVideos().catch(() => []),
+      ]);
+      const cats = [...new Set([
+        ...(stationData || []).map((s: any) => s.genre || s.category),
+        ...(videoData || []).map((v: any) => v.category),
+      ].filter(Boolean))] as string[];
       setCategories(cats);
     } catch (error) {
       console.error('Error loading categories:', error);

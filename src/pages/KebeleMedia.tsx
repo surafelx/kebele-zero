@@ -331,21 +331,21 @@ const KebeleMedia: React.FC = () => {
                         onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
                     <div className="absolute bottom-6 left-6 right-6 text-white">
                       <div className="flex items-center space-x-3 mb-3">
-                        <span className="px-4 py-2 bg-paper text-charcoal rounded-lg retro-title text-sm font-bold uppercase border-2 border-charcoal">
+                        <span className="px-4 py-2 bg-white text-charcoal rounded-lg retro-title text-sm font-bold uppercase border-2 border-charcoal shadow-lg">
                           {filteredMedia[0].category}
                         </span>
                         {yearOf(filteredMedia[0].date) && (
-                          <span className="retro-title text-sm font-bold">
+                          <span className="px-3 py-1.5 bg-white/90 text-charcoal rounded-lg retro-title text-sm font-bold shadow-lg">
                             {yearOf(filteredMedia[0].date)}
                           </span>
                         )}
                       </div>
-                      <h2 className="text-2xl md:text-3xl font-bold mb-2 retro-title">{filteredMedia[0].title}</h2>
+                      <h2 className="text-2xl md:text-3xl font-bold mb-2 retro-title drop-shadow-lg">{filteredMedia[0].title}</h2>
                       {filteredMedia[0].description && (
-                        <p className="text-lg opacity-90 leading-relaxed max-w-2xl">{filteredMedia[0].description}</p>
+                        <p className="text-lg leading-relaxed max-w-2xl drop-shadow-md text-white/95">{filteredMedia[0].description}</p>
                       )}
                     </div>
                   </div>
@@ -358,28 +358,18 @@ const KebeleMedia: React.FC = () => {
                   <div key={item.id} className="retro-window retro-floating overflow-hidden group cursor-pointer">
                     {/* Image/Video Container */}
                     <div className="aspect-[4/3] overflow-hidden relative">
-                      {item.type === 'video' && item.youtubeId ? (
-                        <img
-                          src={item.imageUrl || PLACEHOLDER}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          loading="lazy"
-                          onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
-                        />
-                      ) : (
-                        <img
-                          src={item.imageUrl || PLACEHOLDER}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          loading="lazy"
-                          onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 group-hover:from-black/60 transition-all duration-300"></div>
+                      <img
+                        src={item.imageUrl || PLACEHOLDER}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        loading="lazy"
+                        onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 group-hover:from-black/70 transition-all duration-300"></div>
 
                       {/* Category Badge */}
                       <div className="absolute top-3 left-3">
-                        <span className="px-3 py-2 bg-paper text-charcoal rounded-lg retro-title text-sm font-bold uppercase border-2 border-charcoal shadow-2xl transform -rotate-3 group-hover:rotate-0 transition-transform duration-300">
+                        <span className="px-3 py-2 bg-white text-charcoal rounded-lg retro-title text-sm font-bold uppercase border-2 border-charcoal shadow-lg transform -rotate-3 group-hover:rotate-0 transition-transform duration-300">
                           {item.category}
                         </span>
                       </div>
@@ -387,7 +377,7 @@ const KebeleMedia: React.FC = () => {
                       {/* Video Play Indicator */}
                       {item.type === 'video' && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-14 h-14 bg-black/70 rounded-full flex items-center justify-center border-2 border-white">
+                          <div className="w-14 h-14 bg-black/70 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
                             <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M8 5v14l11-7z"/>
                             </svg>
@@ -397,33 +387,33 @@ const KebeleMedia: React.FC = () => {
 
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="bg-paper text-charcoal px-4 py-2 rounded-lg retro-title text-sm font-bold uppercase border-2 border-charcoal shadow-2xl">
+                        <div className="bg-white text-charcoal px-4 py-2 rounded-lg retro-title text-sm font-bold uppercase border-2 border-charcoal shadow-lg">
                           {item.type === 'video' ? 'PLAY VIDEO' : 'VIEW FULL SIZE'}
                         </div>
                       </div>
                     </div>
 
                     {/* Content */}
-                    <div className="p-4">
+                    <div className="p-4 bg-white">
                       <div className="flex items-center justify-between mb-3 gap-2">
-                        <h3 className="retro-title text-base font-bold uppercase line-clamp-2 group-hover:text-sky-blue transition-colors">
+                        <h3 className="retro-title text-base font-bold uppercase line-clamp-2 text-charcoal group-hover:text-pink-600 transition-colors">
                           {item.title}
                         </h3>
                         {yearOf(item.date) && (
-                          <span className="retro-title text-sm font-bold text-charcoal flex-shrink-0">
+                          <span className="retro-title text-sm font-bold text-gray-500 flex-shrink-0">
                             {yearOf(item.date)}
                           </span>
                         )}
                       </div>
 
                       {item.description && (
-                        <p className="retro-text text-sm mb-4 leading-relaxed opacity-90 line-clamp-2">
+                        <p className="retro-text text-sm mb-4 leading-relaxed text-gray-600 line-clamp-2">
                           {item.description}
                         </p>
                       )}
 
-                      <div className="flex items-center justify-between">
-                        <span className="retro-text text-xs opacity-70">
+                      <div className="flex items-center justify-between border-t border-gray-200 pt-3">
+                        <span className="retro-text text-xs text-gray-400">
                           Click to enlarge
                         </span>
                         <button className="retro-btn text-xs py-2 px-4 font-bold uppercase">
