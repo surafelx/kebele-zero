@@ -7,6 +7,10 @@ const {
   getRadioStations, createRadioStation, updateRadioStation, deleteRadioStation,
   getAbout, upsertAboutSection,
 } = require('../controllers/contentController');
+const {
+  listAdminVideos, createVideoFromLink, updateVideo,
+  listChannels, addChannel, syncChannel, deleteChannel,
+} = require('../controllers/videosController');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 
@@ -57,6 +61,31 @@ router.post(
   uploadMedia
 );
 router.delete('/media/:id', requireAuth, deleteMedia);
+
+// ── Videos (admin) ───────────────────────────────────────────────────────────
+// Registered before nothing conflicting; these two-segment /media/admin/* paths
+// don't collide with the single-segment /media/:id above.
+router.get('/media/admin/videos', requireAuth, requireAdmin, listAdminVideos);
+router.post(
+  '/media/admin/videos',
+  requireAuth, requireAdmin,
+  [body('link').trim().notEmpty().withMessage('A YouTube link is required')],
+  validate,
+  createVideoFromLink
+);
+router.put('/media/admin/videos/:id', requireAuth, requireAdmin, updateVideo);
+
+// ── Channels (admin) — sync videos from a YouTube channel ────────────────────
+router.get('/channels', requireAuth, requireAdmin, listChannels);
+router.post(
+  '/channels',
+  requireAuth, requireAdmin,
+  [body('url').trim().notEmpty().withMessage('A channel link is required')],
+  validate,
+  addChannel
+);
+router.post('/channels/:id/sync', requireAuth, requireAdmin, syncChannel);
+router.delete('/channels/:id', requireAuth, requireAdmin, deleteChannel);
 
 // ── Radio ──────────────────────────────────────────────────────────────────
 router.get('/radio', getRadioStations);

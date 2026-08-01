@@ -72,6 +72,53 @@ export const mediaAPI = {
   },
 };
 
+// ── Videos (admin) ──────────────────────────────────────────────────────────
+export const videosAPI = {
+  // All videos, including hidden ones (admin view).
+  getAdminVideos: async () => {
+    const r = await api.get('/media/admin/videos');
+    return r.data;
+  },
+  // Add one video from a YouTube link (or bare ID).
+  addVideo: async (data: { link: string; title?: string; description?: string; category?: string }) => {
+    const r = await api.post('/media/admin/videos', data);
+    return r.data;
+  },
+  updateVideo: async (
+    id: string,
+    data: { title?: string; description?: string; category?: string; isPublic?: boolean; link?: string }
+  ) => {
+    const r = await api.put(`/media/admin/videos/${id}`, data);
+    return r.data;
+  },
+  deleteVideo: async (id: string) => {
+    await api.delete(`/media/${id}`);
+  },
+  setVisibility: async (id: string, isPublic: boolean) => {
+    const r = await api.put(`/media/admin/videos/${id}`, { isPublic });
+    return r.data;
+  },
+};
+
+// ── Channels (admin) — sync videos from a YouTube channel ────────────────────
+export const channelsAPI = {
+  getChannels: async () => {
+    const r = await api.get('/channels');
+    return r.data;
+  },
+  addChannel: async (url: string) => {
+    const r = await api.post('/channels', { url });
+    return r.data; // { channel, added }
+  },
+  syncChannel: async (id: string) => {
+    const r = await api.post(`/channels/${id}/sync`);
+    return r.data; // { channel, added }
+  },
+  deleteChannel: async (id: string) => {
+    await api.delete(`/channels/${id}`);
+  },
+};
+
 // ── Radio ─────────────────────────────────────────────────────────────────
 export const radioAPI = {
   getStations: async (params?: { active?: boolean }) => {
