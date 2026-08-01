@@ -13,12 +13,15 @@ const AdminRadio = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
   const [radioFormData, setRadioFormData] = useState({
-    title: '',
+    name: '',
     description: '',
     youtube_id: '',
+    source: 'youtube' as 'youtube' | 'soundcloud',
+    soundcloudUrl: '',
     category: 'music',
     tags: '',
-    is_featured: false
+    is_featured: false,
+    isActive: true
   });
 
   useEffect(() => {
@@ -55,7 +58,7 @@ const AdminRadio = () => {
       await radioAPI.updateStation(editingTrack._id || editingTrack.id, trackData);
       setShowRadioForm(false);
       setEditingTrack(null);
-      setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false });
+      setRadioFormData({ name: '', description: '', youtube_id: '', source: 'youtube', soundcloudUrl: '', category: 'music', tags: '', is_featured: false, isActive: true });
       fetchRadioTracks();
     } catch (error) {
       console.error('Error updating track:', error);
@@ -77,7 +80,7 @@ const AdminRadio = () => {
 
   const filteredTracks = radioTracks.filter(track => {
     const matchesSearch = !searchTerm || 
-      track.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      track.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       track.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !filterCategory || track.category === filterCategory;
     return matchesSearch && matchesCategory;
@@ -120,7 +123,7 @@ const AdminRadio = () => {
             </div>
           </div>
           <button
-            onClick={() => { setEditingTrack(null); setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false }); setShowRadioForm(true); }}
+            onClick={() => { setEditingTrack(null); setRadioFormData({ name: '', description: '', youtube_id: '', source: 'youtube', soundcloudUrl: '', category: 'music', tags: '', is_featured: false, isActive: true }); setShowRadioForm(true); }}
             className="retro-btn px-4 py-2 bg-white text-black"
           >
             <Plus className="w-4 h-4 inline mr-2" />
@@ -217,14 +220,14 @@ const AdminRadio = () => {
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
-                        <h4 className="font-bold text-gray-800 uppercase tracking-wide">{track.title}</h4>
+                        <h4 className="font-bold text-gray-800 uppercase tracking-wide">{track.name}</h4>
                         {track.is_featured && (
                           <span className="px-2 py-0.5 bg-yellow-100 border-2 border-black text-xs font-bold uppercase">
                             Featured
                           </span>
                         )}
                       </div>
-                      <p className="retro-text text-sm">{track.category} • {track.youtube_id}</p>
+                      <p className="retro-text text-sm">{track.category} • <span className="uppercase font-bold">{track.source || 'youtube'}</span></p>
                       {track.description && (
                         <p className="retro-text text-sm opacity-70 line-clamp-1">{track.description}</p>
                       )}
@@ -235,12 +238,15 @@ const AdminRadio = () => {
                       onClick={() => {
                         setEditingTrack(track);
                         setRadioFormData({
-                          title: track.title || '',
+                          name: track.name || '',
                           description: track.description || '',
                           youtube_id: track.youtube_id || '',
+                          source: track.source || 'youtube',
+                          soundcloudUrl: track.soundcloudUrl || '',
                           category: track.category || 'music',
                           tags: Array.isArray(track.tags) ? track.tags.join(', ') : (track.tags || ''),
                           is_featured: track.is_featured || false,
+                          isActive: track.isActive !== false,
                         });
                         setShowRadioForm(true);
                       }}
@@ -265,7 +271,7 @@ const AdminRadio = () => {
       {/* Modal - Retro Style */}
       <Modal
         isOpen={showRadioForm}
-        onClose={() => { setShowRadioForm(false); setEditingTrack(null); setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false }); }}
+        onClose={() => { setShowRadioForm(false); setEditingTrack(null); setRadioFormData({ name: '', description: '', youtube_id: '', source: 'youtube', soundcloudUrl: '', category: 'music', tags: '', is_featured: false, isActive: true }); }}
         title={editingTrack ? 'Edit Track' : 'Add New Track'}
         size="md"
         icon={<Radio className="w-5 h-5 text-amber-500" />}
@@ -281,10 +287,10 @@ const AdminRadio = () => {
               <input
                 type="text"
                 required
-                value={radioFormData.title}
-                onChange={(e) => setRadioFormData({ ...radioFormData, title: e.target.value })}
+                value={radioFormData.name}
+                onChange={(e) => setRadioFormData({ ...radioFormData, name: e.target.value })}
                 className="retro-input"
-                placeholder="Enter video title"
+                placeholder="Enter track title"
               />
             </div>
             <div className="space-y-2">
@@ -301,16 +307,41 @@ const AdminRadio = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">YouTube Video ID</label>
-            <input
-              type="text"
-              required
-              value={radioFormData.youtube_id}
-              onChange={(e) => setRadioFormData({ ...radioFormData, youtube_id: e.target.value })}
+            <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Source</label>
+            <select
+              value={radioFormData.source}
+              onChange={(e) => setRadioFormData({ ...radioFormData, source: e.target.value as 'youtube' | 'soundcloud' })}
               className="retro-input"
-              placeholder="e.g., dQw4w9WgXcQ"
-            />
+            >
+              <option value="youtube">YouTube</option>
+              <option value="soundcloud">SoundCloud</option>
+            </select>
           </div>
+          {radioFormData.source === 'youtube' ? (
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">YouTube Video ID</label>
+              <input
+                type="text"
+                required={radioFormData.source === 'youtube'}
+                value={radioFormData.youtube_id}
+                onChange={(e) => setRadioFormData({ ...radioFormData, youtube_id: e.target.value })}
+                className="retro-input"
+                placeholder="e.g., dQw4w9WgXcQ"
+              />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">SoundCloud URL</label>
+              <input
+                type="text"
+                required={radioFormData.source === 'soundcloud'}
+                value={radioFormData.soundcloudUrl}
+                onChange={(e) => setRadioFormData({ ...radioFormData, soundcloudUrl: e.target.value })}
+                className="retro-input"
+                placeholder="https://soundcloud.com/artist/track-name"
+              />
+            </div>
+          )}
           <div className="space-y-2">
             <label className="block text-sm font-bold text-gray-800 uppercase tracking-wide">Description</label>
             <textarea
@@ -341,6 +372,16 @@ const AdminRadio = () => {
             />
             <label htmlFor="is_featured" className="retro-text font-bold uppercase text-sm">Mark as Featured</label>
           </div>
+          <div className="flex items-center space-x-3">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={radioFormData.isActive}
+              onChange={(e) => setRadioFormData({ ...radioFormData, isActive: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <label htmlFor="isActive" className="retro-text font-bold uppercase text-sm">Show on Site</label>
+          </div>
           <div className="flex space-x-3 pt-4">
             <button
               type="submit"
@@ -350,7 +391,7 @@ const AdminRadio = () => {
             </button>
             <button
               type="button"
-              onClick={() => { setShowRadioForm(false); setEditingTrack(null); setRadioFormData({ title: '', description: '', youtube_id: '', category: 'music', tags: '', is_featured: false }); }}
+              onClick={() => { setShowRadioForm(false); setEditingTrack(null); setRadioFormData({ name: '', description: '', youtube_id: '', source: 'youtube', soundcloudUrl: '', category: 'music', tags: '', is_featured: false, isActive: true }); }}
               className="px-5 py-3 retro-btn"
             >
               Cancel

@@ -6,6 +6,8 @@ const radioStationSchema = new mongoose.Schema(
     // streamUrl doubles as the YouTube ID when no full URL is provided
     streamUrl: { type: String, default: '' },
     youtubeId: { type: String, default: '' },
+    source: { type: String, enum: ['youtube', 'soundcloud'], default: 'youtube' },
+    soundcloudUrl: { type: String, default: '' },
     genre: { type: String, default: 'general' },
     category: { type: String, default: 'music' },
     description: { type: String, default: '' },

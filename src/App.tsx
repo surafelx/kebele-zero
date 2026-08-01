@@ -517,21 +517,33 @@ function MainApp() {
             </div>
 
             {/* Video embed */}
-            {radioTracks.length > 0 && radioTracks[currentTrackIndex]?.youtube_id ? (
-              <div className="w-full aspect-video bg-black border-b-4 border-black">
-                <iframe
-                  key={radioTracks[currentTrackIndex].youtube_id}
-                  src={`https://www.youtube.com/embed/${radioTracks[currentTrackIndex].youtube_id}?autoplay=${isPlaying ? 1 : 0}&controls=1`}
-                  className="w-full h-full"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen={false}
-                  title={radioTracks[currentTrackIndex].title}
-                />
-              </div>
-            ) : (
-              <div className="w-full aspect-video bg-gray-100 border-b-4 border-black flex items-center justify-center">
-                <Music className="w-12 h-12 text-gray-300" />
-              </div>
+            {radioTracks.length > 0 && (
+              radioTracks[currentTrackIndex]?.source === 'soundcloud' && radioTracks[currentTrackIndex]?.soundcloudUrl ? (
+                <div className="w-full h-44 bg-black border-b-4 border-black">
+                  <iframe
+                    key={`${radioTracks[currentTrackIndex].soundcloudUrl}-${isPlaying}`}
+                    src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(radioTracks[currentTrackIndex].soundcloudUrl)}&auto_play=${isPlaying ? 1 : 0}&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false`}
+                    className="w-full h-full"
+                    allow="autoplay"
+                    title={radioTracks[currentTrackIndex].name}
+                  />
+                </div>
+              ) : radioTracks[currentTrackIndex]?.youtube_id ? (
+                <div className="w-full aspect-video bg-black border-b-4 border-black">
+                  <iframe
+                    key={radioTracks[currentTrackIndex].youtube_id}
+                    src={`https://www.youtube.com/embed/${radioTracks[currentTrackIndex].youtube_id}?autoplay=${isPlaying ? 1 : 0}&controls=1`}
+                    className="w-full h-full"
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen={false}
+                    title={radioTracks[currentTrackIndex].name}
+                  />
+                </div>
+              ) : (
+                <div className="w-full aspect-video bg-gray-100 border-b-4 border-black flex items-center justify-center">
+                  <Music className="w-12 h-12 text-gray-300" />
+                </div>
+              )
             )}
 
             {/* Current track info */}
@@ -539,7 +551,7 @@ function MainApp() {
               {radioTracks.length > 0 ? (
                 <>
                   <p className="font-black text-sm uppercase truncate" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                    {radioTracks[currentTrackIndex]?.title || 'Unknown Track'}
+                    {radioTracks[currentTrackIndex]?.name || 'Unknown Track'}
                   </p>
                   <p className="text-xs text-gray-500 capitalize" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
                     {radioTracks[currentTrackIndex]?.category || 'music'} • {currentTrackIndex + 1}/{radioTracks.length}
@@ -586,7 +598,7 @@ function MainApp() {
                     }`}
                   >
                     <p className="font-bold truncate uppercase" style={{ fontFamily: "'Comic Sans MS', cursive, sans-serif" }}>
-                      {idx === currentTrackIndex ? '▶ ' : ''}{track.title}
+                      {idx === currentTrackIndex ? '▶ ' : ''}{track.name}
                     </p>
                     <p className="text-gray-400 capitalize">{track.category}</p>
                   </button>
