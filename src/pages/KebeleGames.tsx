@@ -46,6 +46,7 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
    const [multiJumpPiece, setMultiJumpPiece] = useState<{row: number, col: number} | null>(null);
    const [humanScore, setHumanScore] = useState(0);
    const [aiScore, setAiScore] = useState(0);
+   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
 
    // Generate all legal moves for current player
    const generateLegalMoves = (board: number[][], player: 'human' | 'ai') => {
@@ -174,83 +175,106 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
      }
    };
 
-   const executeMove = async (fromRow: number, fromCol: number, toRow: number, toCol: number, boardState?: number[][]) => {
-     const newBoard = (boardState || board).map(row => [...row]);
-     const piece = newBoard[fromRow][fromCol];
+    const executeMove = async (fromRow: number, fromCol: number, toRow: number, toCol: number, boardState?: number[][], aiTurn = false) => {
+      const newBoard = (boardState || board).map(row => [...row]);
+      const piece = newBoard[fromRow][fromCol];
 
-     // Calculate captures
-     const captures = [];
-     if (Math.abs(toRow - fromRow) === 2) {
-       // Single capture
-       const jumpedRow = (fromRow + toRow) / 2;
-       const jumpedCol = (fromCol + toCol) / 2;
-       captures.push({row: jumpedRow, col: jumpedCol});
-     }
+      // Calculate captures
+      const captures = [];
+      if (Math.abs(toRow - fromRow) === 2) {
+        // Single capture
+        const jumpedRow = (fromRow + toRow) / 2;
+        const jumpedCol = (fromCol + toCol) / 2;
+        captures.push({row: jumpedRow, col: jumpedCol});
+      }
 
-     // Remove captured pieces
-     captures.forEach(capture => {
-       newBoard[capture.row][capture.col] = 0;
-     });
+      // Remove captured pieces
+      captures.forEach(capture => {
+        newBoard[capture.row][capture.col] = 0;
+      });
 
-     // Move piece
-     newBoard[fromRow][fromCol] = 0;
-     newBoard[toRow][toCol] = piece;
+      // Move piece
+      newBoard[fromRow][fromCol] = 0;
+      newBoard[toRow][toCol] = piece;
 
-     // Check for king promotion
-     let promoted = false;
-     if (piece === 1 && toRow === 0) {
-       newBoard[toRow][toCol] = 2; // Human king
-       promoted = true;
-     } else if (piece === -1 && toRow === 7) {
-       newBoard[toRow][toCol] = -2; // AI king
-       promoted = true;
-     }
+      // Check for king promotion
+      let promoted = false;
+      if (piece === 1 && toRow === 0) {
+        newBoard[toRow][toCol] = 2; // Human king
+        promoted = true;
+      } else if (piece === -1 && toRow === 7) {
+        newBoard[toRow][toCol] = -2; // AI king
+        promoted = true;
+      }
 
-     setBoard(newBoard);
+      setBoard(newBoard);
 
-     // Check for additional captures (multi-jump)
-     const additionalCaptures = getCaptureMoves(newBoard, toRow, toCol, newBoard[toRow][toCol], Math.abs(newBoard[toRow][toCol]) === 2, piece > 0 ? -1 : 1, piece > 0 ? -1 : 1);
-     if (additionalCaptures.length > 0 && !promoted) {
-       // Multi-jump possible
-       setMultiJumpPiece({row: toRow, col: toCol});
-       setValidMoves(additionalCaptures.map(move => ({...move.to, isCapture: true})));
-       return; // Don't switch turns
-     }
+      // Check for additional captures (multi-jump)
+      const pieceDirection = piece > 0 ? -1 : 1;
+      const additionalCaptures = getCaptureMoves(newBoard, toRow, toCol, newBoard[toRow][toCol], Math.abs(newBoard[toRow][toCol]) === 2, pieceDirection, piece > 0 ? -1 : 1);
+      if (additionalCaptures.length > 0 && !promoted) {
+        if (aiTurn) {
+          // AI multi-jump: continue AI's turn automatically
+          setTimeout(() => makeAIMove(newBoard, true), 500);
+          return;
+        }
+        // Human multi-jump: set up for human to continue
+        setMultiJumpPiece({row: toRow, col: toCol});
+        setValidMoves(additionalCaptures.map(move => ({...move.to, isCapture: true})));
+        return; // Don't switch turns
+      }
 
-     // End turn
-     setSelectedSquare(null);
-     setValidMoves([]);
-     setMultiJumpPiece(null);
+      // End turn
+      setSelectedSquare(null);
+      setValidMoves([]);
+      setMultiJumpPiece(null);
 
-     const nextPlayer = currentPlayer === 'human' ? 'ai' : 'human';
-     setCurrentPlayer(nextPlayer);
+      const nextPlayer = currentPlayer === 'human' ? 'ai' : 'human';
+      setCurrentPlayer(nextPlayer);
 
-     // Check win condition — returns true if game is over
-     const isOver = await checkWinCondition(newBoard, currentPlayer);
+      // Check win condition — returns true if game is over
+      const isOver = await checkWinCondition(newBoard, currentPlayer);
 
-     // AI turn — only if game is still running
-     if (gameMode === 'computer' && nextPlayer === 'ai' && !isOver) {
-       setTimeout(() => makeAIMove(newBoard), 800);
-     }
-   };
+      // AI turn — only if game is still running
+      if (gameMode === 'computer' && nextPlayer === 'ai' && !isOver) {
+        setTimeout(() => makeAIMove(newBoard), 800);
+      }
+    };
 
-   const makeAIMove = (currentBoard: number[][]) => {
-     setIsComputerThinking(true);
+    const makeAIMove = (currentBoard: number[][], isMultiJump = false) => {
+      setIsComputerThinking(true);
 
-     setTimeout(() => {
-       const legalMoves = generateLegalMoves(currentBoard, 'ai');
+      setTimeout(() => {
+        const legalMoves = generateLegalMoves(currentBoard, 'ai');
 
-       if (legalMoves.length > 0) {
-         // Prefer captures over normal moves
-         const captures = legalMoves.filter(m => m.captures.length > 0);
-         const pool = captures.length > 0 ? captures : legalMoves;
-         const chosenMove = pool[Math.floor(Math.random() * pool.length)];
-         executeMove(chosenMove.from.row, chosenMove.from.col, chosenMove.to.row, chosenMove.to.col, currentBoard);
-       }
+        if (legalMoves.length > 0) {
+          const captures = legalMoves.filter(m => m.captures.length > 0);
+          let pool: typeof legalMoves;
 
-       setIsComputerThinking(false);
-     }, 1000);
-   };
+          if (difficulty === 'easy') {
+            // Easy: 40% chance to capture if available, otherwise random
+            pool = (captures.length > 0 && Math.random() < 0.4) ? captures : legalMoves;
+          } else if (difficulty === 'medium') {
+            // Medium: 70% chance to capture if available
+            pool = (captures.length > 0 && Math.random() < 0.7) ? captures : legalMoves;
+          } else {
+            // Hard: always capture if possible
+            pool = captures.length > 0 ? captures : legalMoves;
+          }
+
+          const chosenMove = pool[Math.floor(Math.random() * pool.length)];
+          executeMove(chosenMove.from.row, chosenMove.from.col, chosenMove.to.row, chosenMove.to.col, currentBoard, true);
+        } else {
+          // AI has no legal moves — human wins
+          setIsComputerThinking(false);
+          if (!gameOver) {
+            setGameOver(true);
+            setWinner('human');
+            setHumanScore(prev => prev + 1);
+          }
+        }
+      }, 1000);
+    };
 
    const checkWinCondition = async (board: number[][], playerWhoJustMoved: 'human' | 'ai'): Promise<boolean> => {
      const humanPieces = board.flat().filter(piece => piece > 0).length;
@@ -303,31 +327,48 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
      return winner !== null;
    };
 
-   const resetGame = () => {
-     setBoard(initialBoard.map(row => [...row]));
-     setCurrentPlayer('human');
-     setSelectedSquare(null);
-     setValidMoves([]);
-     setMustCapture(false);
-     setGameOver(false);
-     setWinner(null);
-     setIsComputerThinking(false);
-     setMultiJumpPiece(null);
-   };
+    const resetGame = () => {
+      setBoard(initialBoard.map(row => [...row]));
+      setCurrentPlayer('human');
+      setSelectedSquare(null);
+      setValidMoves([]);
+      setMustCapture(false);
+      setGameOver(false);
+      setWinner(null);
+      setIsComputerThinking(false);
+      setMultiJumpPiece(null);
+      setDifficulty('medium');
+    };
 
    return (
      <div className="space-y-6">
-       <div className="flex items-center justify-between">
-         <h2 className="retro-title text-2xl">Checkers</h2>
-         <div className="flex space-x-3">
-           <button onClick={resetGame} className="retro-btn px-4 py-2">
-             Reset Game
-           </button>
-           <button onClick={onClose} className="retro-btn-secondary px-4 py-2">
-             Close
-           </button>
-         </div>
-       </div>
+        <div className="flex items-center justify-between">
+          <h2 className="retro-title text-2xl">Checkers</h2>
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1">
+              <span className="retro-text text-xs">AI:</span>
+              {(['easy', 'medium', 'hard'] as const).map(d => (
+                <button
+                  key={d}
+                  onClick={() => setDifficulty(d)}
+                  className={`px-2 py-1 text-xs font-bold uppercase rounded transition-all ${
+                    difficulty === d
+                      ? d === 'easy' ? 'bg-green-500 text-white' : d === 'medium' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+            <button onClick={resetGame} className="retro-btn px-4 py-2">
+              Reset Game
+            </button>
+            <button onClick={onClose} className="retro-btn-secondary px-4 py-2">
+              Close
+            </button>
+          </div>
+        </div>
 
        <div className="text-center">
          <div className="flex justify-center space-x-8 mb-4">
@@ -393,9 +434,9 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
          </div>
        </div>
 
-       <div className="text-center retro-text text-sm opacity-80">
-         {multiJumpPiece ? 'Continue your multi-jump!' : 'Click on your pieces to select them, then click on highlighted squares to move. Captures are mandatory!'}
-       </div>
+        <div className="text-center retro-text text-sm opacity-80">
+          {multiJumpPiece ? 'Continue your multi-jump!' : `Click on your pieces to select them, then click on highlighted squares to move. Captures are mandatory! AI difficulty: ${difficulty}`}
+        </div>
      </div>
    );
  };
