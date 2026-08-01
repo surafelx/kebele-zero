@@ -299,62 +299,9 @@ const KebeleMedia: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-8">
-              {/* Featured Image - Large Hero */}
-              {filteredMedia[0] && (
-                <div className="retro-window retro-floating overflow-hidden">
-                  <div className="retro-titlebar retro-titlebar-coral">
-                    <div className="flex items-center space-x-3">
-                      <span className="retro-title text-sm font-bold uppercase">FEATURED</span>
-                    </div>
-                    <div className="retro-window-controls">
-                      <div className="retro-window-dot"></div>
-                      <div className="retro-window-dot"></div>
-                      <div className="retro-window-dot"></div>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    {filteredMedia[0].type === 'video' && filteredMedia[0].youtubeId ? (
-                      <div className="w-full h-96">
-                        <iframe
-                          src={`https://www.youtube.com/embed/${filteredMedia[0].youtubeId}`}
-                          className="w-full h-full"
-                          allow="autoplay; encrypted-media"
-                          allowFullScreen
-                          title={filteredMedia[0].title}
-                        />
-                      </div>
-                    ) : (
-                      <img
-                        src={filteredMedia[0].imageUrl || PLACEHOLDER}
-                        alt={filteredMedia[0].title}
-                        className="w-full h-96 object-cover"
-                        onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-                    <div className="absolute bottom-6 left-6 right-6 text-white">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <span className="px-4 py-2 bg-white text-charcoal rounded-lg retro-title text-sm font-bold uppercase border-2 border-charcoal shadow-lg">
-                          {filteredMedia[0].category}
-                        </span>
-                        {yearOf(filteredMedia[0].date) && (
-                          <span className="px-3 py-1.5 bg-white/90 text-charcoal rounded-lg retro-title text-sm font-bold shadow-lg">
-                            {yearOf(filteredMedia[0].date)}
-                          </span>
-                        )}
-                      </div>
-                      <h2 className="text-2xl md:text-3xl font-bold mb-2 retro-title drop-shadow-lg">{filteredMedia[0].title}</h2>
-                      {filteredMedia[0].description && (
-                        <p className="text-lg leading-relaxed max-w-2xl drop-shadow-md text-white/95">{filteredMedia[0].description}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Gallery Grid - Remaining Images */}
+              {/* Gallery Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredMedia.slice(1).map((item, index) => (
+                {filteredMedia.map((item, index) => (
                   <div key={item.id} className="retro-window retro-floating overflow-hidden group cursor-pointer">
                     {/* Image/Video Container */}
                     <div className="aspect-[4/3] overflow-hidden relative">
