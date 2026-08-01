@@ -215,7 +215,8 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
       if (additionalCaptures.length > 0 && !promoted) {
         if (aiTurn) {
           // AI multi-jump: continue AI's turn automatically
-          setTimeout(() => makeAIMove(newBoard, true), 500);
+          await new Promise(resolve => setTimeout(resolve, 500));
+          await makeAIMove(newBoard, true);
           return;
         }
         // Human multi-jump: set up for human to continue
@@ -228,6 +229,7 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
       setSelectedSquare(null);
       setValidMoves([]);
       setMultiJumpPiece(null);
+      setIsComputerThinking(false);
 
       const nextPlayer = currentPlayer === 'human' ? 'ai' : 'human';
       setCurrentPlayer(nextPlayer);
@@ -237,43 +239,39 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
 
       // AI turn — only if game is still running
       if (gameMode === 'computer' && nextPlayer === 'ai' && !isOver) {
-        setTimeout(() => makeAIMove(newBoard), 800);
+        await makeAIMove(newBoard);
       }
     };
 
-    const makeAIMove = (currentBoard: number[][], isMultiJump = false) => {
+    const makeAIMove = async (currentBoard: number[][], isMultiJump = false) => {
       setIsComputerThinking(true);
 
-      setTimeout(() => {
-        const legalMoves = generateLegalMoves(currentBoard, 'ai');
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-        if (legalMoves.length > 0) {
-          const captures = legalMoves.filter(m => m.captures.length > 0);
-          let pool: typeof legalMoves;
+      const legalMoves = generateLegalMoves(currentBoard, 'ai');
 
-          if (difficulty === 'easy') {
-            // Easy: 40% chance to capture if available, otherwise random
-            pool = (captures.length > 0 && Math.random() < 0.4) ? captures : legalMoves;
-          } else if (difficulty === 'medium') {
-            // Medium: 70% chance to capture if available
-            pool = (captures.length > 0 && Math.random() < 0.7) ? captures : legalMoves;
-          } else {
-            // Hard: always capture if possible
-            pool = captures.length > 0 ? captures : legalMoves;
-          }
+      if (legalMoves.length > 0) {
+        const captures = legalMoves.filter(m => m.captures.length > 0);
+        let pool: typeof legalMoves;
 
-          const chosenMove = pool[Math.floor(Math.random() * pool.length)];
-          executeMove(chosenMove.from.row, chosenMove.from.col, chosenMove.to.row, chosenMove.to.col, currentBoard, true);
+        if (difficulty === 'easy') {
+          pool = (captures.length > 0 && Math.random() < 0.4) ? captures : legalMoves;
+        } else if (difficulty === 'medium') {
+          pool = (captures.length > 0 && Math.random() < 0.7) ? captures : legalMoves;
         } else {
-          // AI has no legal moves — human wins
-          setIsComputerThinking(false);
-          if (!gameOver) {
-            setGameOver(true);
-            setWinner('human');
-            setHumanScore(prev => prev + 1);
-          }
+          pool = captures.length > 0 ? captures : legalMoves;
         }
-      }, 1000);
+
+        const chosenMove = pool[Math.floor(Math.random() * pool.length)];
+        await executeMove(chosenMove.from.row, chosenMove.from.col, chosenMove.to.row, chosenMove.to.col, currentBoard, true);
+      } else {
+        setIsComputerThinking(false);
+        if (!gameOver) {
+          setGameOver(true);
+          setWinner('human');
+          setHumanScore(prev => prev + 1);
+        }
+      }
     };
 
    const checkWinCondition = async (board: number[][], playerWhoJustMoved: 'human' | 'ai'): Promise<boolean> => {
