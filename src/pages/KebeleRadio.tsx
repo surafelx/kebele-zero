@@ -126,7 +126,8 @@ const KebeleRadio: React.FC = () => {
     const q = searchTerm.toLowerCase();
     const matchesSearch = !q ||
       v.title.toLowerCase().includes(q) ||
-      v.description.toLowerCase().includes(q);
+      v.description.toLowerCase().includes(q) ||
+      (v.tags && v.tags.some(t => t.toLowerCase().includes(q)));
     const matchesCategory = !selectedCategory || v.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -272,6 +273,12 @@ const KebeleRadio: React.FC = () => {
                         <span className="absolute top-2 left-2 px-2 py-0.5 bg-mustard text-charcoal rounded retro-title text-xs font-bold uppercase border-2 border-charcoal">
                           {video.category}
                         </span>
+                        {/* Source badge */}
+                        <span className={`absolute top-2 right-2 px-2 py-0.5 rounded retro-title text-xs font-bold uppercase border-2 border-white ${
+                          video.source === 'soundcloud' ? 'bg-orange-500 text-white' : 'bg-red-600 text-white'
+                        }`}>
+                          {video.source === 'soundcloud' ? '♪ SC' : '▶ YT'}
+                        </span>
                       </button>
                     )}
                   </div>
@@ -282,33 +289,52 @@ const KebeleRadio: React.FC = () => {
                       {video.title}
                     </h3>
 
+                    {/* Tags */}
+                    {video.tags && video.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {video.tags.slice(0, 4).map((tag, idx) => (
+                          <span key={idx} className="px-2 py-0.5 bg-teal-100 text-teal-700 border border-teal-300 rounded retro-text text-[10px] font-bold uppercase">
+                            {tag}
+                          </span>
+                        ))}
+                        {video.tags.length > 4 && (
+                          <span className="px-2 py-0.5 bg-gray-100 text-gray-500 border border-gray-300 rounded retro-text text-[10px] font-bold">
+                            +{video.tags.length - 4}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
                     {video.description && (
                       <p className="retro-text text-xs mb-3 leading-relaxed opacity-80 line-clamp-2 flex-1">
                         {video.description}
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between pt-2 border-t-2 border-charcoal/10 mt-auto">
-                      <span className="retro-text text-xs opacity-70 uppercase font-bold">{video.category}</span>
+                    {/* Source links */}
+                    <div className="flex items-center gap-2 pt-2 border-t-2 border-charcoal/10 mt-auto">
                       {video.source === 'soundcloud' && video.soundcloudUrl ? (
                         <a
                           href={video.soundcloudUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="retro-btn text-xs py-1.5 px-3 font-bold uppercase flex items-center space-x-1"
+                          className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded retro-text text-[10px] font-bold uppercase hover:opacity-90 transition-opacity"
                         >
-                          <Play className="w-3 h-3" />
-                          <span>Listen</span>
+                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M1 18V11h1v7H1zm2.5 0V9h1v9h-1zm2.5 0V10h1v8H6zm2.5 0V7h1v11h-1zm2.5 0V9h1v9h-1zm2.5 0V6h1v12h-1zm2.5 0V8h1v10h-1zm2.5 0V4h1v14h-1z"/>
+                          </svg>
+                          <span>SoundCloud</span>
                         </a>
-                      ) : video.youtube_id ? (
+                      ) : null}
+                      {video.youtube_id ? (
                         <a
                           href={`https://www.youtube.com/watch?v=${video.youtube_id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="retro-btn text-xs py-1.5 px-3 font-bold uppercase flex items-center space-x-1"
+                          className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-red-600 text-white rounded retro-text text-[10px] font-bold uppercase hover:bg-red-700 transition-colors"
                         >
-                          <Play className="w-3 h-3" />
-                          <span>Watch</span>
+                          <Play className="w-3 h-3" fill="white" />
+                          <span>YouTube</span>
                         </a>
                       ) : null}
                     </div>
