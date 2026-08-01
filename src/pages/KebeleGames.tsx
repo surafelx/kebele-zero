@@ -231,11 +231,12 @@ const CheckersGameComponent: React.FC<{ onClose: () => void; gameMode: 'human' |
       setMultiJumpPiece(null);
       setIsComputerThinking(false);
 
-      const nextPlayer = currentPlayer === 'human' ? 'ai' : 'human';
+      // Determine next player from aiTurn flag, not stale currentPlayer closure
+      const nextPlayer: 'human' | 'ai' = aiTurn ? 'human' : 'ai';
       setCurrentPlayer(nextPlayer);
 
       // Check win condition — returns true if game is over
-      const isOver = await checkWinCondition(newBoard, currentPlayer);
+      const isOver = await checkWinCondition(newBoard, aiTurn ? 'ai' : 'human');
 
       // AI turn — only if game is still running
       if (gameMode === 'computer' && nextPlayer === 'ai' && !isOver) {
