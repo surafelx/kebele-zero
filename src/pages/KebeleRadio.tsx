@@ -9,6 +9,8 @@ interface Video {
   description: string;
   youtube_id: string;
   youtube_url: string;
+  source: string;
+  soundcloudUrl: string;
   category: string;
   tags: string[];
   duration: string;
@@ -46,6 +48,8 @@ const KebeleRadio: React.FC = () => {
         description: station.description || '',
         youtube_id: station.streamUrl || station.youtube_id || '',
         youtube_url: station.streamUrl || station.youtube_url || '',
+        source: station.source || 'youtube',
+        soundcloudUrl: station.soundcloudUrl || '',
         category: station.genre || station.category || 'music',
         tags: station.tags || [],
         duration: station.duration || '0:00',
@@ -181,32 +185,56 @@ const KebeleRadio: React.FC = () => {
                   {/* Thumbnail with lazy play — iframe only loads on click */}
                   <div className="aspect-video bg-black relative overflow-hidden group">
                     {activeVideoId === video.id ? (
-                      <iframe
-                        src={`https://www.youtube.com/embed/${video.youtube_id}?autoplay=1`}
-                        title={video.title}
-                        className="w-full h-full"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
+                      video.source === 'soundcloud' && video.soundcloudUrl ? (
+                        <iframe
+                          src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(video.soundcloudUrl)}&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false`}
+                          title={video.title}
+                          className="w-full h-full"
+                          frameBorder="0"
+                          allow="autoplay"
+                        ></iframe>
+                      ) : video.youtube_id ? (
+                        <iframe
+                          src={`https://www.youtube.com/embed/${video.youtube_id}?autoplay=1`}
+                          title={video.title}
+                          className="w-full h-full"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-900">
+                          <Play className="w-12 h-12 text-gray-500" />
+                        </div>
+                      )
                     ) : (
                       <button
                         onClick={() => setActiveVideoId(video.id)}
                         className="absolute inset-0 w-full h-full"
                         title={`Play ${video.title}`}
                       >
-                        <img
-                          src={`https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`}
-                          alt={video.title}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }}
-                        />
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                          <div className="w-14 h-14 bg-coral-red rounded-full flex items-center justify-center border-2 border-white shadow-xl group-hover:scale-110 transition-transform">
-                            <Play className="w-6 h-6 text-white ml-1" fill="white" />
+                        {video.source === 'soundcloud' && video.soundcloudUrl ? (
+                          <div className="w-full h-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center">
+                            <svg className="w-16 h-16 text-white" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M1 18V11h1v7H1zm2.5 0V9h1v9h-1zm2.5 0V10h1v8H6zm2.5 0V7h1v11h-1zm2.5 0V9h1v9h-1zm2.5 0V6h1v12h-1zm2.5 0V8h1v10h-1zm2.5 0V4h1v14h-1z"/>
+                            </svg>
                           </div>
-                        </div>
+                        ) : (
+                          <>
+                            <img
+                              src={`https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`}
+                              alt={video.title}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }}
+                            />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                              <div className="w-14 h-14 bg-coral-red rounded-full flex items-center justify-center border-2 border-white shadow-xl group-hover:scale-110 transition-transform">
+                                <Play className="w-6 h-6 text-white ml-1" fill="white" />
+                              </div>
+                            </div>
+                          </>
+                        )}
                         <span className="absolute top-2 left-2 px-2 py-0.5 bg-mustard text-charcoal rounded retro-title text-xs font-bold uppercase border-2 border-charcoal">
                           {video.category}
                         </span>
@@ -228,15 +256,27 @@ const KebeleRadio: React.FC = () => {
 
                     <div className="flex items-center justify-between pt-2 border-t-2 border-charcoal/10 mt-auto">
                       <span className="retro-text text-xs opacity-70 uppercase font-bold">{video.category}</span>
-                      <a
-                        href={`https://www.youtube.com/watch?v=${video.youtube_id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="retro-btn text-xs py-1.5 px-3 font-bold uppercase flex items-center space-x-1"
-                      >
-                        <Play className="w-3 h-3" />
-                        <span>Watch</span>
-                      </a>
+                      {video.source === 'soundcloud' && video.soundcloudUrl ? (
+                        <a
+                          href={video.soundcloudUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="retro-btn text-xs py-1.5 px-3 font-bold uppercase flex items-center space-x-1"
+                        >
+                          <Play className="w-3 h-3" />
+                          <span>Listen</span>
+                        </a>
+                      ) : video.youtube_id ? (
+                        <a
+                          href={`https://www.youtube.com/watch?v=${video.youtube_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="retro-btn text-xs py-1.5 px-3 font-bold uppercase flex items-center space-x-1"
+                        >
+                          <Play className="w-3 h-3" />
+                          <span>Watch</span>
+                        </a>
+                      ) : null}
                     </div>
                   </div>
                 </div>

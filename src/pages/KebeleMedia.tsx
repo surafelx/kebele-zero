@@ -27,16 +27,33 @@ const KebeleMedia: React.FC = () => {
 
   const fetchMediaItems = async () => {
     try {
-      const data = await mediaAPI.getMedia();
-      const transformedData = (data || []).map((item: any) => ({
+      const [imagesData, videosData] = await Promise.all([
+        mediaAPI.getMedia(),
+        mediaAPI.getMedia({ type: 'video' }),
+      ]);
+      const imageItems = (imagesData || []).map((item: any) => ({
         id: item._id || item.id,
         title: item.title,
         description: item.description || '',
         imageUrl: item.url || item.media_url || item.imageUrl,
         category: item.category || 'General',
-        date: item.createdAt || item.created_at
+        date: item.createdAt || item.created_at,
+        type: item.type || 'image',
+        youtubeId: item.youtubeId || '',
       }));
-      setMediaItems(transformedData);
+      const videoItems = (videosData || []).map((item: any) => ({
+        id: item._id || item.id,
+        title: item.title,
+        description: item.description || '',
+        imageUrl: item.youtubeId
+          ? `https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`
+          : (item.url || ''),
+        category: item.category || 'General',
+        date: item.publishedAt || item.createdAt || item.created_at,
+        type: 'video',
+        youtubeId: item.youtubeId || '',
+      }));
+      setMediaItems([...videoItems, ...imageItems]);
     } catch (error) {
       console.error('Error fetching media:', error);
       setMediaItems([]);
@@ -296,12 +313,24 @@ const KebeleMedia: React.FC = () => {
                     </div>
                   </div>
                   <div className="relative">
-                    <img
-                      src={filteredMedia[0].imageUrl || PLACEHOLDER}
-                      alt={filteredMedia[0].title}
-                      className="w-full h-96 object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
-                    />
+                    {filteredMedia[0].type === 'video' && filteredMedia[0].youtubeId ? (
+                      <div className="w-full h-96">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${filteredMedia[0].youtubeId}`}
+                          className="w-full h-full"
+                          allow="autoplay; encrypted-media"
+                          allowFullScreen
+                          title={filteredMedia[0].title}
+                        />
+                      </div>
+                    ) : (
+                      <img
+                        src={filteredMedia[0].imageUrl || PLACEHOLDER}
+                        alt={filteredMedia[0].title}
+                        className="w-full h-96 object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                     <div className="absolute bottom-6 left-6 right-6 text-white">
                       <div className="flex items-center space-x-3 mb-3">
@@ -327,15 +356,25 @@ const KebeleMedia: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredMedia.slice(1).map((item, index) => (
                   <div key={item.id} className="retro-window retro-floating overflow-hidden group cursor-pointer">
-                    {/* Image Container */}
+                    {/* Image/Video Container */}
                     <div className="aspect-[4/3] overflow-hidden relative">
-                      <img
-                        src={item.imageUrl || PLACEHOLDER}
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        loading="lazy"
-                        onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
-                      />
+                      {item.type === 'video' && item.youtubeId ? (
+                        <img
+                          src={item.imageUrl || PLACEHOLDER}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          loading="lazy"
+                          onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
+                        />
+                      ) : (
+                        <img
+                          src={item.imageUrl || PLACEHOLDER}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          loading="lazy"
+                          onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
+                        />
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 group-hover:from-black/60 transition-all duration-300"></div>
 
                       {/* Category Badge */}
@@ -345,10 +384,21 @@ const KebeleMedia: React.FC = () => {
                         </span>
                       </div>
 
+                      {/* Video Play Indicator */}
+                      {item.type === 'video' && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-14 h-14 bg-black/70 rounded-full flex items-center justify-center border-2 border-white">
+                            <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8 5v14l11-7z"/>
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <div className="bg-paper text-charcoal px-4 py-2 rounded-lg retro-title text-sm font-bold uppercase border-2 border-charcoal shadow-2xl">
-                          VIEW FULL SIZE
+                          {item.type === 'video' ? 'PLAY VIDEO' : 'VIEW FULL SIZE'}
                         </div>
                       </div>
                     </div>
